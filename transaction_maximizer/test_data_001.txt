@@ -1,0 +1,33 @@
+2
+1 5
+2 5
+1
+1
+1 2 5
+
+Test example#3 where 1 tr rolls back
+
+3
+1 5
+2 10
+3 15
+1
+1
+2 1 11
+
+Test example#4 where 2 trs reconcile to non-zeo
+
+3
+1 5
+2 10
+3 15
+2
+1
+2 1 11
+2
+1 2 3
+3 1 2
+
+
+
+

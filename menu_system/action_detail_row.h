@@ -1,0 +1,4 @@
+#ifndef ACTION_DETAIL_ROW_H
+#define ACTION_DETAIL_ROW_H
+
+#endif // ACTION_DETAIL_ROW_H

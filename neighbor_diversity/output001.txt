@@ -1,0 +1,9 @@
+1         // the best number of transactions
+This is a basic single transfer test
+
+//////////// Example of expected output:
+1         // 1 transaction
+0         // the 0-index transaction
+2         // 2 balances in the database
+1 5       // account 1 has a balance of 5
+2 10      // account 2 has a balance of 10
