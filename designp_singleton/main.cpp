@@ -34,8 +34,17 @@ public:
 bool                            Singleton::is_initialized            {false};
 Only_one_of_UDT1                Singleton::only_one_of_udt1_instance;                // TODO??: Why exactly will it not take this:{31,"Thirty one.", {32,"Thirty two."}};
 Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2_instance {nullptr};      // TODO??: clang told me to put nullptr here.
-//Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2 {77};         // TODO??: rvalue not allowed.
-//Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2 = nullptr;    // TODO??: is using = same as {}
+//Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2 {77};                 // TODO??: rvalue not allowed.
+//Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2 = nullptr;            // TODO??: is using = same as {}
+
+class Singleton_subclassed : Singleton {};  // TODO??: How and why would one do this?  GOF suggests it, but for what situation, give example.
+// TODO??: how would all above examples be used within multiple compilation units with regard to access and order of initializaion.
+
+// MySingleton::MySingleton() { // TODO??: make sense of this code block below from GOF
+    //...
+    //Singleton::Register("MySingleton", this);
+//}
+
 int main() {
     Only_one_of_UDT1    my_singleton_udt1       = Singleton::instance();
     int                 my_singleton_udt_int    = my_singleton_udt1.i;
