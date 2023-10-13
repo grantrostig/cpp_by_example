@@ -13,45 +13,106 @@ struct Only_one_of_UDT2 {
     int     i       {98};
     string  s       {"NULL"};
     Row     row     {};};  // should get inited values from type
-class Singleton {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
-private:
-    // why this bool?  well I could use std::expected, or optional, or nullptr as a flag.
-    static bool                             is_initialized;     // cannot init here.
-    // TODO??: Enhancement request:make this into a registry of singletons.
-    static Only_one_of_UDT1                 only_one_of_udt1_instance;   // cannot init here.
-    static Only_one_of_UDT2 const * const   only_one_of_udt2_instance;   // cannot init here.
-    // TODO??: in addition let's add a shared or unique pointer to also?
+//class Singleton {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
+//private:
+//    // why this bool?  well I could use std::expected, or optional, or nullptr as a flag.
+//    static bool                             is_initialized;     // cannot init here.
+//    // TODO??: Enhancement request:make this into a registry of singletons.
+//    //Only_one_of_UDT1 const *                only_one_of_udt1_instance;   // cannot init here.
+//    //Only_one_of_UDT2 const * const   only_one_of_udt2_instance;   // cannot init here.
+//    // TODO??: in addition let's add a shared or unique pointer to also?
+
+//    /* static Singleton *    _instance;   // cannot init here. */
+
+//protected:
+//    Singleton() = default;
+//    //Singleton const & singleton( Singleton s ) {
+//    //Singleton singleton( Singleton s ) {
+//public:
+//    int my_int {66};
+//    Singleton (Singleton const & s ) = delete;
+//    virtual ~Singleton() = default;
+//    Singleton & operator=( Singleton const & s ) =delete;
+
+//    static Singleton & instance() {
+//        static Singleton _instance;
+//        return _instance;
+//    }
+
+
+
+//    /* static Singleton * instance() {        // TODO??: Could this be by value instead?  I guess not since then there would be copies??  But still access() would get the right thing, but the user might not use access and get to the values some other way??
+//        if ( not is_initialized ) {
+//            //Row row                                     {51,"Fifty one."};
+//            //Only_one_of_UDT1 only_one_udt1_instance     {41,"Fourty one.",row};
+//            _instance = new Singleton;
+//            _instance->my_int = 67;
+//            is_initialized = true; }
+//        return _instance;
+//    }*/
+//};
+//bool                            Singleton::is_initialized            {false};
+
+//class Singleton {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
+//private:
+//    Singleton() = default;
+//protected:
+//public:
+//    int        my_int {66};
+//    Singleton (Singleton const & s ) = delete;
+//    virtual ~Singleton() = default;
+//    Singleton & operator=( Singleton const & s ) =delete;
+//    static Singleton & instance() {
+//        static Singleton _instance;
+//        return _instance;
+//    }
+//};
+
+template <typename T>
+class SingletonBase {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
 protected:
-    Singleton();
+    SingletonBase() noexcept = default;
 public:
-    static Only_one_of_UDT1 & instance() {        // TODO??: Could this be by value instead?  I guess not since then there would be copies??  But still access() would get the right thing, but the user might not use access and get to the values some other way??
-        if ( not is_initialized ) {
-            Row row                         {51,"Fifty one."};
-            Only_one_of_UDT1 only_one_udt1_instance  {41,"Fourty one.",row};
-            is_initialized = true;
-        }
-        return only_one_of_udt1_instance;
-}};
-bool                            Singleton::is_initialized            {false};
-Only_one_of_UDT1                Singleton::only_one_of_udt1_instance;                // TODO??: Why exactly will it not take this:{31,"Thirty one.", {32,"Thirty two."}};
-Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2_instance {nullptr};      // TODO??: clang told me to put nullptr here.
+    SingletonBase(SingletonBase const &   ) = delete;
+    SingletonBase(SingletonBase       &&  ) = delete;
+    SingletonBase & operator=( SingletonBase const &  ) noexcept = delete;
+    SingletonBase & operator=( SingletonBase       && ) noexcept = delete;
+    SingletonBase & operator()() = delete;  // redundant
+    virtual ~SingletonBase() = default;
+    static T & instance() {        // TODO??: Could this be by value instead?  I guess not since then there would be copies??  But still access() would get the right thing, but the user might not use access and get to the values some other way??
+        static T _instance;
+        return   _instance;
+    };
+};
+
+class Singleton_subclassed final : public SingletonBase< Singleton_subclassed > {
+    //friend SingletonBase SingletonBase<Singleton_subclassed>::instance();
+public:
+    int my_int {69};
+};
+
+//Only_one_of_UDT1                Singleton::only_one_of_udt1_instance;                // TODO??: Why exactly will it not take this:{31,"Thirty one.", {32,"Thirty two."}};
+//Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2_instance {nullptr};      // TODO??: clang told me to put nullptr here.
 //Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2 {77};                 // TODO??: rvalue not allowed.
 //Only_one_of_UDT2 const * const  Singleton::only_one_of_udt2 = nullptr;            // TODO??: is using = same as {}
 
-class Singleton_subclassed : Singleton {};  // TODO??: How and why would one do this?  GOF suggests it, but for what situation, give example.
+
 // TODO??: how would all above examples be used within multiple compilation units with regard to access and order of initializaion.
 
 // MySingleton::MySingleton() { // TODO??: make sense of this code block below from GOF
     //...
     //Singleton::Register("MySingleton", this);
 //}
-
 int main() {
-    Only_one_of_UDT1    my_singleton_udt1       = Singleton::instance();
-    int                 my_singleton_udt_int    = my_singleton_udt1.i;
-    Row                 my_singleton_udt_row    = my_singleton_udt1.row;
-    cout << "Have only one of this:" << my_singleton_udt1.i <<", " << my_singleton_udt1.s <<", " << my_singleton_udt1.row.ri << endl ;
+    //Singleton    *       my_singleton       = Singleton::instance();
+    //Singleton            & my_singleton                 = Singleton::instance();
+    Singleton_subclassed & my_singleton_subclassed  = Singleton_subclassed::instance();
+    Singleton_subclassed & my_singleton_subclassed2  = Singleton_subclassed::instance();
 
+    //int                 my_singleton_udt_int    = my_singleton_udt1.i;
+    //Row                 my_singleton_udt_row    = my_singleton_udt1.row;
+    //cout << "Have only one of this:" << my_singleton_udt1.i <<", " << my_singleton_udt1.s <<", " << my_singleton_udt1.row.ri << endl ;
+    cout << "Have only one of this:" << my_singleton_subclassed.my_int << endl ;
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
