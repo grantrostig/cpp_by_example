@@ -1,5 +1,5 @@
 #pragma once
-#include "Broadcaster.hpp"
+#include "broadcaster.hpp"
 #include <atomic>
 #include <chrono>
 #include <mutex>
@@ -9,31 +9,31 @@
 enum class Direction { u, d, l, r };
 
 struct Modifiers {
-  const bool ctrl  : 1; //todo??: what is : doing there?  bitfields, only in "structs"
-  const bool alt   : 1;
-  const bool shift : 1;
+    const bool ctrl  : 1; //todo??: what is : doing there?  bitfields, only in "structs"
+    const bool alt   : 1;
+    const bool shift : 1;
 };
 
-class Keystroke_events {
+class Keystroke_events_I {
 public:
-  virtual ~Keystroke_events() = default;
-  virtual void tk_escape()                        {}
-  virtual void tk_char(         char,       bool) {}
-  virtual void tk_enter(        const Modifiers &&) {}
-  virtual void tk_backspace(    const Modifiers &&) {}
-  virtual void tk_ins(          const Modifiers &&) {}
-  virtual void tk_del(          const Modifiers &&) {}
-  virtual void tk_home(         const Modifiers &&) {}
-  virtual void tk_end(          const Modifiers &&) {}
-  virtual void tk_center(       const Modifiers &&) {}
-  virtual void tk_tab(          Direction) {}
-  virtual void tk_arrow(        Direction, const Modifiers &&) {}
-  virtual void tk_page(         Direction, const Modifiers &&) {}
-  virtual void tk_function(     int8_t, const Modifiers &&) {}
-  virtual void tk_unhandled(    uint64_t) {}
+    virtual ~Keystroke_events_I() = default;
+    virtual void tk_escape()                          = 0;
+    virtual void tk_char(         char,       bool) {}
+    virtual void tk_enter(        const Modifiers &&) {}
+    virtual void tk_backspace(    const Modifiers &&) {}
+    virtual void tk_ins(          const Modifiers &&) {}
+    virtual void tk_del(          const Modifiers &&) {}
+    virtual void tk_home(         const Modifiers &&) {}
+    virtual void tk_end(          const Modifiers &&) {}
+    virtual void tk_center(       const Modifiers &&) {}
+    virtual void tk_tab(          Direction) {}
+    virtual void tk_arrow(        Direction, const Modifiers &&) {}
+    virtual void tk_page(         Direction, const Modifiers &&) {}
+    virtual void tk_function(     int8_t, const Modifiers &&) {}
+    virtual void tk_unhandled(    uint64_t)             = 0;
 };
 
-class Tty : public Broadcaster< Keystroke_events > {
+class Tty : public Broadcaster< Keystroke_events_I > {
 public:
   ~Tty();
   void read_keystrokes();

@@ -6,7 +6,7 @@
 // -Wcast-align -Woverloaded-virtual -Wunused -pedantic -Wsign-conversion -Wmisleading-indentation -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wimplicit-fallthrough
 // -std=c++20 Term_keys.cpp main.cpp -o tk
 
-#include "Tty.hpp"
+#include "tty.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-class Tty_controller : public Keystroke_events {
+class Tty_controller : public Keystroke_events_I {
 public:
   void run() {
     Tty tk;

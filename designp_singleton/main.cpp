@@ -13,6 +13,7 @@ struct Only_one_of_UDT2 {
     int     i       {98};
     string  s       {"NULL"};
     Row     row     {};};  // should get inited values from type
+
 //class Singleton {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
 //private:
 //    // why this bool?  well I could use std::expected, or optional, or nullptr as a flag.
@@ -38,8 +39,6 @@ struct Only_one_of_UDT2 {
 //        static Singleton _instance;
 //        return _instance;
 //    }
-
-
 
 //    /* static Singleton * instance() {        // TODO??: Could this be by value instead?  I guess not since then there would be copies??  But still access() would get the right thing, but the user might not use access and get to the values some other way??
 //        if ( not is_initialized ) {
@@ -69,23 +68,23 @@ struct Only_one_of_UDT2 {
 //};
 
 template <typename T>
-class SingletonBase {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
+class SingletonBaseTref {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
 protected:
-    SingletonBase() noexcept = default;
+    SingletonBaseTref() noexcept = default;
 public:
-    SingletonBase(SingletonBase const &   ) = delete;
-    SingletonBase(SingletonBase       &&  ) = delete;
-    SingletonBase & operator=( SingletonBase const &  ) noexcept = delete;
-    SingletonBase & operator=( SingletonBase       && ) noexcept = delete;
-    SingletonBase & operator()() = delete;  // redundant
-    virtual ~SingletonBase() = default;
+    SingletonBaseTref(SingletonBaseTref const &   )                         = delete;
+    SingletonBaseTref(SingletonBaseTref       &&  )                         = delete;
+    virtual ~SingletonBaseTref()                                        = default;
+    SingletonBaseTref & operator=( SingletonBaseTref const &  ) noexcept    = delete;
+    SingletonBaseTref & operator=( SingletonBaseTref       && ) noexcept    = delete;
+    SingletonBaseTref & operator()()                                    = delete;     // Redundant since it isn't rule of 5/6.
     static T & instance() {        // TODO??: Could this be by value instead?  I guess not since then there would be copies??  But still access() would get the right thing, but the user might not use access and get to the values some other way??
         static T _instance;
         return   _instance;
     };
 };
 
-class Singleton_subclassed final : public SingletonBase< Singleton_subclassed > {
+class STr_derived final : public SingletonBaseTref< STr_derived > {  // CRTP TODO??: how does modern c++ obviate this approach?
     //friend SingletonBase SingletonBase<Singleton_subclassed>::instance();
 public:
     int my_int {69};
@@ -106,13 +105,13 @@ public:
 int main() {
     //Singleton    *       my_singleton       = Singleton::instance();
     //Singleton            & my_singleton                 = Singleton::instance();
-    Singleton_subclassed & my_singleton_subclassed  = Singleton_subclassed::instance();
-    Singleton_subclassed & my_singleton_subclassed2  = Singleton_subclassed::instance();
+    STr_derived & str_derived   = STr_derived::instance();
+    STr_derived & str_derived2  = STr_derived::instance();
 
     //int                 my_singleton_udt_int    = my_singleton_udt1.i;
     //Row                 my_singleton_udt_row    = my_singleton_udt1.row;
     //cout << "Have only one of this:" << my_singleton_udt1.i <<", " << my_singleton_udt1.s <<", " << my_singleton_udt1.row.ri << endl ;
-    cout << "Have only one of this:" << my_singleton_subclassed.my_int << endl ;
+    cout << "Have only one of this:" << str_derived.my_int << endl ;
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
