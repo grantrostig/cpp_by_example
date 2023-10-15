@@ -1,5 +1,5 @@
 #pragma once
-#include "broadcaster.hpp"
+#include "subject_i.hpp"
 #include <atomic>
 #include <chrono>
 #include <mutex>
@@ -33,7 +33,7 @@ public:
     virtual void tk_unhandled(    uint64_t)             = 0;
 };
 
-class Tty : public Broadcaster< Keystroke_events_I > {
+class Tty : public Subject_I< Keystroke_events_I > {
 public:
   ~Tty();
   void read_keystrokes();

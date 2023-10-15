@@ -10,7 +10,7 @@ SOURCES += \
         main.cpp
 
 HEADERS += \
-    broadcaster.hpp \
+    subject_i.hpp \
     tty.hpp
 
 

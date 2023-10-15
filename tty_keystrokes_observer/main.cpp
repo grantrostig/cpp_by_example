@@ -20,7 +20,7 @@ class Tty_controller : public Keystroke_events_I {
 public:
   void run() {
     Tty tk;
-    tk.attach_receiver(*this);
+      tk.attach_observer(*this);
     tk.read_keystrokes();
   }
 
