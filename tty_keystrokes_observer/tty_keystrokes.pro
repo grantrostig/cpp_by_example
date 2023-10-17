@@ -6,13 +6,16 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        observer.cpp \
         tty.cpp \
-        main.cpp
+        main.cpp \
+        tty_controller.cpp
 
 HEADERS += \
-    subject_i.hpp \
-    tty.hpp
-
+    observer.hpp \
+    subject.hpp \
+    tty.hpp \
+    tty_controller.hpp
 
 QMAKE_CXXFLAGS += \
         # -std=c++2b 		\
@@ -20,4 +23,10 @@ QMAKE_CXXFLAGS += \
         # -Wno-uninitialized 	\
         # -Wno-reorder 		\
         # -Wno-unused-parameter 	\
+
+STATECHARTS += \
+    gr_state_chart.scxml
+
+DISTFILES += \
+    gr_model.qmodel
 

@@ -10,7 +10,7 @@ Tty::~Tty() {
 
 void Tty::stop() { _is_stop_request_atomic = true; }  // TODO: why not clear out _in_char and reset is_char_ready?
 
-tcflag_t Tty::config_tty() {
+tcflag_t Tty::config_tty_to_raw() {
   tcflag_t          initial_lflag;
   struct termios    t;
   tcgetattr( 0, &t);          // TODO: need to check errors.
@@ -23,11 +23,11 @@ tcflag_t Tty::config_tty() {
 void Tty::restore_tty() {
   struct termios    t;
   tcgetattr(0, &t);          // TODO: need to check errors.
-  t.c_lflag =       _tty_cflags;
+  t.c_lflag =       _orig_tty_cflags;
   tcsetattr(0, TCSANOW, &t);
 }
 
-void Tty::read_tty_thread() {    // ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+void Tty::tty_read_thread() {    // ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   // Grab chars until EOT or stop_request.
   assert( _in_char == 0                && "Precondition: we are just starting to read, so should be empty.");
   assert( not _is_char_ready_atomic    && "Precondition: we are just starting to read, so should not be ready.");
@@ -48,7 +48,7 @@ void Tty::read_tty_thread() {    // ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   return;   // ReturnRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 }
 
-void Tty::read_keystrokes() {
+void Tty::read_keystrokes_from_keyboard() {
   using std::chrono::time_point, std::chrono::microseconds, std::chrono::steady_clock, std::chrono::duration_cast;
   //using namespace std::chrono;  // TODO??: what is advantage of using above specifically for this class? or is it a namespace, or something else?
   assert( _in_char == 0                && "Precondition: we are just starting to read, so should be empty.");
@@ -58,21 +58,22 @@ void Tty::read_keystrokes() {
   microseconds              esc_elapsed;
   bool                      escaped         {false};
   uint64_t                  sequence        {0};
-  _tty_cflags = config_tty();
-  std::thread               child_read_thread{ [&] () { read_tty_thread(); }};     // ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-  //  main thread continues.
+
+  _orig_tty_cflags = config_tty_to_raw();
+  std::thread               child_read_thread{ [&] () { tty_read_thread(); }};     // CHILD ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+  //  ******* Main thread continues below.
   while ( not _is_stop_request_atomic.load()) {
-    while ( not _is_char_ready_atomic.load()) {  //
-      if ( escaped ) {
+    while ( not _is_char_ready_atomic.load()) {  // Check for ALL ready chars read on child_read_thread, .  Give up when more than allowed time has expired for characters arriving.
+      if ( escaped ) {                           // TODO??: What is this, considering we might have simple single regular tk_char below?
           esc_elapsed = duration_cast<microseconds>( steady_clock::now() - esc_t0 );
-          if ( esc_elapsed > _single_char_esc_timeout) {
+          if ( esc_elapsed > _single_char_esc_timeout) {    // Not a MULTI-BYTE sequence  OR we are the END of a multi-byte sequence.
               escaped = false;
               if (sequence == 0) {
-                  notify( &Keystroke_events_I::tk_escape                                             );
+                  notify_fn_args( &Keystroke_events_I::tk_escape                                             );
               } else if ( sequence < 0xFF &&               isprint( static_cast<int>( sequence ))) {
-                  notify( &Keystroke_events_I::tk_char,           static_cast<char>( _in_char ), true);
+                  notify_fn_args( &Keystroke_events_I::tk_char,           static_cast<char>( _in_char ), true);
               } else {
-                  notify( &Keystroke_events_I::tk_unhandled, std::forward<uint64_t>( sequence )      );
+                  notify_fn_args( &Keystroke_events_I::tk_unhandled, std::forward<uint64_t>( sequence )      );
               }
           }
       }
@@ -97,467 +98,467 @@ void Tty::read_keystrokes() {
 
           switch ( sequence ) {
           case ascii_lf:
-              notify(&Keystroke_events_I::tk_enter, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_enter, {false, true, false});
               break;
           case ascii_bs:
-              notify(&Keystroke_events_I::tk_backspace, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_backspace, {false, true, false});
               break;
           case bs_ctrl_alt:
-              notify(&Keystroke_events_I::tk_backspace, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_backspace, {true, true, false});
               break;
           case key_seq_f1:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 1, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 1, {false, false, false});
               break;
           case key_seq_f1_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 1, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 1, {true, false, false});
               break;
           case key_seq_f1_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 1, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 1, {false, true, false});
               break;
           case key_seq_f1_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 1, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 1, {false, false, true});
               break;
           case key_seq_f1_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 1, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 1, {true, false, true});
               break;
           case key_seq_f1_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 1, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 1, {false, true, true});
               break;
           case key_seq_f1_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 1, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 1, {true, true, true});
               break;
           case key_seq_f2:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 2, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 2, {false, false, false});
               break;
           case key_seq_f2_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 2, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 2, {true, false, false});
               break;
           case key_seq_f2_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 2, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 2, {false, true, false});
               break;
           case key_seq_f2_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 2, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 2, {false, false, true});
               break;
           case key_seq_f2_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 2, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 2, {true, false, true});
               break;
           case key_seq_f2_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 2, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 2, {false, true, true});
               break;
           case key_seq_f2_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 2, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 2, {true, true, true});
               break;
           case key_seq_f3:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 3, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 3, {false, false, false});
               break;
           case key_seq_f3_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 3, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 3, {true, false, false});
               break;
           case key_seq_f3_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 3, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 3, {false, true, false});
               break;
           case key_seq_f3_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 3, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 3, {false, false, true});
               break;
           case key_seq_f3_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 3, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 3, {true, false, true});
               break;
           case key_seq_f3_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 3, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 3, {false, true, true});
               break;
           case key_seq_f3_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 3, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 3, {true, true, true});
               break;
           case key_seq_f4:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 4, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 4, {false, false, false});
               break;
           case key_seq_f4_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 4, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 4, {true, false, false});
               break;
           case key_seq_f4_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 4, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 4, {false, true, false});
               break;
           case key_seq_f4_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 4, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 4, {false, false, true});
               break;
           case key_seq_f4_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 4, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 4, {true, false, true});
               break;
           case key_seq_f4_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 4, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 4, {false, true, true});
               break;
           case key_seq_f4_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 4, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 4, {true, true, true});
               break;
           case key_seq_f5:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 5, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 5, {false, false, false});
               break;
           case key_seq_f5_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 5, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 5, {true, false, false});
               break;
           case key_seq_f5_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 5, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 5, {false, true, false});
               break;
           case key_seq_f5_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 5, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 5, {false, false, true});
               break;
           case key_seq_f5_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 5, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 5, {true, false, true});
               break;
           case key_seq_f5_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 5, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 5, {false, true, true});
               break;
           case key_seq_f5_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 5, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 5, {true, true, true});
               break;
           case key_seq_f6:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 6, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 6, {false, false, false});
               break;
           case key_seq_f6_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 6, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 6, {true, false, false});
               break;
           case key_seq_f6_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 6, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 6, {false, true, false});
               break;
           case key_seq_f6_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 6, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 6, {false, false, true});
               break;
           case key_seq_f6_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 6, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 6, {true, false, true});
               break;
           case key_seq_f6_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 6, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 6, {false, true, true});
               break;
           case key_seq_f6_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 6, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 6, {true, true, true});
               break;
           case key_seq_f7:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 7, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 7, {false, false, false});
               break;
           case key_seq_f7_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 7, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 7, {true, false, false});
               break;
           case key_seq_f7_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 7, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 7, {false, true, false});
               break;
           case key_seq_f7_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 7, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 7, {false, false, true});
               break;
           case key_seq_f7_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 7, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 7, {true, false, true});
               break;
           case key_seq_f7_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 7, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 7, {false, true, true});
               break;
           case key_seq_f7_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 7, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 7, {true, true, true});
               break;
           case key_seq_f8:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 8, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 8, {false, false, false});
               break;
           case key_seq_f8_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 8, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 8, {true, false, false});
               break;
           case key_seq_f8_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 8, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 8, {false, true, false});
               break;
           case key_seq_f8_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 8, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 8, {false, false, true});
               break;
           case key_seq_f8_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 8, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 8, {true, false, true});
               break;
           case key_seq_f8_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 8, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 8, {false, true, true});
               break;
           case key_seq_f8_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 8, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 8, {true, true, true});
               break;
           case key_seq_f9:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 9, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 9, {false, false, false});
               break;
           case key_seq_f9_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 9, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 9, {true, false, false});
               break;
           case key_seq_f9_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 9, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 9, {false, true, false});
               break;
           case key_seq_f9_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 9, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 9, {false, false, true});
               break;
           case key_seq_f9_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 9, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 9, {true, false, true});
               break;
           case key_seq_f9_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 9, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 9, {false, true, true});
               break;
           case key_seq_f9_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 9, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 9, {true, true, true});
               break;
           case key_seq_f10:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 10, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 10, {false, false, false});
               break;
           case key_seq_f10_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 10, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 10, {true, false, false});
               break;
           case key_seq_f10_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 10, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 10, {false, true, false});
               break;
           case key_seq_f10_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 10, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 10, {false, false, true});
               break;
           case key_seq_f10_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 10, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 10, {true, false, true});
               break;
           case key_seq_f10_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 10, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 10, {false, true, true});
               break;
           case key_seq_f10_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 10, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 10, {true, true, true});
               break;
           case key_seq_f11:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 11, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 11, {false, false, false});
               break;
           case key_seq_f11_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 11, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 11, {true, false, false});
               break;
           case key_seq_f11_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 11, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 11, {false, true, false});
               break;
           case key_seq_f11_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 11, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 11, {false, false, true});
               break;
           case key_seq_f11_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 11, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 11, {true, false, true});
               break;
           case key_seq_f11_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 11, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 11, {false, true, true});
               break;
           case key_seq_f11_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 11, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 11, {true, true, true});
               break;
           case key_seq_f12:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 12, {false, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 12, {false, false, false});
               break;
           case key_seq_f12_ctrl:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 12, {true, false, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 12, {true, false, false});
               break;
           case key_seq_f12_alt:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 12, {false, true, false});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 12, {false, true, false});
               break;
           case key_seq_f12_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 12, {false, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 12, {false, false, true});
               break;
           case key_seq_f12_ctrl_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 12, {true, false, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 12, {true, false, true});
               break;
           case key_seq_f12_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 12, {false, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 12, {false, true, true});
               break;
           case key_seq_f12_ctrl_alt_shift:
-              notify<int8_t>(&Keystroke_events_I::tk_function, 12, {true, true, true});
+              notify_fn_args<int8_t>(&Keystroke_events_I::tk_function, 12, {true, true, true});
               break;
           case key_seq_arrow_u:
-              notify(&Keystroke_events_I::tk_arrow, Direction::u, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::u, {false, false, false});
               break;
           case key_seq_arrow_u_ctrl:
-              notify(&Keystroke_events_I::tk_arrow, Direction::u, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::u, {true, false, false});
               break;
           case key_seq_arrow_u_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::u, {false, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::u, {false, false, true});
               break;
           case key_seq_arrow_u_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::u, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::u, {false, true, false});
               break;
           case key_seq_arrow_u_alt_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::u, {false, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::u, {false, true, true});
               break;
           case key_seq_arrow_u_ctrl_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::u, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::u, {true, true, false});
               break;
           case key_seq_arrow_d:
-              notify(&Keystroke_events_I::tk_arrow, Direction::d, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::d, {false, false, false});
               break;
           case key_seq_arrow_d_ctrl:
-              notify(&Keystroke_events_I::tk_arrow, Direction::d, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::d, {true, false, false});
               break;
           case key_seq_arrow_d_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::d, {false, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::d, {false, false, true});
               break;
           case key_seq_arrow_d_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::d, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::d, {false, true, false});
               break;
           case key_seq_arrow_d_alt_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::d, {false, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::d, {false, true, true});
               break;
           case key_seq_arrow_d_ctrl_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::d, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::d, {true, true, false});
               break;
           case key_seq_arrow_r:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {false, false, false});
               break;
           case key_seq_arrow_r_ctrl:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {true, false, false});
               break;
           case key_seq_arrow_r_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {false, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {false, false, true});
               break;
           case key_seq_arrow_r_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {false, true, false});
               break;
           case key_seq_arrow_r_alt_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {false, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {false, true, true});
               break;
           case key_seq_arrow_r_ctrl_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {true, true, false});
               break;
           case key_seq_arrow_r_ctrl_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {true, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {true, false, true});
               break;
           case key_seq_arrow_r_ctrl_alt_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::r, {true, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::r, {true, true, true});
               break;
           case key_seq_arrow_l:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {false, false, false});
               break;
           case key_seq_arrow_l_ctrl:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {true, false, false});
               break;
           case key_seq_arrow_l_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {false, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {false, false, true});
               break;
           case key_seq_arrow_l_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {false, true, false});
               break;
           case key_seq_arrow_l_alt_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {false, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {false, true, true});
               break;
           case key_seq_arrow_l_ctrl_alt:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {true, true, false});
               break;
           case key_seq_arrow_l_ctrl_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {true, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {true, false, true});
               break;
           case key_seq_arrow_l_ctrl_alt_shift:
-              notify(&Keystroke_events_I::tk_arrow, Direction::l, {true, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_arrow, Direction::l, {true, true, true});
               break;
           case key_seq_center:
-              notify(&Keystroke_events_I::tk_center, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_center, {false, false, false});
               break;
           case key_seq_center_ctrl:
-              notify(&Keystroke_events_I::tk_center, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_center, {true, false, false});
               break;
           case key_seq_center_shift:
-              notify(&Keystroke_events_I::tk_center, {false, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_center, {false, false, true});
               break;
           case key_seq_center_alt:
-              notify(&Keystroke_events_I::tk_center, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_center, {false, true, false});
               break;
           case key_seq_center_alt_shift:
-              notify(&Keystroke_events_I::tk_center, {false, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_center, {false, true, true});
               break;
           case key_seq_center_ctrl_alt:
-              notify(&Keystroke_events_I::tk_center, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_center, {true, true, false});
               break;
           case key_seq_center_ctrl_shift:
-              notify(&Keystroke_events_I::tk_center, {true, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_center, {true, false, true});
               break;
           case key_seq_center_ctrl_alt_shift:
-              notify(&Keystroke_events_I::tk_center, {true, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_center, {true, true, true});
               break;
           case key_seq_end:
-              notify(&Keystroke_events_I::tk_end, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_end, {false, false, false});
               break;
           case key_seq_end_ctrl:
-              notify(&Keystroke_events_I::tk_end, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_end, {true, false, false});
               break;
           case key_seq_end_alt:
-              notify(&Keystroke_events_I::tk_end, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_end, {false, true, false});
               break;
           case key_seq_end_ctrl_alt:
-              notify(&Keystroke_events_I::tk_end, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_end, {true, true, false});
               break;
           case key_seq_home:
-              notify(&Keystroke_events_I::tk_home, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_home, {false, false, false});
               break;
           case key_seq_home_ctrl:
-              notify(&Keystroke_events_I::tk_home, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_home, {true, false, false});
               break;
           case key_seq_home_alt:
-              notify(&Keystroke_events_I::tk_home, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_home, {false, true, false});
               break;
           case key_seq_home_ctrl_alt:
-              notify(&Keystroke_events_I::tk_home, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_home, {true, true, false});
               break;
           case key_seq_ins:
-              notify(&Keystroke_events_I::tk_ins, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_ins, {false, false, false});
               break;
           case key_seq_ins_alt:
-              notify(&Keystroke_events_I::tk_ins, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_ins, {false, true, false});
               break;
           case key_seq_del:
-              notify(&Keystroke_events_I::tk_del, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_del, {false, false, false});
               break;
           case key_seq_del_ctrl:
-              notify(&Keystroke_events_I::tk_del, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_del, {true, false, false});
               break;
           case key_seq_del_alt:
-              notify(&Keystroke_events_I::tk_del, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_del, {false, true, false});
               break;
           case key_seq_del_shift:
-              notify(&Keystroke_events_I::tk_del, {false, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_del, {false, false, true});
               break;
           case key_seq_del_ctrl_shift:
-              notify(&Keystroke_events_I::tk_del, {true, false, true});
+              notify_fn_args(&Keystroke_events_I::tk_del, {true, false, true});
               break;
           case key_seq_del_alt_shift:
-              notify(&Keystroke_events_I::tk_del, {false, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_del, {false, true, true});
               break;
           case key_seq_del_ctrl_alt_shift:
-              notify(&Keystroke_events_I::tk_del, {true, true, true});
+              notify_fn_args(&Keystroke_events_I::tk_del, {true, true, true});
               break;
           case key_seq_page_u:
-              notify(&Keystroke_events_I::tk_page, Direction::u, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::u, {false, false, false});
               break;
           case key_seq_page_u_ctrl:
-              notify(&Keystroke_events_I::tk_page, Direction::u, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::u, {true, false, false});
               break;
           case key_seq_page_u_alt:
-              notify(&Keystroke_events_I::tk_page, Direction::u, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::u, {false, true, false});
               break;
           case key_seq_page_u_ctrl_alt:
-              notify(&Keystroke_events_I::tk_page, Direction::u, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::u, {true, true, false});
               break;
           case key_seq_page_d:
-              notify(&Keystroke_events_I::tk_page, Direction::d, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::d, {false, false, false});
               break;
           case key_seq_page_d_ctrl:
-              notify(&Keystroke_events_I::tk_page, Direction::d, {true, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::d, {true, false, false});
               break;
           case key_seq_page_d_alt:
-              notify(&Keystroke_events_I::tk_page, Direction::d, {false, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::d, {false, true, false});
               break;
           case key_seq_page_d_ctrl_alt:
-              notify(&Keystroke_events_I::tk_page, Direction::d, {true, true, false});
+              notify_fn_args(&Keystroke_events_I::tk_page, Direction::d, {true, true, false});
               break;
           case key_seq_tab_shift:
-              notify(&Keystroke_events_I::tk_tab, Direction::l);
+              notify_fn_args(&Keystroke_events_I::tk_tab, Direction::l);
               break;
           default:
               escaped = true;
           }
       } else if ( isprint(_in_char)) {
-          notify(&Keystroke_events_I::tk_char, static_cast<char>(_in_char), false);
+          notify_fn_args(&Keystroke_events_I::tk_char, static_cast<char>(_in_char), false);
       } else {
           switch ( _in_char) {
           case ascii_tab:
-              notify(&Keystroke_events_I::tk_tab, Direction::r);
+              notify_fn_args(&Keystroke_events_I::tk_tab, Direction::r);
               break;
           case ascii_lf:
-              notify(&Keystroke_events_I::tk_enter, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_enter, {false, false, false});
               break;
           case ascii_bs:
-              notify(&Keystroke_events_I::tk_backspace, {false, false, false});
+              notify_fn_args(&Keystroke_events_I::tk_backspace, {false, false, false});
               break;
           }
       }
