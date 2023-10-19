@@ -8,8 +8,9 @@
 
 template <typename T>
 class Subject {
-    std::vector<std::reference_wrapper<T>>  _receivers{};
-    mutable std::mutex                      _receivers_mutex{};
+    std::vector<std::reference_wrapper<T>>  _observers          {};
+    std::vector<std::reference_wrapper<T>>  _receivers          {};
+    mutable std::mutex                      _receivers_mutex    {};
 public:
     virtual ~Subject() = default;   // TODO??: is this required under the rule of 5/6?
 

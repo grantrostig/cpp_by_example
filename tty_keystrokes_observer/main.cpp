@@ -12,7 +12,7 @@
 // -Wcast-align -Woverloaded-virtual -Wunused -pedantic -Wsign-conversion -Wmisleading-indentation -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wimplicit-fallthrough
 // -std=c++20 Term_keys.cpp main.cpp -o tk
 
-#include "tty_controller.hpp"
+#include "tty_keystroke_observer.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
@@ -23,7 +23,7 @@
 #include <vector>
 
 int main() {
-    Tty_controller tt;
+    Tty_keystroke_observer tt;
     tt.run();
 
     return 0;
