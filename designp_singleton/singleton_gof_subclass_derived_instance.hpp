@@ -4,9 +4,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
-class Singleton_gof_subclass_derived_instance
-{
+class Singleton_gof_subclass_derived_instance {
 public:
     Singleton_gof_subclass_derived_instance();
 };

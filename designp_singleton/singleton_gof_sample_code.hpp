@@ -49,7 +49,7 @@ void test_singleton_gof_sample_code() {
     my_singleton2->_my_int = 42;
     cout << "ptr2:" << my_singleton2->_my_int << endl ;
     cout << "ptr1:" << my_singleton1->_my_int << endl ;
-    cout << "BAD ptr1 was not updated but shows it was." << endl;
+    cout << "BAD 1 was not updated but shows it was, or is that the point of Singletons?" << endl;
     my_singleton2 = my_singleton1;  // TODO??: why does this compile? I thought I =delete'd this
     Singleton_gof_sample_code *    my_singleton3   { my_singleton1};
 }

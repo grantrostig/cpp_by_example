@@ -4,9 +4,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
-class Singleton_gof_registry
-{
+class Singleton_gof_registry {
 public:
     Singleton_gof_registry();
 };

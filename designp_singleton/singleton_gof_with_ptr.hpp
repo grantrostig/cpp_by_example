@@ -64,11 +64,11 @@ void test_Singleton_gof_with_ptr() {
     cout << "ptr1:" << my_singleton_ptr1->_my_int << endl ;
     cout << "ptr2:" << my_singleton_ptr2->_my_int << endl ;
     cout << "int from ptr1:" << ++my_singleton_int << endl ;
-    cout<< "set only int2 to 42." << endl;
+    cout << "set only int2 to 42." << endl;
     my_singleton_ptr2->_my_int = 42;
     cout << "ptr2:" << my_singleton_ptr2->_my_int << endl ;
     cout << "ptr1:" << my_singleton_ptr1->_my_int << endl ;
-    cout<< "BAD ptr1 was not updated but shows it was." << endl;
+    cout << "BAD 1 was not updated but shows it was, or is that the point of Singletons?" << endl;
     my_singleton_ptr2 = my_singleton_ptr1;  // TODO??: why does this compile? I thought I =delete'd this
     Singleton_gof_with_ptr *    my_singleton_ptr3   { my_singleton_ptr1};
 }
@@ -81,11 +81,11 @@ void test_Singleton_gof_with_ref() {
     cout << "ref1:" << my_singleton_ref1._my_int << endl ;
     cout << "ref2:" << my_singleton_ref2._my_int << endl ;
     cout << "int from ref1:" << ++my_singleton_int << endl ;
-    cout<< "update only int2 to 42." << endl;
+    cout << "update only int2 to 42." << endl;
     my_singleton_ref2._my_int = 42;
     cout << "ref2:" << my_singleton_ref2._my_int << endl ;
     cout << "ref1:" << my_singleton_ref1._my_int << endl ;
-    cout<< "BAD ref1 was not updated but shows it was." << endl;
+    cout << "BAD 1 was not updated but shows it was, or is that the point of Singletons?" << endl;
     //my_singleton_ref2 = my_singleton_ref1;
     Singleton_gof_with_ref &    my_singleton_ref3 { my_singleton_ref1 };  // TODO??: why does this compile? I thought I =delete'd this
 }
