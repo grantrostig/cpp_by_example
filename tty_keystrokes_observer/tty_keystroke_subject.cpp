@@ -1,16 +1,16 @@
-#include "tty.hpp"
+#include "tty_keystroke_observer.hpp"
 #include <cassert>
 #include <iostream>
 #include <thread>
 
-Tty::~Tty() {
+Tty_keystroke_subject::~Tty_keystroke_subject() {
     _is_stop_request_atomic = true;  // TODO??: why bother at this point?  read_thread is already down, correct?
     restore_tty();
 }
 
-void Tty::stop() { _is_stop_request_atomic = true; }  // TODO: why not clear out _in_char and reset is_char_ready?
+void Tty_keystroke_subject::stop() { _is_stop_request_atomic = true; }  // TODO: why not clear out _in_char and reset is_char_ready?
 
-tcflag_t Tty::config_tty_to_raw() {
+tcflag_t Tty_keystroke_subject::config_tty_to_raw() {
   tcflag_t          initial_lflag;
   struct termios    t;
   tcgetattr( 0, &t);          // TODO: need to check errors.
@@ -20,14 +20,14 @@ tcflag_t Tty::config_tty_to_raw() {
   return initial_lflag;
 }
 
-void Tty::restore_tty() {
+void Tty_keystroke_subject::restore_tty() {
   struct termios    t;
   tcgetattr(0, &t);          // TODO: need to check errors.
   t.c_lflag =       _orig_tty_cflags;
   tcsetattr(0, TCSANOW, &t);
 }
 
-void Tty::tty_read_thread() {    // ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+void Tty_keystroke_subject::tty_read_thread() {    // ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   // Grab chars until EOT or stop_request.
   assert( _in_char == 0                && "Precondition: we are just starting to read, so should be empty.");
   assert( not _is_char_ready_atomic    && "Precondition: we are just starting to read, so should not be ready.");
@@ -48,7 +48,7 @@ void Tty::tty_read_thread() {    // ThreadTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   return;   // ReturnRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 }
 
-void Tty::read_keystrokes_from_keyboard() {
+void Tty_keystroke_subject::read_keystrokes_from_keyboard() {
   using std::chrono::time_point, std::chrono::microseconds, std::chrono::steady_clock, std::chrono::duration_cast;
   //using namespace std::chrono;  // TODO??: what is advantage of using above specifically for this class? or is it a namespace, or something else?
   assert( _in_char == 0                && "Precondition: we are just starting to read, so should be empty.");
