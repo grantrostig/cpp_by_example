@@ -18,7 +18,7 @@ QMAKE_CXXFLAGS += \
 
 SOURCES += \
         main.cpp \
-        singleton_gof_derived_t_ref.cpp \
+        singleton_derived_t_ref.cpp \
         singleton_gof_registry.cpp \
         singleton_gof_sample_code.cpp \
         singleton_gof_subclass_derived_instance.cpp \
@@ -26,7 +26,7 @@ SOURCES += \
         singleton_gof_with_ptr.cpp
 
 HEADERS += \
-    singleton_gof_derived_t_ref.hpp \
+    singleton_derived_t_ref.hpp \
     singleton_gof_registry.hpp \
     singleton_gof_sample_code.hpp \
     singleton_gof_subclass_derived_instance.hpp \

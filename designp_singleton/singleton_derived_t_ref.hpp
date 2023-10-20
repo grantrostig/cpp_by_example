@@ -1,4 +1,6 @@
 // cppmsg.com Boost 1.0 license.
+// author: Marc
+// edited: Grant Rostig
 // see: GOF 1995-SS 1.Singleton; Vlissides 1998-ch2,ch3; Larman 2005-SS 26.5; Robert Martin 2002-Singleton and Monstate; Headington 1996-SS2.7 p79; Cline 1999-ch16-?;
 #pragma once
 #include <bits/stdc++.h>
@@ -27,7 +29,7 @@ public:
     int my_int {99};
 };
 
-void test_singleton_gof_derived_t_ref() {
+void test_singleton_derived_t_ref() {
     cout<< "test_singleton_gof_derived_t_ref()" << endl;
     S_gof_derived_t_ref & s_g_d_t1      { S_gof_derived_t_ref::instance()};
     int                   s_g_d_t1_int   { s_g_d_t1.my_int};
