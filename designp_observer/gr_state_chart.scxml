@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="gr_state_chart" qt:editorversion="11.0.3">
+    <final id="Final_1">
+        <qt:editorinfo scenegeometry="384.38;558.72;364.38;538.72;40;40" geometry="384.38;558.72;-20;-20;40;40"/>
+    </final>
+    <parallel id="Parallel_1">
+        <qt:editorinfo scenegeometry="829.25;251.74;769.25;201.74;120;100" geometry="829.25;251.74;-60;-50;120;100"/>
+    </parallel>
+    <state id="State_1">
+        <qt:editorinfo scenegeometry="492.84;251.74;432.84;201.74;120;100" geometry="492.84;251.74;-60;-50;120;100"/>
+        <transition type="external" event="Transition_1">
+            <qt:editorinfo localGeometry="69.96;-89.99;303.51;-32.23;180.55;42.04;-4.31;94.86;17.97;-32.23;-4.31;-32.23;-4.31;-32.23;-4.31;-32.23;-4.31;-32.23;-362.46;-103.20"/>
+        </transition>
+    </state>
+    <state id="State_2">
+        <qt:editorinfo scenegeometry="132.86;178.25;72.86;128.25;120;100" geometry="132.86;178.25;-60;-50;120;100"/>
+    </state>
+</scxml>
