@@ -2,10 +2,16 @@
 // see: GOF 1995-SS 1.Singleton; Vlissides 1998-ch2,ch3; Larman 2005-SS 26.5; Robert Martin 2002-Singleton and Monstate; Headington 1996-SS2.7 p79; Cline 1999-ch16-?;
 #include "singleton_gof_with_ptr.hpp"
 #include "singleton_gof_derived_t_ref.hpp"
+#include "singleton_gof_sample_code.hpp"
+
+//#include "singleton_gof_subclass_in_instance.hpp"
+//#include "singleton_gof_subclass_derived_instance.hpp"
+//#include "singleton_gof_registry.hpp"
+
 #include <bits/stdc++.h>
 using namespace std;
 
-/*  struct Row {
+/*  struct Row {  //ignore these ravings for now
     int     ri       {99};
     string  rs       {"NULL"}; };
 struct Only_one_of_UDT1 {
@@ -15,7 +21,7 @@ struct Only_one_of_UDT1 {
 struct Only_one_of_UDT2 {
     int     i       {98};
     string  s       {"NULL"};
-    Row     row     {};};  // should get inited values from type */
+    Row     row     {};};  // should get inited values from type
 
 //class Singleton {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
 //private:
@@ -26,7 +32,7 @@ struct Only_one_of_UDT2 {
 //    //Only_one_of_UDT2 const * const   only_one_of_udt2_instance;   // cannot init here.
 //    // TODO??: in addition let's add a shared or unique pointer to also?
 
-//    /* static Singleton *    _instance;   // cannot init here. */
+//     static Singleton *    _instance;   // cannot init here.
 
 //protected:
 //    Singleton() = default;
@@ -43,7 +49,7 @@ struct Only_one_of_UDT2 {
 //        return _instance;
 //    }
 
-//    /* static Singleton * instance() {        // TODO??: Could this be by value instead?  I guess not since then there would be copies??  But still access() would get the right thing, but the user might not use access and get to the values some other way??
+//    ** static Singleton * instance() {        // TODO??: Could this be by value instead?  I guess not since then there would be copies??  But still access() would get the right thing, but the user might not use access and get to the values some other way??
 //        if ( not is_initialized ) {
 //            //Row row                                     {51,"Fifty one."};
 //            //Only_one_of_UDT1 only_one_udt1_instance     {41,"Fourty one.",row};
@@ -51,7 +57,7 @@ struct Only_one_of_UDT2 {
 //            _instance->my_int = 67;
 //            is_initialized = true; }
 //        return _instance;
-//    }*/
+//    }*****
 //};
 //bool                            Singleton::is_initialized            {false};
 
@@ -81,16 +87,18 @@ struct Only_one_of_UDT2 {
 // MySingleton::MySingleton() { // TODO??: make sense of this code block below from GOF
     //...
     //Singleton::Register("MySingleton", this);
-//}
+//} */
+
 int main() {
     test_Singleton_gof_with_ptr();
     test_Singleton_gof_with_ref();
     test_singleton_gof_derived_t_ref();
+    test_singleton_gof_sample_code();
 
-    //Singleton    *       my_singleton       = Singleton::instance();
-    //Singleton            & my_singleton                 = Singleton::instance();
-    //int                 my_singleton_udt_int    = my_singleton_udt1.i;
-    //Row                 my_singleton_udt_row    = my_singleton_udt1.row;
+    //test_singleton_gof_subclass_in_instance();
+    //test_singleton_gof_subclass_derived_instance();
+    //test_singleton_gof_registry();
+
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }

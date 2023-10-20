@@ -9,8 +9,8 @@ class Singleton_gof_base_t_ref {           // NOTE: In fact since I have more th
 protected:
     Singleton_gof_base_t_ref() noexcept = default;
 public:
-    virtual ~Singleton_gof_base_t_ref()                                        = default;
-    Singleton_gof_base_t_ref(Singleton_gof_base_t_ref const &   )                         = delete;
+    virtual ~Singleton_gof_base_t_ref()                                                   = default;
+    Singleton_gof_base_t_ref(Singleton_gof_base_t_ref const &   )                         = delete;  // TODO??: Should this be explicit? and then so what?
     Singleton_gof_base_t_ref(Singleton_gof_base_t_ref       &&  )                         = delete;
     Singleton_gof_base_t_ref & operator=( Singleton_gof_base_t_ref const &  ) noexcept    = delete;
     Singleton_gof_base_t_ref & operator=( Singleton_gof_base_t_ref       && ) noexcept    = delete;
@@ -24,18 +24,23 @@ public:
 class S_gof_derived_t_ref final : public Singleton_gof_base_t_ref< S_gof_derived_t_ref > {  // CRTP TODO??: how does modern c++ obviate this approach?
     //friend SingletonBase SingletonBase<Singleton_subclassed>::instance();
 public:
-    int my_int {98};
+    int my_int {99};
 };
 
 void test_singleton_gof_derived_t_ref() {
     cout<< "test_singleton_gof_derived_t_ref()" << endl;
-    S_gof_derived_t_ref & s_g_d_t       { S_gof_derived_t_ref::instance()};
+    S_gof_derived_t_ref & s_g_d_t1      { S_gof_derived_t_ref::instance()};
+    int                   s_g_d_t1_int   { s_g_d_t1.my_int};
     S_gof_derived_t_ref & s_g_d_t2      { S_gof_derived_t_ref::instance()};
-    int                   s_g_d_t_int   { s_g_d_t.my_int};
 
-    cout << "Have only one of this:" << s_g_d_t.my_int << endl ;
-    cout << "Have only one of this:" << s_g_d_t2.my_int << endl ;
-    s_g_d_t.my_int = 42;
-    cout << "Have only one of this:" << s_g_d_t2.my_int << endl ;
-    cout << "Have a copy   of this:" << ++s_g_d_t_int << endl ;
+    cout << "t1:" << s_g_d_t1.my_int << endl ;
+    cout << "t2:" << s_g_d_t2.my_int << endl ;
+    cout << "++int1:" << ++s_g_d_t1_int << endl ;
+    cout<< "set only int2 to 42." << endl;
+    s_g_d_t2.my_int = 42;
+    cout << "t2:" << s_g_d_t2.my_int << endl ;
+    cout << "t1:" << s_g_d_t2.my_int << endl ;
+    cout<< "BAD ptr1 was not updated but shows it was." << endl;
+    //s_g_d_t1 = s_g_d_t2;
+    S_gof_derived_t_ref & s_g_d_t3 { s_g_d_t1 };  // TODO??: why does this compile? I thought I =delete'd this
 }

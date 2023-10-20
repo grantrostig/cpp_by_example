@@ -16,16 +16,16 @@ struct Only_one_of_UDT2 {
     Row     row     {};};  // should get inited values from type */
 
 /// Problems with approach #1 "ensuring a unique instance"
-/// a) More than one instance of a static object can be declared.  How exactly?  TODO??:
-/// b) Static init time is too early if Singleton owns variable values known later during the run.  TODO??:
-/// c) Constructors are called at unknown order, so Singletons can't depend on each other.  Is this same as reference each other?  TODO??:
-/// gr1) No inheritance to create other unique types, so no code reuse if multiple Singletons are required?
+/** a) More than one instance of a static object can be declared and they both access the same Singleton data instance!  How exactly?  TODO??:
+    b) Static init time is too early if Singleton owns variable values known later during the run.  TODO??:
+    c) Constructors are called at unknown order, so Singletons can't depend on each other.  Is this same as reference each other?  TODO??:
+    gr1) No inheritance to create other unique types, so no code reuse if multiple Singletons are required? */
 class Singleton_gof_with_ptr {
 private:    static  Singleton_gof_with_ptr * _instance;
 protected:          Singleton_gof_with_ptr()  noexcept =default;  // TODO??: why do I get a link error if I don't say: =default
 protected:          ~Singleton_gof_with_ptr() noexcept =default;
-                    Singleton_gof_with_ptr(Singleton_gof_with_ptr const &   )                         = delete;
-                    Singleton_gof_with_ptr(Singleton_gof_with_ptr       &&  )                         = delete;
+                    explicit Singleton_gof_with_ptr(Singleton_gof_with_ptr const &   )                = delete;  // TODO: what if anything does explicity do here?
+                    explicit Singleton_gof_with_ptr(Singleton_gof_with_ptr       &&  )                = delete;
                     Singleton_gof_with_ptr & operator=( Singleton_gof_with_ptr const &  ) noexcept    = delete;
                     Singleton_gof_with_ptr & operator=( Singleton_gof_with_ptr       && ) noexcept    = delete;
 public:     int     _my_int        {99};  // could be protected by a getter.
@@ -33,19 +33,19 @@ public:     int     _my_int        {99};  // could be protected by a getter.
 };
 Singleton_gof_with_ptr * Singleton_gof_with_ptr::_instance {nullptr};
 Singleton_gof_with_ptr * Singleton_gof_with_ptr::Instance() {
-    if( nullptr == _instance) {
+    if ( nullptr == _instance) {
         _instance = new Singleton_gof_with_ptr;
     }
     return _instance;
 };
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 /// See same problems for Singleton_gof_with_ptr above.  TODO??: is this true?
-/// TODO??: how does returning a ref reduce flexibility in the use of the Singleton?  Can only be used in one c++ context?
+/// TODO??: how does returning a ref reduce flexibility in the use of the Singleton?  Can only be used in one c++ context? No. It is gppd that it can't be modified since it is const pointer??
 class Singleton_gof_with_ref {
 protected:          Singleton_gof_with_ref() noexcept { _my_int = 88; }
 protected:          ~Singleton_gof_with_ref() noexcept =default;
-                    Singleton_gof_with_ref(Singleton_gof_with_ref const &   )                         = delete;
-                    Singleton_gof_with_ref(Singleton_gof_with_ref       &&  )                         = delete;
+                    explicit Singleton_gof_with_ref(Singleton_gof_with_ref const &   )                = delete;  // TODO: what if anything does explicity do here?
+                    explicit Singleton_gof_with_ref(Singleton_gof_with_ref       &&  )                = delete;
                     Singleton_gof_with_ref & operator=( Singleton_gof_with_ref const &  ) noexcept    = delete;
                     Singleton_gof_with_ref & operator=( Singleton_gof_with_ref       && ) noexcept    = delete;
 public:     int     _my_int                                      {99};  // could be protected by a getter.
@@ -58,19 +58,34 @@ Singleton_gof_with_ref & Singleton_gof_with_ref::Instance() {  // TODO??: since 
 
 void test_Singleton_gof_with_ptr() {
     cout<< "test_Singleton_gof_with_ptr()" << endl;
-    Singleton_gof_with_ptr *    my_singleton_ptr    { Singleton_gof_with_ptr::Instance()};
-    int                         my_singleton_int    { my_singleton_ptr->_my_int};
-    cout << "Have only one of this:" << my_singleton_ptr->_my_int << endl ;
-    cout << "Have a copy of   this:" << my_singleton_int << endl ;
+    Singleton_gof_with_ptr *    my_singleton_ptr1   { Singleton_gof_with_ptr::Instance()};
+    int                         my_singleton_int    { my_singleton_ptr1->_my_int};
+    Singleton_gof_with_ptr *    my_singleton_ptr2   { Singleton_gof_with_ptr::Instance()};
+    cout << "ptr1:" << my_singleton_ptr1->_my_int << endl ;
+    cout << "ptr2:" << my_singleton_ptr2->_my_int << endl ;
+    cout << "int from ptr1:" << ++my_singleton_int << endl ;
+    cout<< "set only int2 to 42." << endl;
+    my_singleton_ptr2->_my_int = 42;
+    cout << "ptr2:" << my_singleton_ptr2->_my_int << endl ;
+    cout << "ptr1:" << my_singleton_ptr1->_my_int << endl ;
+    cout<< "BAD ptr1 was not updated but shows it was." << endl;
+    my_singleton_ptr2 = my_singleton_ptr1;  // TODO??: why does this compile? I thought I =delete'd this
+    Singleton_gof_with_ptr *    my_singleton_ptr3   { my_singleton_ptr1};
 }
+
 void test_Singleton_gof_with_ref() {
     cout<< "test_Singleton_gof_with_ref()" << endl;
-    Singleton_gof_with_ref &    my_singleton_ref    { Singleton_gof_with_ref::Instance()};
+    Singleton_gof_with_ref &    my_singleton_ref1   { Singleton_gof_with_ref::Instance()};
+    int                         my_singleton_int    { my_singleton_ref1._my_int};
     Singleton_gof_with_ref &    my_singleton_ref2   { Singleton_gof_with_ref::Instance()};
-    int                         my_singleton_int    { my_singleton_ref._my_int};
-    cout << "Have only one of this:" << my_singleton_ref._my_int << endl ;
-    cout << "Have only one of this:" << my_singleton_ref2._my_int << endl ;
-    my_singleton_ref._my_int = 42;
-    cout << "Have only one of this:" << my_singleton_ref2._my_int << endl ;
-    cout << "Have a copy of   this:" << ++my_singleton_int << endl ;
+    cout << "ref1:" << my_singleton_ref1._my_int << endl ;
+    cout << "ref2:" << my_singleton_ref2._my_int << endl ;
+    cout << "int from ref1:" << ++my_singleton_int << endl ;
+    cout<< "update only int2 to 42." << endl;
+    my_singleton_ref2._my_int = 42;
+    cout << "ref2:" << my_singleton_ref2._my_int << endl ;
+    cout << "ref1:" << my_singleton_ref1._my_int << endl ;
+    cout<< "BAD ref1 was not updated but shows it was." << endl;
+    //my_singleton_ref2 = my_singleton_ref1;
+    Singleton_gof_with_ref &    my_singleton_ref3 { my_singleton_ref1 };  // TODO??: why does this compile? I thought I =delete'd this
 }
