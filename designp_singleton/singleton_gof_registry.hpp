@@ -6,24 +6,27 @@ using namespace std;
 
 /// GOF p131 under SS 2, option: the 3rd one, we call it option "c"
 class Singleton_gof_registry;
-
 struct Singleton_name_a_ptr {
     std::string name;
     Singleton_gof_registry * singleton_ptr;
 };
-
 using Registry = std::vector< Singleton_name_a_ptr >;
 
 class Singleton_gof_registry {
     //Singleton_gof_registry( std::string const name );
-    static Singleton_gof_registry *                            _instance;
-    static Registry                                            _registry;
-protected:
-    static Singleton_gof_registry * lookup(        std::string const & name );  // TODO??: why is this not private?
-public:
-    static bool                     add_singleton( std::string const & name, Singleton_gof_registry * singleton_ptr);
-    static Singleton_gof_registry * instance(      std::string const & name );
+            static      Singleton_gof_registry *                            _instance;
+            static      Registry                                            _registry;
+protected:              ~Singleton_gof_registry()                                             noexcept      =default;
+            explicit    Singleton_gof_registry()                                                            =default;  // TODO: what if anything does explicity do here?
+            explicit    Singleton_gof_registry(Singleton_gof_registry const &   )                           =delete;  // TODO: what if anything does explicity do here?
+            explicit    Singleton_gof_registry(Singleton_gof_registry       &&  )                           =delete;
+                        Singleton_gof_registry & operator=( Singleton_gof_registry const &  ) noexcept      =delete;
+                        Singleton_gof_registry & operator=( Singleton_gof_registry       && ) noexcept      =delete;
+            static      Singleton_gof_registry * lookup(        std::string const & name );  // TODO??: why is this not private?
+public:     static bool                     add_singleton( std::string const & name, Singleton_gof_registry * singleton_ptr);
+            static      Singleton_gof_registry * instance(      std::string const & name );
 };
+
 Singleton_gof_registry *               Singleton_gof_registry::_instance   {nullptr};
 Registry                               Singleton_gof_registry::_registry   {};
 
@@ -70,8 +73,11 @@ public: int my_int {99};
 };
 
 void test_singleton_gof_registry() {
-    Singleton1 singleton1      = Singleton_gof_registry::instance("singleton1_name") ;
-    Singleton1 singleton1_copy = Singleton_gof_registry::instance("singleton1_name") ;
-    Singleton2 singleton2      = Singleton_gof_registry::instance("singleton2_name") ;
+    Singleton_gof_registry * singleton1      = Singleton_gof_registry::instance("singleton1_name") ;
+    if ( nullptr == singleton1 ) cout << "failed." << endl;
+    Singleton_gof_registry * singleton1_copy = Singleton_gof_registry::instance("singleton1_name") ;
+    if ( nullptr == singleton1_copy ) cout << "failed." << endl;
+    Singleton_gof_registry * singleton2      = Singleton_gof_registry::instance("singleton2_name") ;
+    if ( nullptr == singleton2 ) cout << "failed." << endl;
 
 }

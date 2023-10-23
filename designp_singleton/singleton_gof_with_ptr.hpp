@@ -24,8 +24,8 @@ class Singleton_gof_with_ptr {
 private:    static  Singleton_gof_with_ptr * _instance;
 protected:          Singleton_gof_with_ptr()  noexcept =default;  // TODO??: why do I get a link error if I don't say: =default
 protected:          ~Singleton_gof_with_ptr() noexcept =default;
-                    explicit Singleton_gof_with_ptr(Singleton_gof_with_ptr const &   )                = delete;  // TODO: what if anything does explicity do here?
-                    explicit Singleton_gof_with_ptr(Singleton_gof_with_ptr       &&  )                = delete;
+           explicit Singleton_gof_with_ptr(Singleton_gof_with_ptr const &   )                = delete;  // TODO: what if anything does explicity do here?
+           explicit Singleton_gof_with_ptr(Singleton_gof_with_ptr       &&  )                = delete;
                     Singleton_gof_with_ptr & operator=( Singleton_gof_with_ptr const &  ) noexcept    = delete;
                     Singleton_gof_with_ptr & operator=( Singleton_gof_with_ptr       && ) noexcept    = delete;
 public:     int     _my_int        {99};  // could be protected by a getter.
@@ -45,8 +45,8 @@ Singleton_gof_with_ptr * Singleton_gof_with_ptr::Instance() {  // TODO??: this i
 class Singleton_gof_with_ref {
 protected:          Singleton_gof_with_ref() noexcept { _my_int = 88; }
 protected:          ~Singleton_gof_with_ref() noexcept =default;
-                    explicit Singleton_gof_with_ref(Singleton_gof_with_ref const &   )                = delete;  // TODO: what if anything does explicity do here?
-                    explicit Singleton_gof_with_ref(Singleton_gof_with_ref       &&  )                = delete;
+           explicit Singleton_gof_with_ref(Singleton_gof_with_ref const &   )                = delete;  // TODO: what if anything does explicity do here?
+           explicit Singleton_gof_with_ref(Singleton_gof_with_ref       &&  )                = delete;
                     Singleton_gof_with_ref & operator=( Singleton_gof_with_ref const &  ) noexcept    = delete;
                     Singleton_gof_with_ref & operator=( Singleton_gof_with_ref       && ) noexcept    = delete;
 public:     int     _my_int                                      {99};  // could be protected by a getter.
@@ -57,7 +57,7 @@ Singleton_gof_with_ref & Singleton_gof_with_ref::Instance() {  // TODO??: since 
     return _instance;
 };
 
-void test_Singleton_gof_with_ptr() {
+void test_singleton_gof_with_ptr() {
     cout<< "test_Singleton_gof_with_ptr()" << endl;
     Singleton_gof_with_ptr *    my_singleton_ptr1   { Singleton_gof_with_ptr::Instance()};
     int                         my_singleton_int    { my_singleton_ptr1->_my_int};
@@ -74,7 +74,7 @@ void test_Singleton_gof_with_ptr() {
     Singleton_gof_with_ptr *    my_singleton_ptr3   { my_singleton_ptr1};
 }
 
-void test_Singleton_gof_with_ref() {
+void test_singleton_gof_with_ref() {
     cout<< "test_Singleton_gof_with_ref()" << endl;
     Singleton_gof_with_ref &    my_singleton_ref1   { Singleton_gof_with_ref::Instance()};
     int                         my_singleton_int    { my_singleton_ref1._my_int};

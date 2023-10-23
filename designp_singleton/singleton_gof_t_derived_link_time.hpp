@@ -4,7 +4,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-/// TODO??: NOT FINSHED, don't understand
+/* /// TODO??: NOT FINSHED, don't understand
 class Singleton_gof_t_derived_link_time {  // Called Maze_factory in GOF book p132
 protected:          Singleton_gof_t_derived_link_time() = default;
 public:             Singleton_gof_t_derived_link_time* Instance() noexcept;
@@ -73,3 +73,4 @@ void test_singleton_gof_t_derived_link_time () {
     Singleton_gof_t_derived_link_time *    my_singleton3   { my_singleton1};
 }
 
+*/
