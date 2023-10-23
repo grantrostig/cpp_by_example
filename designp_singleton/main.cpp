@@ -1,12 +1,11 @@
 // cppmsg.com Boost 1.0 license.
 // see: GOF 1995-SS 1.Singleton; Vlissides 1998-ch2,ch3; Larman 2005-SS 26.5; Robert Martin 2002-Singleton and Monstate; Headington 1996-SS2.7 p79; Cline 1999-ch16-?;
 #include "singleton_gof_with_ptr.hpp"
-#include "singleton_derived_t_ref.hpp"
-#include "singleton_gof_sample_code.hpp"
+#include "singleton_gof_t_decided_in_base_constr.hpp"
 
-//#include "singleton_gof_subclass_in_instance.hpp"
-//#include "singleton_gof_subclass_derived_instance.hpp"
-//#include "singleton_gof_registry.hpp"
+#include "singleton_derived_t_ref.hpp"
+//#include "singleton_gof_t_derived_link_time.hpp"
+#include "singleton_gof_registry.hpp"
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -92,12 +91,12 @@ struct Only_one_of_UDT2 {
 int main() {
     test_Singleton_gof_with_ptr();
     test_Singleton_gof_with_ref();
-    test_singleton_derived_t_ref();
-    test_singleton_gof_sample_code();
+    test_singleton_gof_t_decided_in_base_constr();
 
-    //test_singleton_gof_subclass_in_instance();
-    //test_singleton_gof_subclass_derived_instance();
-    //test_singleton_gof_registry();
+    //test_singleton_gof_t_derived_link_time();  // not finished, don't undserstand
+    test_singleton_gof_registry();
+
+    test_singleton_derived_t_ref();
 
     cout << "###" << endl;
     return EXIT_SUCCESS;

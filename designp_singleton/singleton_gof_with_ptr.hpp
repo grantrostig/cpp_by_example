@@ -32,15 +32,16 @@ public:     int     _my_int        {99};  // could be protected by a getter.
             static  Singleton_gof_with_ptr * Instance();
 };
 Singleton_gof_with_ptr * Singleton_gof_with_ptr::_instance {nullptr};
-Singleton_gof_with_ptr * Singleton_gof_with_ptr::Instance() {
+Singleton_gof_with_ptr * Singleton_gof_with_ptr::Instance() {  // TODO??: this is NOT thread safe?  How would we do that with atomics, or mutex or with std::call_once?
     if ( nullptr == _instance) {
-        _instance = new Singleton_gof_with_ptr;
+        _instance = new Singleton_gof_with_ptr;   // Lazy initialization, on heap
     }
     return _instance;
 };
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 /// See same problems for Singleton_gof_with_ptr above.  TODO??: is this true?
 /// TODO??: how does returning a ref reduce flexibility in the use of the Singleton?  Can only be used in one c++ context? No. It is gppd that it can't be modified since it is const pointer??
+/// NOTE: GOF doesn't mention using a ref, so this is a simple variation presented for discussion.  grostig
 class Singleton_gof_with_ref {
 protected:          Singleton_gof_with_ref() noexcept { _my_int = 88; }
 protected:          ~Singleton_gof_with_ref() noexcept =default;
@@ -52,7 +53,7 @@ public:     int     _my_int                                      {99};  // could
             static  Singleton_gof_with_ref & Instance();
 };
 Singleton_gof_with_ref & Singleton_gof_with_ref::Instance() {  // TODO??: since C++11, since this is a static function it is atomic??, thread safe??
-    static Singleton_gof_with_ref  _instance {};
+    static Singleton_gof_with_ref  _instance {};   // NOT Lazy initialization, NOT on heap.
     return _instance;
 };
 

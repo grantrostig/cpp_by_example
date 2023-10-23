@@ -20,15 +20,13 @@ SOURCES += \
         main.cpp \
         singleton_derived_t_ref.cpp \
         singleton_gof_registry.cpp \
-        singleton_gof_sample_code.cpp \
-        singleton_gof_subclass_derived_instance.cpp \
-        singleton_gof_subclass_in_instance.cpp \
+        singleton_gof_t_decided_in_base_constr.cpp \
+        singleton_gof_t_derived_link_time.cpp \
         singleton_gof_with_ptr.cpp
 
 HEADERS += \
     singleton_derived_t_ref.hpp \
     singleton_gof_registry.hpp \
-    singleton_gof_sample_code.hpp \
-    singleton_gof_subclass_derived_instance.hpp \
-    singleton_gof_subclass_in_instance.hpp \
+    singleton_gof_t_decided_in_base_constr.hpp \
+    singleton_gof_t_derived_link_time.hpp \
     singleton_gof_with_ptr.hpp
