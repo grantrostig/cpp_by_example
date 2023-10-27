@@ -89,6 +89,7 @@ struct Only_one_of_UDT2 {
 //} */
 
 int main() {
+    cout << "BEGIN MAIN."<<endl;
     //test_singleton_gof_with_ptr();
     //test_singleton_gof_with_ref();
     //test_singleton_gof_t_decided_in_base_constr();
