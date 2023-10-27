@@ -19,6 +19,7 @@ QMAKE_CXXFLAGS += \
 SOURCES += \
         main.cpp \
         singleton_derived_t_ref.cpp \
+        singleton_di.cpp \
         singleton_gof_registry.cpp \
         singleton_gof_t_decided_in_base_constr.cpp \
         singleton_gof_t_derived_link_time.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
 
 HEADERS += \
     singleton_derived_t_ref.hpp \
+    singleton_di.hpp \
     singleton_gof_registry.hpp \
     singleton_gof_t_decided_in_base_constr.hpp \
     singleton_gof_t_derived_link_time.hpp \

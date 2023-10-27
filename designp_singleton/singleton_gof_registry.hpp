@@ -89,7 +89,7 @@ void test_singleton_gof_registry() {
     //if ( nullptr == singleton1_p_copy ) cout << "failed." << endl;
     //Singleton_gof_registry * singleton2_p      = Singleton_gof_registry::instance( "singleton2_name") ;
     //if ( nullptr == singleton2_p ) cout << "failed." << endl; */
-    cout << "BEGIN OF TEST CASE."<<endl; list_registry();
+    cout << "BEGIN OF TEST CASE."<<endl;
     Singleton1 *  my_singleton1 = Singleton1::instance( "my_singleton1");  // TODO??: this is the wrong type! It does not have the data members I want in Singleton1.
     if ( nullptr == my_singleton1 ) cout << "failed." << endl;
     cout << my_singleton1->my_int<<endl;
@@ -100,8 +100,5 @@ void test_singleton_gof_registry() {
     if ( nullptr == my_singleton2 )
         cout << "failed." << endl;
     cout << my_singleton2->my_int<<endl;
-    cout << my_singleton2->name<<endl;
-    cout << my_singleton2->name_COLLISION_in_derived<<endl;
-
     list_registry();
 }
