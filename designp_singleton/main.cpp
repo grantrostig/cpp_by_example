@@ -1,5 +1,10 @@
 // cppmsg.com Boost 1.0 license.
-// see: GOF 1995-SS 1.Singleton; Vlissides 1998-ch2,ch3; Larman 2005-SS 26.5; Robert Martin 2002-Singleton and Monstate; Headington 1996-SS2.7 p79; Cline 1999-ch16-?;https://vladris.com/blog/2017/07/10/singletons.html 
+// see: GOF 1995-SS 1.Singleton; Vlissides 1998-ch2,ch3; Larman 2005-SS 26.5; Robert Martin 2002-Singleton and Monstate; Headington 1996-SS2.7 p79; Cline 1999-ch16-?;https://vladris.com/blog/2017/07/10/singletons.html
+/// In 2009, the authors of the original design patterns said the only pattern they would consider removing from the original list is Singleton.
+/// This is because it is essentially a way to store global data and tends to be an indicator of poor design.
+/// There are several alternatives to the Singleton pattern:  dependency injection, Monostate pattern, session context.
+/// grostig: yes, but which one is better?
+
 #include "singleton_gof_with_ptr.hpp"
 #include "singleton_gof_t_decided_in_base_constr.hpp"
 

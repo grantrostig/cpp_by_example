@@ -1,12 +1,13 @@
 TEMPLATE = app
-CONFIG += console c++latest
+CONFIG += console
+//CONFIG += console c++latest
 //CONFIG += console c++20
 CONFIG += warn_on
 CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += \
-        #-std=gnu++2b		\
+        -std=gnu++2b		\
         -g3 		        \
         -O0 		        \
         -Wall   		\  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html

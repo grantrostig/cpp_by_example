@@ -23,7 +23,8 @@ LIBS += \
         -lboost_unit_test_framework
 
 SOURCES += \
-    main.cpp                 \
+    #main_stable.cpp                 \
+    main_ut.cpp                 \
 
 HEADERS += \
 

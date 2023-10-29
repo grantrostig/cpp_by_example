@@ -6,6 +6,30 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+/* template <typename T>
+class Singleton_base_t_ref {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
+protected:
+    Singleton_base_t_ref() noexcept = default;
+public:
+    virtual ~Singleton_base_t_ref()                                                   = default;
+    Singleton_base_t_ref(Singleton_base_t_ref const &   )                         = delete;  // TODO??: Should this be explicit? and then so what?
+    Singleton_base_t_ref(Singleton_base_t_ref       &&  )                         = delete;
+    Singleton_base_t_ref & operator=( Singleton_base_t_ref const &  ) noexcept    = delete;
+    Singleton_base_t_ref & operator=( Singleton_base_t_ref       && ) noexcept    = delete;
+    Singleton_base_t_ref & operator()()                                    = delete;     // Redundant since it isn't rule of 5/6.
+    static T & instance() {        /// TODO??: Could this be by value instead?  I guess not since then there would be copies??
+                                   /// But still access() would get the right thing,
+                                   /// but the user might not use access and get to the values some other way??
+        static T _instance;         // NOT lazy initialization, not on heap.
+        return   _instance;
+    };
+};
+
+class S_derived_t_ref final : public Singleton_base_t_ref< S_derived_t_ref > {  // CRTP TODO??: how does modern c++ obviate this approach?
+    //friend SingletonBase SingletonBase<Singleton_subclassed>::instance();  TODO??: why does this not work?
+    public: int my_int {99};
+}; */
+
 template <typename T>
 class Singleton_base_t_ref {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
 protected:
