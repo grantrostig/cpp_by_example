@@ -17,7 +17,7 @@ public:
     int                         intb_public_instance_var {};
     string                      my_string {};
     Row                         row_instance_var {};
-    Cpp_static_example();
+    Cpp_static_example() = default;
     Cpp_static_example( int );         // init not allowed for static data
 };
 
