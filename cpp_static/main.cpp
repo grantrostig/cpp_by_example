@@ -113,8 +113,8 @@ namespace n {
     static int n();  //
 }
 class C {
-    extern int f();  // TODO??: when would one do this and what does it do?
-    extern int m();  // static because of static m() lines above.  // TODO??: when would one do this and what does it do?
+    //extern int f();  // TODO??: when would one do this and what does it do?
+    //extern int m();  // static because of static m() lines above.  // TODO??: when would one do this and what does it do?
     static int n();  //
            int o();  // TODO??: when would one do this and what does it do?
 };
@@ -124,7 +124,6 @@ int main() {
 
     Row my_row;
     Cpp_static_example ret_default_constructed {};
-    //Cpp_static_example ret_default_initializer_no_list { 1, "one" };
     cout << "###" << endl;
     return 0;
 }
