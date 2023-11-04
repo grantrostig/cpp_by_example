@@ -2,36 +2,40 @@
 // Copyright 2023 Grant Rostig .com
 // License Boost 1.0
 // See also: https://www.youtube.com/watch?v=0kgTuWkyorc&pp=ygUWZHVyYW50aW9uIGxpbmthZ2Ugc2Frcw%3D%3D
-#include "cpp_static_example.h"
+
 #include <bits/stdc++.h>
+#include "cpp_static_example.hpp"
+#include "scope.hpp"
 using namespace std;
 /*          [.*]  === not covered here             ~.*~  === type comment only
 
 KEY INSIGHT 1) re: Object and Funtions: Scope, Storage_Duration & Linkage.  memory too: S,SD,L === SSDL
+                1.b) also initialization ordering.
             2) extern & static:         linkage and storage,        DON'T affect scope.
             3) static:                  "Can" affect function type, NO "this" implicit parameter.
             4) SCOPE is just for one TU.  Linker requires external linkage to see globals and namespaced objects and funtions.
 
-Object file space layout:  text/data & const & dss & bss.
+Object File Format  (LDF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars).
 
-Object File:     Dcl === Definition has a Declaration also. IE. has { ... }; "Definition"
-                 Dfn === Declaration does not have the Definition. "Non-defining declaration"
+Object File:     Drn === Definition has a Declaration also. IE. has { ... }; "Definition"
+                 Dec === Declaration does not have the Definition. "Non-defining declaration"
 
-                 TU  === Translation Unit.
 External_linkage:Def === Linker Definition
                  Ref === Linker Reference
+                 TU  === Translation Unit.
 
 Objects & Functions & Labels have Attributes:                   */
 
-///                                             StorageDuration//////////LINKAGE/////////TYPE//////_SCOPE////////////////////////NAME
-/*                                              extern_StorageDuration    external_ln                local_SCOPE
-                                                [mutable_Storage]         internal_ln               class_SCOPE
-                                                static_Storage                                      namespace_SCOPE just for TU!!  But one can see and linker can, if same namespace in other file it is external linkage.
-                                                [thread_local_StorageDur]                           global_SCOPE    just for TU!!
+///                                             StorageDuration//////////LINKAGE//////////////TYPE//////_SCOPE////////////////////////NAME
+/*                                              ?extern_StorageDuration   extern'al_ln                   local_SCOPE
+                                                [mutable_Storage]         internal_ln static2           class_SCOPE (+struct/union)
+                                                static1_Storage                                          namespace_SCOPE just for TU!!  But one can see and linker can, if same namespace in other file it is external linkage.
+                                                [thread_local_StorageDur]                               global_SCOPE    just for TU!!
+                                                [auto-OLD-deprecated]
                                                 dynamic_StorageDur                                                                                                                      */
-///                                             +Object   |||             +Object  |||     +Object  ||| +Object   |||               +Object
-///                                                                       +Function        +Function    +Function                   +Function
-///                                                                                      +Label       +Label                      +Label
+///                                             +Object   |||             +Object  |||                  +Object  ||| +Object   |||               +Object
+///                                                                       +Function                     +Function    +Function                   +Function
+///                                                                                                     +Label       +Label                      +Label
 /*
 Code_Example                                    StorageDuration         Linkage         Type        Scope                   Name        Compiler_Sugar               Usage/location
 
@@ -121,6 +125,12 @@ class C {
 int main() {
     extern int f();  // TODO??: when would one do this and what does it do?
     extern int m();  //
+
+
+
+
+    test_scope();
+
 
     Row my_row;
     Cpp_static_example ret_default_constructed {};

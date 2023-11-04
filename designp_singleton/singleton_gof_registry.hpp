@@ -42,7 +42,7 @@ Registry                 Singleton_gof_registry::_registry   {};          // TOD
 /// Returns found already existing registered singleton_ptr OR nullptr
 Singleton_name_a_ptr * Singleton_gof_registry::lookup( std::string const & name ) { cout << "lockup()."<<endl;
     Singleton_name_a_ptr * result;
-    auto match_name_predicate = [&name] (Singleton_name_a_ptr a) ->bool { cout<<"checking a name:"<< a.name<< endl; return a.name == name;};
+    auto match_name_predicate =  [&name] (Singleton_name_a_ptr a) ->bool { cout<<"checking a name:"<< a.name<< endl; return a.name == name;};
     auto itr =  std::find_if( _registry.begin(), _registry.end(), match_name_predicate );
     if ( itr != _registry.cend() ) {
         result = itr.base(); cout << "lockup() found:" <<itr->name <<endl;
