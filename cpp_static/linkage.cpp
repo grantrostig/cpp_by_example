@@ -1,6 +1,5 @@
 #include "linkage.hpp"
 
-linkage::linkage()
-{
+linkage::linkage() {
 
 }

@@ -2,43 +2,38 @@
 // Copyright 2023 Grant Rostig .com
 // License Boost 1.0
 // See also: https://www.youtube.com/watch?v=0kgTuWkyorc&pp=ygUWZHVyYW50aW9uIGxpbmthZ2Ugc2Frcw%3D%3D
-
-#include <bits/stdc++.h>
 #include "cpp_static_example.hpp"
 #include "scope.hpp"
+#include "scope_test.hpp"
+#include <bits/stdc++.h>
 using namespace std;
-/*          [.*]  === not covered here             ~.*~  === type comment only
-
+/*  [.*]  === not covered here        ~.*~  === type comment only
 KEY INSIGHT 1) re: Object and Funtions: Scope, Storage_Duration & Linkage.  memory too: S,SD,L === SSDL
-                1.b) also initialization ordering.
+            1.b) also initialization ordering.
             2) extern & static:         linkage and storage,        DON'T affect scope.
             3) static:                  "Can" affect function type, NO "this" implicit parameter.
-            4) SCOPE is just for one TU.  Linker requires external linkage to see globals and namespaced objects and funtions.
+            4) SCOPE is just for one TU. Linker requires external linkage to see globals and namespaced objects and funtions.
 
-Object File Format  (LDF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars).
+Object File Format (LDF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars).
 
 Object File:     Drn === Definition has a Declaration also. IE. has { ... }; "Definition"
                  Dec === Declaration does not have the Definition. "Non-defining declaration"
-
 External_linkage:Def === Linker Definition
                  Ref === Linker Reference
                  TU  === Translation Unit.
 
-Objects & Functions & Labels have Attributes:                   */
-
-///                                             StorageDuration//////////LINKAGE//////////////TYPE//////_SCOPE////////////////////////NAME
-/*                                              ?extern_StorageDuration   extern'al_ln                   local_SCOPE
-                                                [mutable_Storage]         internal_ln static2           class_SCOPE (+struct/union)
-                                                static1_Storage                                          namespace_SCOPE just for TU!!  But one can see and linker can, if same namespace in other file it is external linkage.
-                                                [thread_local_StorageDur]                               global_SCOPE    just for TU!!
-                                                [auto-OLD-deprecated]
-                                                dynamic_StorageDur                                                                                                                      */
-///                                             +Object   |||             +Object  |||                  +Object  ||| +Object   |||               +Object
-///                                                                       +Function                     +Function    +Function                   +Function
-///                                                                                                     +Label       +Label                      +Label
-/*
-Code_Example                                    StorageDuration         Linkage         Type        Scope                   Name        Compiler_Sugar               Usage/location
-
+Objects & Functions & Labels have Attributes:                                                                                                                   */
+///                                             StorageDuration/////////////_LINKAGE/////////////////_SCOPE////////////////////////NAME/////////////////////////TYPE
+/*                                              ?extern_StorageDur          external_l extern2     local_SCOPE
+                                                static1_StorageDur          internal_l static2     class_SCOPE (+struct/union)
+                                                dynamic_StorageDur                                  namespace_SCOPE TU, But linker can see, if same namespace in other file it is external linkage.
+                                                [mutable_Storage]                                   global_SCOPE    TU
+                                                [thread_local_StorageDur]
+                                                [auto-OLD-deprecated]  */
+///                                             +Object                     +Object                 +Object                       +Object                     +Object
+///                                                                         +Function               +Function                     +Function                   +Function
+///                                                                                                 +Label                        +Label                      +Label
+/* Code_Example                                 StorageDuration             Linkage                 Scope                   Name    Type            Compiler_Sugar               Usage/location
 ???SCOPE:
                 extern  int     i;       //Dcl  na                      external        int        Ns/Gbl              i                                       .hpp ONLY
                 extern  int     i {};    //Dfn  static                  external        int        Ns/Gbl              i                                       .cpp +? // same as not using "extern" @Global
@@ -126,14 +121,13 @@ int main() {
     extern int f();  // TODO??: when would one do this and what does it do?
     extern int m();  //
 
+    scope_test();
 
-
-
-    test_scope();
-
-
-    Row my_row;
-    Cpp_static_example ret_default_constructed {};
+    //Row my_row;
+    //Cpp_static_example ret_default_constructed {};
+    clog.flush();
+    cerr.flush();
+    cout.flush();
     cout << "###" << endl;
     return 0;
 }
