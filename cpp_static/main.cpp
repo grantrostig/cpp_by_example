@@ -15,7 +15,7 @@ KEY INSIGHT 1) re: Object and Funtions: Scope, Storage_Duration & Linkage.  memo
             4) SCOPE is just for one TU. Linker requires external linkage to see globals and namespaced objects and funtions.
 
 Object File Format (LDF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars).
-
+One Definition Rule (ODR).
 Object File:     Drn === Definition has a Declaration also. IE. has { ... }; "Definition"
                  Dec === Declaration does not have the Definition. "Non-defining declaration"
 External_linkage:Def === Linker Definition
@@ -24,10 +24,11 @@ External_linkage:Def === Linker Definition
 
 Objects & Functions & Labels have Attributes:                                                                                                                   */
 ///                                             StorageDuration/////////////_LINKAGE/////////////////_SCOPE////////////////////////NAME/////////////////////////TYPE
-/*                                              ?extern_StorageDur          external_l extern2     local_SCOPE
-                                                static1_StorageDur          internal_l static2     class_SCOPE (+struct/union)
-                                                dynamic_StorageDur                                  namespace_SCOPE TU, But linker can see, if same namespace in other file it is external linkage.
-                                                [mutable_Storage]                                   global_SCOPE    TU
+/*                                                                                                  function_parameter_SCOPEy
+                                               ?extern_StorageDur          external_l extern2       block_SCOPEy
+                                                static1_StorageDur          internal_l static2      class_SCOPE (+struct/union)
+                                                dynamic_StorageDur                                  namespace_SCOPEy TU, But linker can see, if same namespace in other file it is external linkage.
+                                                [mutable_Storage]                                   global_namespace_SCOPEy TU
                                                 [thread_local_StorageDur]
                                                 [auto-OLD-deprecated]  */
 ///                                             +Object                     +Object                 +Object                       +Object                     +Object

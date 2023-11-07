@@ -1,9 +1,12 @@
 #pragma once
-/* extern              linkage required   in hpp
-   static ie. internal linkage prohibited in hpp
-   internal            linkage prohibited in hpp
-   none                        prohibited in hpp, except the CONST special linkage exception */
+/* Scope types:         local, class, namespace, namespace.anonymous, namespace.global
+   Linkage types:
+    extern              linkage required   in hpp, prohibited in cpp
+    static ie. internal linkage prohibited in hpp, prohibited mention in cpp, even though it is static if so in hpp.
+    internal            linkage unavailabe in hpp, but can be expressed in cpp.
+    ???none???          TODO??: can't remember why I mentined this?!?:prohibited in hpp, except the CONST special linkage exception */
 
+// Global_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
   extern            int global____________________scope_hpp_noInit_int;            // extern to expose global in cpp.
 //extern            int global_static_____________scope_hpp_noInit_int;            // clashes with static in cpp
 //extern static     int global_static_____________scope_hpp_noInit_int;            // an extern object is already static_storage and internal_linkage.
@@ -20,34 +23,48 @@ inline   constexpr  int global________constexpri__scope_hpp___Init_int    {87}; 
 extern int global_extern_scope_fn(int i);  // extern not needed?? TODO??:
        int global________scope_fn(int i);  // extern not needed?? TODO??:
 
-namespace Namespace_sc {                    // namespace is like a class so extern is not needed or allowed.
-    extern int namespace_scope_int;         // forward declartion
-//  static int namespace_scope_int_static;  // static internal linkage not allowed in hpp.
-//         int namespace_scope_int;         // blank is stupid here.
-//         int namespace_scope_int {11};    // blank is stupid here.
+// Namespace_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
+namespace Namespace_scope {                    // namespace is like a class so extern is not needed or allowed.
+    extern              int     namespace_scope_int;         // forward declartion
+    static              int     namespace_scope_int_static;  //
+//                      int     namespace_scope_int;         // blank is stupid here, because hpp is used multiple times causing ~ODR.
+//                      int     namespace_scope_int {11};    // blank is stupid here, because hpp is used multiple times causing ~ODR.
+    static const        int     namespace_scope_int_const_static     {72};  // allowed because initialized const.
+    static constexpr    int     namespace_scope_int_constexpr_static {73};  // allowed because initialized const.
 
     extern int namespace_scope_fn(int i);   // forward declartion TODO??: blank or extern same?
            int namespace_scope_fn(int i);   // forward declartion TODO??: blank or extern same?
 } // End NampespaceNNNNNNNNNNNNNNNNNNNNNN
 
-//namespace { // anonymous
-//    extern int namespace_scope_int ;
-//           int namespace_scope_int;         // forward declartion
-//    extern int namespace_scope_fn(int i);   // forward declartion
-//           int namespace_scope_fn(int i);   // forward declartion
-//} // End NampespaceNNNNNNNNNNNNNNNNNNNNNN
+// Namespace_anon_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
+namespace { // anonymous
+    extern int namespace_scope_int ;
+           int namespace_scope_int;         // forward declartion
+    static int namespace_scope_int_static;
+    extern int namespace_scope_fn(int i);   // forward declartion
+           int namespace_scope_fn(int i);   // forward declartion
+} // End NampespaceNNNNNNNNNNNNNNNNNNNNNN
 
-//extern class scope {  // not allowed event though IT IS EXTERN
+// Global_class_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
+
+//extern class Global_extern_class_scope {};    // extern: prohibited, even though IT IS EXTERN.
+//static class Global_static_class_scope {};    // static: prohibited, it is not storage but a type, except it can have static data and function members, which we consider storage!?!
 class Global_class_scope {
 public:
-           int        class_scope_int         {60};       // typical storage specifier. IT IS EXTERN
-//  extern int        class_scope_int1        {63};      // extern: not allowed. IT IS EXTERN
-    static int        class_scope_int_static;
-//  static int        class_scope_int_static2 {61};  // init not allowed in hpp
-    static const int  class_scope_int_static3 {62};  // allowed because const, but why allow static in hpp also
+                        int     class_scope_int                  {60};  // blank: storage specifier is typical. But IT IS EXTERN.
+//  extern              int     class_scope_int1                 {63};  // extern: prohibited, even though IT IS EXTERN.
 
-           int class_scope_fn( int i ); // comment in which line?? extern not allowed even though IT IS EXTERNAL linkage.
-//  extern int class_scope_fn( int i ); // comment in which line?? extern not allowed even though IT IS EXTERNAL linkage.
+    static              int     class_scope_int_static;
+//  static              int     class_scope_int_static2          {61};  // init of static: prohibited in hpp, must do in cpp.
+
+    static const        int     class_scope_int_const_static     {62};  // allowed because initialized const.
+    static constexpr    int     class_scope_int_constexpr_static {63};  // allowed because initialized const.
+
+//  extern int class_scope_fn(        int i );  // extern not allowed even though IT IS EXTERNAL linkage.
+           int class_scope_fn(        int i );  //
+    static int class_scope_fn_static( int i );  //
+
     Global_class_scope()  =default;
     ~Global_class_scope() =default;
 };
+// ################################################################

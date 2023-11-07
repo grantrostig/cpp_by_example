@@ -35,7 +35,7 @@ extern int ef(int i) {  // extern not needed
     return 0;
 }
 
-namespace Namespace_sc {
+namespace Namespace_scope {
                         // NAMESPACE
 int namespace_storage_duration_int {};
 int nf(int i) {
