@@ -9,11 +9,7 @@ void scope_test() {
     global________scope_fn(            11 );
     global_extern_scope_fn(            12 );
 
-
-
-
 // Namespace_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-
     LOGGERX("",Namespace_scope::namespace_scope_int )
     LOGGERX("",Namespace_scope::namespace_scope_int_static)
     LOGGERX("",Namespace_scope::namespace_scope_int_const_static)
@@ -24,17 +20,6 @@ void scope_test() {
 //  LOGGERX("",Namespace_scope::namespace_scope_fn(  14 ) )
 //  LOGGERX("",Namespace_scope::namespace_scope_fn::local_scope_int  )  // error due to: function is not addressable like this, class/struct would. TODO??:
 //  LOGGERX("",Namespace_scope::namespace_scope_fn::namespace_scope_int_static )       // error due to: internal linkage in hpp.
-
-
-
-
-
-
-
-
-
-
-
 
     // Namespace_anonymous_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
 // Global_class_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
