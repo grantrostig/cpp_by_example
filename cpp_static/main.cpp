@@ -122,6 +122,9 @@ int main() {
     extern int f();  // TODO??: when would one do this and what does it do?
     extern int m();  //
 
+    //auto int a1 {};
+    auto     a2 {"my_auto_a"};
+
     scope_test();
 
     //Row my_row;

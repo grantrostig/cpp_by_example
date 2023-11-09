@@ -49,38 +49,7 @@ int namespace_anon_scope_fn(int i) {
 }
 } // End NampespaceNNNNNNNNNNNNNNNNNNNNNN
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Global_class_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
-
          int        Global_class_scope::class_scope_int_static         {32};    // static is internal linkage, so not visible outside this cpp.
 //extern int        Global_class_scope:;class_scope_int_extern;                 // extern: here not allowed.
 //       int        Global_class_scope::class_scope_int                {31};    // init is done in class hpp for non-static.
