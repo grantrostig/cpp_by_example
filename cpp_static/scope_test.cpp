@@ -4,8 +4,18 @@
 
 void scope_test() {
 // Global_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-    cout<<   global____________________scope_hpp_noInit_int << endl;
-    LOGGERX("global___________________scope_hpp_noInit_int",global____________________scope_hpp_noInit_int);
+    //cout<<   global____________________scope_cpp_noInit_int << endl;
+    LOGGERX("global____________________scope_hpp_noInit_int",global____________________scope_cpp_noInit_int);
+    LOGGERX("global________const_______scope_hpp___Init_int",global________const_______scope_hpp___Init_int);
+    LOGGERX("global_static_const_______scope_hpp___Init_int",global_static_const_______scope_hpp___Init_int);
+    LOGGERX("global________constexpr___scope_hpp___Init_int",global________constexpr___scope_hpp___Init_int);
+    LOGGERX("global________constexpri__scope_hpp___Init_int",global________constexpri__scope_hpp___Init_int);
+
+
+
+
+
+
     global________scope_fn(            11 );
     global_extern_scope_fn(            12 );
 

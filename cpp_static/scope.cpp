@@ -5,7 +5,10 @@
    none   solely     in cpp */
 
 // Global_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
-                    int global____________________scope_hpp_noInit_int {97};  // not internal because have extern in hpp.
+                    int global____________________scope_cpp_noInit_int {97};  // not internal because have extern in hpp.
+                    int global__________const_____scope_cpp_noInit_int {95};
+  static            int global___static___________scope_cpp_noInit_int {96};  // TODO??: so what does static do here if anything?
+
   static            int internal_static___________scope_hpp_noInit_int {98};
 //extern            int global_static_____________scope_hpp_noInit_int {99};  // extern: can't init in cpp
   extern            int global_static_____________scope_hpp_noInit_int;       // extern: here does nothing, TODO??: except maybe forward declare object?

@@ -1,23 +1,42 @@
 // Not done yet!! :)
 // Copyright 2023 Grant Rostig .com
 // License Boost 1.0
-// See also: https://www.youtube.com/watch?v=0kgTuWkyorc&pp=ygUWZHVyYW50aW9uIGxpbmthZ2Ugc2Frcw%3D%3D
+// See also:
+// Headington 94;
+// Sacks:https://www.youtube.com/watch?v=0kgTuWkyorc&pp=ygUWZHVyYW50aW9uIGxpbmthZ2Ugc2Frcw%3D%3D
 #include "cpp_static_example.hpp"
 #include "scope.hpp"
 #include "scope_test.hpp"
 #include <bits/stdc++.h>
 using namespace std;
-/*  [.*]  === not covered here        ~.*~  === type comment only
-KEY INSIGHT 1) re: Object and Funtions: Scope, Storage_Duration & Linkage.  memory too: S,SD,L === SSDL
+/* Documentation Keys: "===ditto; //"===ditto; [.*]===not covered here; ~.*~===type comment only
+Rules for Header Files: (Headington p67)
+YES + External Var            Dec
+    + Fn Prototypes           Dec
+    + Type                    Dec
+    + Constant Var            Def
+    + Preprocessor Directives Def
+NO  - Fn                      Def
+    - Var                     Def
+
+
+
+
+
+
+
+ *
+KEY INSIGHT 1) Re: Object and Funtions: Scope, Storage_Duration & Linkage.  memory too: S,SD,L === SSDL
             1.b) also initialization ordering.
             2) extern & static:         linkage and storage,        DON'T affect scope.
             3) static:                  "Can" affect function type, NO "this" implicit parameter.
             4) SCOPE is just for one TU. Linker requires external linkage to see globals and namespaced objects and funtions.
 
-Object File Format (LDF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars).
+Object File Format (LDF/ELF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars). https://en.wikipedia.org/wiki/Executable_and_Linkable_Format  https://en.wikipedia.org/wiki/Object_file
 One Definition Rule (ODR).
-Object File:     Drn === Definition has a Declaration also. IE. has { ... }; "Definition"
-                 Dec === Declaration does not have the Definition. "Non-defining declaration"
+Object File:     Def === Definition that has a Declaration also. IE. has { ... }; "Definition"
+                 Dec === Declaration that does not have the Definition.           "Non-defining declaration"
+
 External_linkage:Def === Linker Definition
                  Ref === Linker Reference
                  TU  === Translation Unit.
@@ -25,11 +44,11 @@ External_linkage:Def === Linker Definition
 Objects & Functions & Labels have Attributes:                                                                                                                   */
 ///                                             StorageDuration/////////////_LINKAGE/////////////////_SCOPE////////////////////////NAME/////////////////////////TYPE
 /*                                                                                                  function_parameter_SCOPEy
-                                               ?extern_StorageDur          external_l extern2       block_SCOPEy
+                                               ?extern_StorageDur           external_l extern2       block_SCOPEy
                                                 static1_StorageDur          internal_l static2      class_SCOPE (+struct/union)
-                                                dynamic_StorageDur                                  namespace_SCOPEy TU, But linker can see, if same namespace in other file it is external linkage.
-                                                [mutable_Storage]                                   global_namespace_SCOPEy TU
-                                                [thread_local_StorageDur]
+                                                dynamic_StorageDur          static2                 namespace_SCOPEy - TU, But linker can see, if same namespace in other file it is external linkage.
+                                                [mutable_Storage]           extern2                 global_namespace_SCOPEy TU
+                                                [thread_local_StorageDur]                           unnamed_namespace_SCOPE
                                                 [auto-OLD-deprecated]  */
 ///                                             +Object                     +Object                 +Object                       +Object                     +Object
 ///                                                                         +Function               +Function                     +Function                   +Function
