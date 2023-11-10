@@ -9,10 +9,31 @@
 #include "scope_test.hpp"
 #include <bits/stdc++.h>
 using namespace std;
-/* Documentation Keys: "===ditto; //"===ditto; [.*]===not covered here; ~.*~===type comment only
+/* Document Key: "===ditto; //"===ditto; [.*]===not covered here; ~.*~===type comment only
 
-   Scope types:         function_parameter_scope, block_scope(local?), class, namespace, namespace.unnamed, namespace.global(file?)
-   Linkage types:
+   Scope types 11:              Function_parameter_scope
+                                Template_parameter_scope
+                                Point_of_declartion_scope (many subtypes see cppref)
+                                Block                       //(local?)
+                                Block.nested
+                                Enumeration
+                                Class
+                                Namespace
+                                Namespace.unnamed
+                                Namespace.global           // file scope in C
+                                Concepts_scope??
+
+  Storage Class Specifiers:
+                                extern
+                                static
+                                static_internal
+                                static_thread_local
+                                dynamic
+                                [mutable]
+                                [auto-OLD-deprecated]
+                                [register-OLD-deprecated]
+
+   Linkage types 3:
     extern              linkage required   in hpp, prohibited in cpp
     static ie. internal linkage prohibited in hpp, prohibited mention in cpp, even though it is static if so in hpp.
     internal            linkage unavailabe in hpp, but can be expressed in cpp.
