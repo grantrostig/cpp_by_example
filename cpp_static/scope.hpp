@@ -1,10 +1,4 @@
 #pragma once
-/* Scope types:         function_parameter_scope, block_scope(local?), class, namespace, namespace.unnamed, namespace.global(file?)
-   Linkage types:
-    extern              linkage required   in hpp, prohibited in cpp
-    static ie. internal linkage prohibited in hpp, prohibited mention in cpp, even though it is static if so in hpp.
-    internal            linkage unavailabe in hpp, but can be expressed in cpp.
-    ???none???          TODO??: can't remember why I mentined this?!?:prohibited in hpp, except the CONST special linkage exception */
 
 // Namespace_Global_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
   extern            int global____________________scope_cpp_noInit_int;            // extern to expose a global in a cpp.
@@ -38,11 +32,13 @@ namespace Namespace_scope {                    // namespace is like a class so e
 
 // Namespace_Unnamed_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
 namespace { // unnamed
-  extern            int namespace_scope_int;
-                    int namespace_scope_int;         // forward declartion
-  static            int namespace_scope_int_static;
-  extern int namespace_scope_fn(int i);   // forward declartion
-         int namespace_scope_fn(int i);   // forward declartion
+  extern            int namespace_unnamed_scope_int_hblanks;
+  extern            int namespace_unnamed_scope_int_cblanks;
+                    int namespace_unnamed_scope_int;         // forward declartion
+  static            int namespace_unnamed_scope_int_hstatic;
+  extern int namespace_unnamed_scope_fn(int i);     // forward declartion?? TODO??:
+//       int namespace_unnamed_scope_fn(int i);     // has impl             TODO??: strange warning about being static when I don't specify static!!?!
+         int namespace_unnamed_scope_fn2(int i);    // has impl             TODO??: strange warning about being static when I don't specify static!!?!
 } // End NampespaceNNNNNNNNNNNNNNNNNNNNNN
 
 // Global_class_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs

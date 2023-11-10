@@ -1,4 +1,4 @@
-#include "global_entities.hpp""
+#include "global_entities.hpp"
 #include "scope.hpp"
 /* extern stupid     in cpp
    static solely     in cpp
@@ -39,15 +39,21 @@ int namespace_scope_fn(int i) {
 } // End NampespaceNNNNNNNNNNNNNNNNNNNNNN
 
 
-// Namespace_anon_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
-namespace { // anonymous NamespaceNNNNNNNNNNNNNNNNNNNNNN
-        int namespace_anon_scope_int             {25};   // global linkage, with extern in hpp.  TODO??: is this on stack or bss?
-static  int namespace_anon_scope_int_static;             // static is internal linkage, so not visible outside this cpp.
-extern  int namespace_anon_scope_int_extern;             // extern: here does nothing, TODO??: except maybe forward declare object?
-int namespace_anon_scope_fn(int i) {
+// Namespace_unnamed_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
+namespace { // unnamed NamespaceNNNNNNNNNNNNNNNNNNNNNN
+        int namespace_unnamed_scope_int_cblanks             {25};   // global linkage, with extern in hpp.  TODO??: is this on stack or bss?
+static  int namespace_unnamed_scope_int_cstatic;             // static is internal linkage, so not visible outside this cpp.
+extern  int namespace_unnamed_scope_int_extern;             // extern: here does nothing, TODO??: except maybe forward declare object?
+int namespace_unnamed_scope_fn(int i) {                 // has extern in hpp
     LOGGERX("",26)
     int local_scope_int {27};
     static  int local_scope_int_static {28};          // interal only.
+    return i;
+}
+int namespace_unnamed_scope_fn2(int i) {                // blank storage_duration, but seems to be static anyway?  TODO??:
+    LOGGERX("",29)
+    int local_scope_int {30};
+    static  int local_scope_int_static {31};          // interal only.
     return i;
 }
 } // End NampespaceNNNNNNNNNNNNNNNNNNNNNN

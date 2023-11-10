@@ -10,23 +10,55 @@
 #include <bits/stdc++.h>
 using namespace std;
 /* Documentation Keys: "===ditto; //"===ditto; [.*]===not covered here; ~.*~===type comment only
-Rules for Header Files: (Headington p67)
-YES + External Var            Dec
-    + Fn Prototypes           Dec
-    + Type                    Dec
-    + Constant Var            Def
-    + Preprocessor Directives Def
-NO  - Fn                      Def
-    - Var                     Def
+
+   Scope types:         function_parameter_scope, block_scope(local?), class, namespace, namespace.unnamed, namespace.global(file?)
+   Linkage types:
+    extern              linkage required   in hpp, prohibited in cpp
+    static ie. internal linkage prohibited in hpp, prohibited mention in cpp, even though it is static if so in hpp.
+    internal            linkage unavailabe in hpp, but can be expressed in cpp.
+    ???none???          TODO??: can't remember why I mentined this?!?:prohibited in hpp, except the CONST special linkage exception
+
+Rules for Header Files          hpp  Mostly Decl    (Headington p67)
+YES + External Var              Decl
+    + Fn Prototypes             Decl
+    + Class Prototypes??        Decl
+    + Type                      Decl
+    + Constant Var              Defn
+    + Preprocessor Directives   Defn
+-> YES: extern, static, inline.
+
+NO  - Fn                        Defn
+    - Var                       Defn
+
+Rules for Implementation Files  cpp All Defn (+some hpp stuff)       (Rostig 2023)
+YES + Static Class Var Init     Init
+    + Fn impl of hpp            Defn
+    + Class Fn impl of hpp      Defn
+    + Main Fn                   Defn
+    + Preprocessor Directives   Defn
+    + All of hpp content
+        + ????
+-> NO: extern, static, inline??
+
+Both YES: namespace, using namesapce, using/typedef, ...??
+
+Static:
++ static_linkage:       hidden variable from linker
++ static_storage:       variable in ELF.data for both fundamental types and Classes
+                        + static implied for all vars and fn's in various namespaces? TODO??:  I suppose the warning was about storage, not scope or linkage.
++ static_fn_guard:      entire fn run threadsafe due to guard lock??.
+-> only in hpp
+
+Extern:
++external_linkage:      promise     to linker that name/var/fn is elsewhere, but "extern" is NOT allowed for class, even though it is IMPLICIT.
++external_ABI:          instruction to linker to use "C" ABI.??
+-> both hpp/cpp??
 
 
 
 
 
-
-
- *
-KEY INSIGHT 1) Re: Object and Funtions: Scope, Storage_Duration & Linkage.  memory too: S,SD,L === SSDL
+KEY INSIGHT 1) Objects and Funtions have: Scope, Storage_Duration & Linkage.  memory too: S,SD,L === SSDL  (and "name" also)
             1.b) also initialization ordering.
             2) extern & static:         linkage and storage,        DON'T affect scope.
             3) static:                  "Can" affect function type, NO "this" implicit parameter.
@@ -34,8 +66,8 @@ KEY INSIGHT 1) Re: Object and Funtions: Scope, Storage_Duration & Linkage.  memo
 
 Object File Format (LDF/ELF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars). https://en.wikipedia.org/wiki/Executable_and_Linkable_Format  https://en.wikipedia.org/wiki/Object_file
 One Definition Rule (ODR).
-Object File:     Def === Definition that has a Declaration also. IE. has { ... }; "Definition"
-                 Dec === Declaration that does not have the Definition.           "Non-defining declaration"
+Object File:     Defn === Definition that has a Declaration also. IE. has { ... }; "Definition"
+                 Decl === Declaration that does not have the Definition.           "Non-defining declaration"
 
 External_linkage:Def === Linker Definition
                  Ref === Linker Reference
@@ -122,11 +154,11 @@ inline constexpr int max4 {32};  // TODO??: Why is inline needed again?
 extern inline constexpr int max6 {32};  // TODO??:
 static inline constexpr int max7 {32};  // TODO??:
 
+extern int f() {return 0;};     // extern here does nothing but is allowed and is extern.
 static int m();                 // don't do this sort of forward definition?
-extern int f() {return 0;};  // extern here does nothing but is allowed and is extern.
-extern int m() {return 0;};
+extern int n() {return 0;};
 
-namespace n {
+namespace ns {
     extern int f();  // TODO??: when would one do this and what does it do?
     extern int m();  // static because of static m() lines above.  // TODO??: when would one do this and what does it do?
     static int n();  //
@@ -140,6 +172,7 @@ class C {
 int main() {
     extern int f();  // TODO??: when would one do this and what does it do?
     extern int m();  //
+    extern int n();  //
 
     //auto int a1 {};
     auto     a2 {"my_auto_a"};

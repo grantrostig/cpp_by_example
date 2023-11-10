@@ -6,15 +6,17 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += \
-        -std=gnu++23 		\  # could be wrong:
+        -std=gnu++23 		\
         -g3 		        \
         -O0 		        \
-        -Wall   		\  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-        -Wextra   		\
-        -Wno-comment 		\
-        -Wno-uninitialized 	\
-        -Wno-reorder 		\
+        -Wall   		    \  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+        -Wextra   		    \
+        -Wno-comment 		    \
+        -Wno-reorder 		    \
+        -Wno-unused-function 	\
         -Wno-unused-parameter 	\
+        -Wno-unused-variable 	\
+#        -Wno-uninitialized 	\
 
 HEADERS += \
     cpp_static_example.hpp \

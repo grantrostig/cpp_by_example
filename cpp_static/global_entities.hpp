@@ -33,8 +33,8 @@ using namespace std::chrono_literals;
 #define EXTERN_OBJ
 #define EXTERN_FN
 
-#define STATIC_CLASS
-#define STATIC_OBJ
+#define STATIC_CLASS    // Not allowed, but members can be.
+#define STATIC_OBJ      // of both fundamental type or Class.
 
 #define STATIC_FN
 #define STATIC_CLASS_FN
