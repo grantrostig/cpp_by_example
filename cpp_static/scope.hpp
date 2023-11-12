@@ -43,9 +43,11 @@ namespace { // unnamed
 
 // Global_class_scope SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs
 
+         class Global________class_scope;       // forward declartion
+         class Global_extern_class_scoped {};    //         definition
 //extern class Global_extern_class_scope {};    // extern: prohibited, even though IT IS EXTERN.
 //static class Global_static_class_scope {};    // static: prohibited, it is not storage but a type, except it can have static data and function members, which we consider storage!?!
-class Global_class_scope {
+class Global_class_scope {                                      // must define variables, but need not define member_function (ALA data_member), but we CAN.
 public:
                     int class_scope_int                  {60};  // blank: storage specifier is typical. But IT IS EXTERN.
 //extern            int class_scope_int1                 {63};  // extern: prohibited, even though IT IS EXTERN.
@@ -57,7 +59,7 @@ public:
   static constexpr  int class_scope_int_constexpr_static {63};  // allowed because initialized const.
 
 //extern int class_scope_fn(        int i );  // extern not allowed even though IT IS EXTERNAL linkage.
-         int class_scope_fn(        int i );  //
+         int class_scope_fn(        int i );  // declartion of function interface
   static int class_scope_fn_static( int i );  //
 
   Global_class_scope()  =default;
