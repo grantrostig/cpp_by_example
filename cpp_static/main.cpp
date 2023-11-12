@@ -9,7 +9,7 @@
 #include "scope_test.hpp"
 #include <bits/stdc++.h>
 using namespace std;
-/* Document Key: "===ditto; //"===ditto; [.*]===not covered here; ~.*~===type comment only
+/* Document Key: "===ditto; //"===ditto; [.*]===not covered here; ~.*~===type comment only  "class --> struct also"
 
    Scope types 11:              Function_parameter_scope
                                 Template_parameter_scope
@@ -39,14 +39,24 @@ using namespace std;
     internal            linkage unavailabe in hpp, but can be expressed in cpp.
     ???none???          TODO??: can't remember why I mentined this?!?:prohibited in hpp, except the CONST special linkage exception
 
-Rules for Header Files          hpp  Mostly Decl    (Headington p67)
+   Type:
+                                [volatile-??deprecated]
+                                [const-??]
+
+
+
+Rules for Header/Specifion Files          hpp  Mostly Decl    (Headington p67)
 YES + External Var              Decl
     + Fn Prototypes             Decl
-    + Class Prototypes??        Decl
+    + Class Prototypes??        Decl        // like a forward decl
     + Type                      Decl
     + Constant Var              Defn
+    + Class / Declaration       Defn    MC  // can leave out fn defn
     + Preprocessor Directives   Defn
--> YES: extern, static, inline.
+    + Template Definition       Defn
+keyword-> YES: extern, static, inline.
+keyword-> YES: inheritance
+keyword-> NO:  none.
 
 NO  - Fn                        Defn
     - Var                       Defn
@@ -57,9 +67,20 @@ YES + Static Class Var Init     Init
     + Class Fn impl of hpp      Defn
     + Main Fn                   Defn
     + Preprocessor Directives   Defn
+    + Template Definition       Defn  // wrong
     + All of hpp content
-        + ????
--> NO: extern, static, inline??
+        + except multiuse/global Template_definitions
+        + except Detail namespace Class
+
+keyword-> YES:  static - for a device address/unix file that need not be const.
+                    - variable in a fn.
+                    - variable in a namespace/class
+                inline - ONLY for a hidden fn's in an impl cpp file (likely under the "Detail" namespace (utilities)).
+                extern - WEIRD CASE: hiding a global from viewers of the hpp.
+
+keyword-> YES: inheritance
+
+keyword-> NO: none.
 
 Both YES: namespace, using namesapce, using/typedef, ...??
 
