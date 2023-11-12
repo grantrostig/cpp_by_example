@@ -10,7 +10,7 @@ CONFIG += warn_on
 
 QMAKE_CXXFLAGS += \
 # 2b could be wrong:
-        -std=gnu++2b 		\
+        -std=gnu++23 		\
         -g3 		        \
         -O0 		        \
 #        -Wno-comment 		\
