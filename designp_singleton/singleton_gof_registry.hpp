@@ -81,11 +81,14 @@ public: string  name    {"Singleton1name"};
         Singleton1() {  Singleton_gof_registry::add_singleton( "my_singleton1", this ); cout<<"constructor1."<<endl; }
 static  Singleton1 const  * const instance( std::string const & name );  // TODO??: But I want it const!  Can't get ref to work either.
 };
+
 Singleton1 const * const Singleton1::instance( std::string const & name ) {
     Singleton_gof_registry const * singleton_gof_registry { Singleton_gof_registry::instance( name ) };
     return static_cast<Singleton1 const *>(singleton_gof_registry);
 };
+
 static Singleton1 singleton1;
+
 class Singleton2: public Singleton_gof_registry {
 public: string  name    {"Singleton2name"};
         int     my_int  {99};
@@ -96,7 +99,9 @@ Singleton2 * Singleton2::instance( std::string const & name ) {
     Singleton_gof_registry * singleton_gof_registry { Singleton_gof_registry::instance( name ) };
     return static_cast<Singleton2 *>(singleton_gof_registry);
 };
+
 static Singleton2 singleton2;
+
 void test_singleton_gof_registry() {
     /* Ignore this for now //Singleton_gof_registry * singleton1_p      = Singleton_gof_registry::instance( "singleton1_name") ;
     //if ( nullptr == singleton1_p ) cout << "failed." << endl;
