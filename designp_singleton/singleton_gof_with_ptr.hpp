@@ -45,8 +45,8 @@ Singleton_gof_with_ptr * Singleton_gof_with_ptr::instance() {   // TODO??: this 
 class Singleton_gof_with_ref {
 protected:          Singleton_gof_with_ref()                                                noexcept    =default;
                     ~Singleton_gof_with_ref()                                               noexcept    =default;
-           explicit Singleton_gof_with_ref(Singleton_gof_with_ref const &   )                           =delete;
-           explicit Singleton_gof_with_ref(Singleton_gof_with_ref       &&  )                           =delete;
+           explicit Singleton_gof_with_ref( Singleton_gof_with_ref const &   )                          =delete;
+           explicit Singleton_gof_with_ref( Singleton_gof_with_ref       &&  )                          =delete;
                     Singleton_gof_with_ref & operator=( Singleton_gof_with_ref const &  )   noexcept    =delete;
                     Singleton_gof_with_ref & operator=( Singleton_gof_with_ref       && )   noexcept    =delete;
 public:     int     _my_int {89};                               // could be protected by a getter.

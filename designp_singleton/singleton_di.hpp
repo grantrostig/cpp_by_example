@@ -5,6 +5,7 @@
 using namespace std;
 
 /// adding DI to GOF "registry of singletons"
+/// NOT DONE YET!!
 class Singleton_di;
 struct Singleton_name_a_ptr {
     std::string name {"NULL"};

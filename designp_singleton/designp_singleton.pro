@@ -30,6 +30,7 @@ HEADERS += \
     singleton_derived_t_ref.hpp \
     singleton_di.hpp \
     singleton_gof_registry.hpp \
+    singleton_gof_registry_copy.hpp \
     singleton_gof_t_decided_in_base_constr.hpp \
     singleton_gof_t_derived_link_time.hpp \
     singleton_gof_with_ptr.hpp

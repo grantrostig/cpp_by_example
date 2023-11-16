@@ -4,31 +4,31 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-class Singleton_gof_t_decided_in_base_constr {  // Called Maze_factory in GOF book p132
-            static  Singleton_gof_t_decided_in_base_constr* _instance;
-protected:          Singleton_gof_t_decided_in_base_constr() = default;
-public:     static  Singleton_gof_t_decided_in_base_constr* Instance() noexcept;
-                    int         _my_int  {99};
-};
-Singleton_gof_t_decided_in_base_constr* Singleton_gof_t_decided_in_base_constr::_instance {nullptr};
+/// We did not include all the code detail of other examples.
 
-//class S_derived_enchanted;  // TODO??: incomplete size, so foward delaration does not work for new()?  What if I gave it a size? Then I can't add functions to it later/below?
-//class S_derived_bombed;     // Is it really this complicated? https://stackoverflow.com/questions/553682/when-can-i-use-a-forward-declaration
+class Singleton_gof_t_decided_in_base_constr {  // Called Maze_factory in GOF book p132
+            static  Singleton_gof_t_decided_in_base_constr * _instance;
+protected:          Singleton_gof_t_decided_in_base_constr()            =default;
+public:     static  Singleton_gof_t_decided_in_base_constr * instance() noexcept;
+            int     _my_int  {99};
+};
+
+Singleton_gof_t_decided_in_base_constr * Singleton_gof_t_decided_in_base_constr::_instance {nullptr};
 
 class S_derived_enchanted final : public Singleton_gof_t_decided_in_base_constr {
-public:             std::string str          {"NULL"};
+public: std::string str         {"INIT"};
 };
 
 class S_derived_bombed    final : public Singleton_gof_t_decided_in_base_constr {
-public:             float       real_number  {999.42};
+public: float       real_number {999.42};
 };
 
-Singleton_gof_t_decided_in_base_constr *  Singleton_gof_t_decided_in_base_constr::Instance() noexcept {
+Singleton_gof_t_decided_in_base_constr *  Singleton_gof_t_decided_in_base_constr::instance() noexcept {
     if ( nullptr == _instance ) {
         std::string decider_of_s_type = getenv("SHELL");  // OR this: std::string decider_of_s_type = getenv("USER");
-        if ( "/bin/bash" == decider_of_s_type ) {   // Lazy initialization, on heap
+        if (        "/bin/bash" == decider_of_s_type ) {   // Lazy initialization, on heap
             _instance = new S_derived_enchanted;
-        } else if ( "/bin/sh" == decider_of_s_type ) {
+        } else if ( "/bin/sh"   == decider_of_s_type ) {
             _instance = new S_derived_bombed;
         } else {
             _instance = new Singleton_gof_t_decided_in_base_constr;  // TODO??: not sure why GOF has this option since it does nothing!, but I suppose the base Singleton could do something.
@@ -38,10 +38,10 @@ Singleton_gof_t_decided_in_base_constr *  Singleton_gof_t_decided_in_base_constr
 }
 
 void test_singleton_gof_t_decided_in_base_constr() {
-    cout<< "test_singleton_gof_t_decided_in_base_constr()"<<endl;
-    Singleton_gof_t_decided_in_base_constr *     my_singleton1       { Singleton_gof_t_decided_in_base_constr::Instance()};
-    int                             my_singleton1_int   { my_singleton1->_my_int};
-    Singleton_gof_t_decided_in_base_constr *     my_singleton2       { Singleton_gof_t_decided_in_base_constr::Instance()};
+    cout<< "BEGIN test_singleton_gof_t_decided_in_base_constr()"<<endl;
+    Singleton_gof_t_decided_in_base_constr *    my_singleton1       { Singleton_gof_t_decided_in_base_constr::instance()};
+    int                                         my_singleton1_int   { my_singleton1->_my_int};
+    Singleton_gof_t_decided_in_base_constr *    my_singleton2       { Singleton_gof_t_decided_in_base_constr::instance()};
     cout << "ptr1:" << my_singleton1->_my_int << endl ;
     cout << "ptr2:" << my_singleton2->_my_int << endl ;
     cout << "int from ptr1:" << ++my_singleton1_int << endl ;
@@ -49,7 +49,6 @@ void test_singleton_gof_t_decided_in_base_constr() {
     my_singleton2->_my_int = 42;
     cout << "ptr2:" << my_singleton2->_my_int << endl ;
     cout << "ptr1:" << my_singleton1->_my_int << endl ;
-    cout << "BAD 1 was not updated but shows it was, or is that the point of Singletons?" << endl;
-    my_singleton2 = my_singleton1;  // TODO??: why does this compile? I thought I =delete'd this
-    Singleton_gof_t_decided_in_base_constr *    my_singleton3   { my_singleton1};
+    cout << "Both updated, that the point of Singletons." << endl;
+    cout<< "END   test_singleton_gof_t_decided_in_base_constr()"<<endl;
 }

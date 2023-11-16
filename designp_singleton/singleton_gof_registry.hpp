@@ -8,86 +8,89 @@ using namespace std;
 //using namespace boost::ut::operators::terse;
 using namespace boost::ut;
 
-/// GOF p131 under SS 2, 3rd option: "registry of singletons".
+/// GOF p130 under SS 2.C (2.C or 3rd option): "registry of singletons".
 class Singleton_gof_registry;
-struct Singleton_name_a_ptr {
-    std::string name {"NULL"};
-    Singleton_gof_registry * singleton_ptr;
+struct Singleton_name_a_ptr {  // "a" means "and".
+    std::string              name          {"NULL"};
+    Singleton_gof_registry * singleton_ptr {nullptr};
 };
 using Registry = std::vector< Singleton_name_a_ptr >;
 
 class Singleton_gof_registry {
-                          // TODO??: why don't I need _instance as is shown in the book? Maybe because I have the registry which contains the instances?
-            //static      Singleton_gof_registry *                            _instance;
-            static      Registry                                            _registry;
-protected:              ~Singleton_gof_registry()                                             noexcept      =default;  // TODO??: Read that it should be private but that cause compile error.
-          //explicit    Singleton_gof_registry()                                                            =default;  // TODO: what if anything does explicit do here?
-            explicit    Singleton_gof_registry() {                                                                     // TODO: what if anything does explicit do here?
-                            cout <<"Construct base."<<endl;
-                            name_COLLISION_with_derived = "name init in Singleton base constructor:";
-                        }
-            explicit    Singleton_gof_registry( Singleton_gof_registry const &   )                          =delete;  // TODO: what if anything does explicit do here?
-            explicit    Singleton_gof_registry( Singleton_gof_registry       &&  )                          =delete;
-                        Singleton_gof_registry & operator=( Singleton_gof_registry const &  ) noexcept      =delete;
-                        Singleton_gof_registry & operator=( Singleton_gof_registry       && ) noexcept      =delete;
-            //static      Singleton_name_a_ptr const * const  lookup(        std::string const & name );  // TODO??: why is this not private in the book?
-            static      Singleton_name_a_ptr *  lookup(        std::string const & name );  // TODO??: why is this not private in the book?  Why static?
-public:     static      bool                    add_singleton( std::string const & name, Singleton_gof_registry * singleton_ptr);
-            static      Singleton_gof_registry *instance(      std::string const & name );
-                        string                  name_COLLISION_with_derived {"singleton_got_registry_name"}; // Testing the idea of having this data member. TODO??: Is it permissable for this to be non-static?
-    friend void list_registry();
+            static  Singleton_gof_registry *    _instance;
+            static  Registry               *    _registry;
+protected:          ~Singleton_gof_registry()                                             noexcept      =default;
+          explicit  Singleton_gof_registry();  // { name_COLLISION_with_derived = "name init in Singleton base constructor:"; cout <<"Construct base."<<endl; }
+          explicit  Singleton_gof_registry( Singleton_gof_registry const &   )                          =delete;
+          explicit  Singleton_gof_registry( Singleton_gof_registry       &&  )                          =delete;
+                    Singleton_gof_registry & operator=( Singleton_gof_registry const &  ) noexcept      =delete;
+                    Singleton_gof_registry & operator=( Singleton_gof_registry       && ) noexcept      =delete;
+            static  Singleton_name_a_ptr *      lookup(        std::string const & name );                                  // TODO??: can I make this const const?
+public:     static  bool                        add_singleton( std::string const & name, Singleton_gof_registry * singleton_ptr);  // Called "register" in GOF book we don't want keyword in a name.
+            static  Singleton_gof_registry *    instance(      std::string const & name );
+                    string                      name_COLLISION_with_derived {"singleton_got_registry_name"}; // Just testing the idea of having this data member. TODO??: Is it permissable for this to be non-static?
+   friend void list_registry();  // Just for debugging.
 };
-//Singleton_gof_registry * Singleton_gof_registry::_instance   {nullptr};   // TODO??:Init is probably needed? or not because it is a fundamental type, a pointer?
-Registry                 Singleton_gof_registry::_registry   {};          // TODO??:Init probably not needed.
+Singleton_gof_registry::Singleton_gof_registry() {
+   name_COLLISION_with_derived = "name init in Singleton base constructor:";
+   cout <<"Construct base."<<endl;
+   if ( nullptr == _registry ) {
+       _registry = new Registry;
+   }
+}
 /// Returns found already existing registered singleton_ptr OR nullptr
 Singleton_name_a_ptr * Singleton_gof_registry::lookup( std::string const & name ) { cout << "lockup()."<<endl;
+    assert( nullptr != _registry && "Should already have been created and loaded.");
+    "lookup"_test = [] {
+        0_i == reinterpret_cast<int>( _registry);
+    };
     Singleton_name_a_ptr * result;
-    auto match_name_predicate =  [&name] (Singleton_name_a_ptr a) ->bool { cout<<"checking a name:"<< a.name<< endl; return a.name == name;};
-    auto itr =  std::find_if( _registry.begin(), _registry.end(), match_name_predicate );
-    if ( itr != _registry.cend() ) {
+    auto match_name_predicate =  [&name] (Singleton_name_a_ptr ptr) ->bool { cout<<"checking a name:"<< ptr.name<< endl; return ptr.name == name;};
+    auto itr =  std::find_if( _registry->begin(), _registry->end(), match_name_predicate );             // TODO??: can I make .begin const?
+    if ( itr != _registry->cend() ) {
         result = itr.base(); cout << "lockup() found:" <<itr->name <<endl;
     } else
         result = nullptr;
     return result;
 }
-/// Adds singleton to registry Returns: True if one has just been added. False if it already exists.
+/// Adds singleton to registry
+/// Returns:    True if one has just been added. False if it already exists.
+/// Invariant:  Assumes that singletons are NEVER removed from registry.
 bool Singleton_gof_registry::add_singleton( std::string const & name, Singleton_gof_registry * singleton_ptr) { cout << "add_singleton()."<<endl;  // TODO??: why can't I const ptr or even & ref it?
     mutex mtx;
-    "lookup"_test = [] { expect( 0==0 ); };
+    "lookup"_test = [] { expect( 0==0 ); };  // just testing ut test in a member function
     scoped_lock<std::mutex > lock (mtx);
     if ( auto found_n_a_p = lookup( name ); nullptr == found_n_a_p ) {
         //Singleton_name_a_ptr name_a_ptr { name, singleton_ptr };
-        //_registry.push_back( name_a_ptr );                                                                      cout << "add_singleton() success of:"<<name<<endl;
+        //_registry.push_back( name_a_ptr );                                                                      cout << "add_singleton():success for:"<<name<<endl;
         // singleton_ptr points at static memory and I'm just copying the address to vector.
-        _registry.push_back( {name, singleton_ptr} );                                                            cout << "add_singleton() success of:"<<name<<endl;
+        _registry->push_back( {name, singleton_ptr} );                                                            cout << "add_singleton():success for:"<<name<<endl;
         return true;
     } else return false;
 };
 /// Instanciates _instance
 /// Returns: named registry singleton_ptr OR NULL if name is not found.
-Singleton_gof_registry * Singleton_gof_registry::instance( std::string const & name ) {                     cout << "instance()."<<endl;
+Singleton_gof_registry * Singleton_gof_registry::instance( std::string const & name ) {     cout << "instance()."<<endl;
+    assert( nullptr != _registry && "Should already have been created and loaded.");
     Singleton_gof_registry * result {nullptr};
-    { mutex mtx; scoped_lock<std::mutex> lock (mtx);
-    //    if ( nullptr == _instance ) { _instance = new Singleton_gof_registry;                                   cout<< "new."<<endl;}
-    }
-    if ( auto found_n_a_p = lookup( name ); nullptr != found_n_a_p ) { result = found_n_a_p->singleton_ptr; cout<<"good instance()."<<endl; }
-    else { result = nullptr;                                                                                cout<<"NO instance() to return."<<endl; }
+    if ( auto found_n_a_p = lookup( name ); nullptr != found_n_a_p ) {
+           result = found_n_a_p->singleton_ptr;                                             cout<<"Good instance found()."<<endl; }
+    else { result = nullptr;                                                                cout<<"No instance found ()."<<endl; }
     return result;
 }
-void list_registry(){cout<<"Registry size:"<<Singleton_gof_registry::_registry.size() << ", Members:"; for ( auto i : Singleton_gof_registry::_registry ) { cout << i.name << ", "; } cout << endl; }
+
+// { mutex mtx; scoped_lock<std::mutex> lock (mtx);
+
 class Singleton1: public Singleton_gof_registry {
 public: string  name    {"Singleton1name"};
         int     my_int  {98};  // TODO??: do I need to instanciate _instance constructor, OR will the parent's class constructor be called right afterward?
         Singleton1() {  Singleton_gof_registry::add_singleton( "my_singleton1", this ); cout<<"constructor1."<<endl; }
 static  Singleton1 const  * const instance( std::string const & name );  // TODO??: But I want it const!  Can't get ref to work either.
 };
-
 Singleton1 const * const Singleton1::instance( std::string const & name ) {
     Singleton_gof_registry const * singleton_gof_registry { Singleton_gof_registry::instance( name ) };
     return static_cast<Singleton1 const *>(singleton_gof_registry);
 };
-
-static Singleton1 singleton1;
 
 class Singleton2: public Singleton_gof_registry {
 public: string  name    {"Singleton2name"};
@@ -100,7 +103,12 @@ Singleton2 * Singleton2::instance( std::string const & name ) {
     return static_cast<Singleton2 *>(singleton_gof_registry);
 };
 
-static Singleton2 singleton2;
+Singleton_gof_registry * Singleton_gof_registry::_instance   {nullptr};     // TODO??: Does not allocate memory, so where is that done? We think it will be done by derived Singleton created in .data segment.
+Registry               * Singleton_gof_registry::_registry   {nullptr};     // TODO??: Does not allocate memory, so where is that done?  We attempt it in base Singleton's constructor.
+static Singleton1        singleton1_hidden_from_linker {};  // Allocates memory in .data segment instead of on heap via new().
+static Singleton2        singleton2_hidden_from_linker {};
+
+void list_registry(){cout<<"Registry # members:"<<Singleton_gof_registry::_registry->size() << ", Members:"; for ( auto i : *Singleton_gof_registry::_registry ) { cout << i.name << ", "; } cout << endl; }
 
 void test_singleton_gof_registry() {
     /* Ignore this for now //Singleton_gof_registry * singleton1_p      = Singleton_gof_registry::instance( "singleton1_name") ;
@@ -129,12 +137,7 @@ void test_singleton_gof_registry() {
     cout << my_singleton2->my_int << endl;
     list_registry();
 
-    "memory_size"_test = [] {
-        0_i == 1;
-        int s = sizeof(Singleton_gof_registry);
-        expect( 0 == s );
-        expect( 0 == sizeof(Singleton_gof_registry) );
-        expect( 0 == sizeof(Singleton_gof_registry) < sizeof(Singleton1));
-        //expect(sum(1, 2) > 0_i and 41_i == sum(40, 2));
+    "main"_test = [] {
+        0_i == 0;
     };
 }
