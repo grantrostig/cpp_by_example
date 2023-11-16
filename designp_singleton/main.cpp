@@ -95,11 +95,11 @@ struct Only_one_of_UDT2 {
 
 int main() {
     cout << "BEGIN MAIN."<<endl;
-    //test_singleton_gof_with_ptr();
-    //test_singleton_gof_with_ref();
+    test_singleton_gof_with_ptr();
+    test_singleton_gof_with_ref();
     //test_singleton_gof_t_decided_in_base_constr();
     //test_singleton_gof_t_derived_link_time();  // not finished, don't undserstand
-    test_singleton_gof_registry();
+    //test_singleton_gof_registry();
     //test_singleton_derived_t_ref();
     cout << "###" << endl;
     return EXIT_SUCCESS;
