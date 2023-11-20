@@ -60,7 +60,7 @@ Singleton_di * Singleton_di::instance( std::string const & name ) {             
 }
 void list_registry(){cout<<"Registry size:"<<Singleton_di::_registry.size() << ", Members:"; for ( auto i : Singleton_di::_registry ) { cout << i.name << ", "; } cout << endl; }
 class Singleton1: public Singleton_di {
-public: string  name    {"Singleton1name"};
+public: string  _name    {"Singleton1name"};
     int     my_int  {98};  // TODO??: do I need to instanciate _instance constructor, OR will the parent's class constructor be called right afterward?
     Singleton1() {  Singleton_di::add_singleton( "my_singleton1", this ); cout<<"constructor1."<<endl; }
     static  Singleton1 * instance( std::string const & name );
@@ -71,8 +71,8 @@ Singleton1 * Singleton1::instance( std::string const & name ) {
 };
 static Singleton1 singleton1;
 class Singleton2: public Singleton_di {
-public: string  name    {"Singleton2name"};
-    int     my_int  {99};
+public: string  _name    {"Singleton2name"};
+    int     _my_int  {99};
     Singleton2() {  Singleton_di::add_singleton( "my_singleton2", this ); cout<<"constructor2."<<endl;}
     static  Singleton2 * instance( std::string const & name );
 };
@@ -95,12 +95,12 @@ void test_singleton_di() {
     Singleton1 *  my_singleton1 = Singleton1::instance( "my_singleton1");  // TODO??: this is the wrong type! It does not have the data members I want in Singleton1.
     if ( nullptr == my_singleton1 ) cout << "failed." << endl;
     cout << my_singleton1->my_int<<endl;
-    cout << my_singleton1->name<<endl;
+    cout << my_singleton1->_name<<endl;
     cout << my_singleton1->name_COLLISION_in_derived<<endl;
 
     Singleton2 *  my_singleton2 = Singleton2::instance( "my_singleton2");  // TODO??: BAD see 4 lines up ^^^^.
     if ( nullptr == my_singleton2 )
         cout << "failed." << endl;
-    cout << my_singleton2->my_int<<endl;
+    cout << my_singleton2->_my_int<<endl;
     list_registry();
 }
