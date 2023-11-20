@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 #include <mutex>
-#include <algorithm>>
+#include <algorithm>
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl;
 using namespace std::string_literals;
 
-/// GOF p130 under SS 2.C (2.C or 3rd option): "registry of singletons".
+/// More modern implementation of: Design Patterns, Gamma et al. GOF p130 under SS 2.C (2.C or 3rd option): "registry of singletons".
 /// TODO??: We hope this code is good quality "production" ready and also for multithreading,
 ///           even if Singleton1 and Singletion2 are defined in separate compilation units.
 /// TODO:   Refactor to use shared_pointer's?? and possibly ref's.
@@ -52,22 +52,24 @@ Singleton_gof_registry::Singleton_gof_registry() {
         //_registry = new Registry;
     //}
     auto instanciate_registry = [](){ _registry = new Registry; cout << "Instanciate registry."<< endl;};
-    try { std::call_once( _is_registry_instanciated, instanciate_registry);
+    try { std::call_once( _is_registry_instanciated, instanciate_registry );
     } catch (...) { cerr<<"Throwing exception in Singleton constructor."; }
 }
 Singleton_gof_registry::~Singleton_gof_registry() noexcept {
     delete _registry;
 }
 /// Returns found already existing registered singleton_ptr OR nullptr
+/// Precondition: mutex should already be locked by caller or other.
 /// Invariant: Function should be const.
 Singleton_name_a_ptr const * Singleton_gof_registry::lookup( std::string const & name ) noexcept {
-    cout << "lockup()."<<endl;
+    cout << "lockup my singleton()."<<endl;
     assert( nullptr != _registry && "Should already have been created and loaded.");
-    // like a cassert? but part of the testing framework?? "lookup"_test = [] { 0_ll == (long long)_registry; };
+    // TODO??: apparently there is no way to check if this thread without undefined behavior?
+    //    https://en.cppreference.com/w/cpp/thread/mutex/try_lock
+    // Testing: like a cassert? but part of the testing framework?? "lookup"_test = [] { 0_ll == (long long)_registry; };
     Singleton_name_a_ptr const * result;
     auto const match_name_predicate =  [&name] (Singleton_name_a_ptr const ptr) ->bool { cout<<"checking a name:"<< ptr.name<< endl; return ptr.name == name;};
     // TODO??: can we make above line any more const?
-    // mutex is already locked.
     auto itr =  std::find_if( _registry->cbegin(), _registry->cend(), match_name_predicate );             // TODO??: can I make .begin const?
     if ( itr != _registry->cend() ) {
         result = itr.base(); cout << "lockup() found:" <<itr->name <<endl;
