@@ -22,7 +22,6 @@ using namespace std;
                                 Namespace.unnamed
                                 Namespace.global           // file scope in C
                                 Concepts_scope??
-
   Storage Class Specifiers:
                                 extern
                                 static
@@ -34,7 +33,7 @@ using namespace std;
                                 [register-OLD-deprecated]
 
    Linkage types 3:
-    extern              linkage required   in hpp, prohibited in cpp
+    external            linkage required   in hpp, prohibited in cpp
     static ie. internal linkage prohibited in hpp, prohibited mention in cpp, even though it is static if so in hpp.
     internal            linkage unavailabe in hpp, but can be expressed in cpp.
     ???none???          TODO??: can't remember why I mentined this?!?:prohibited in hpp, except the CONST special linkage exception
