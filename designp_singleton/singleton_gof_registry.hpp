@@ -33,6 +33,7 @@ class Singleton_gof_registry {
             static  Registry *                  _registry;
             static  std::once_flag              _is_registry_instanciated;
             static  std::mutex                  _static_mtx;
+
 protected:          ~Singleton_gof_registry()                                             noexcept;
           explicit  Singleton_gof_registry();
           explicit  Singleton_gof_registry( Singleton_gof_registry const &   )                          =delete;
@@ -40,8 +41,9 @@ protected:          ~Singleton_gof_registry()                                   
                     Singleton_gof_registry & operator=( Singleton_gof_registry const &  )               =delete;
                     Singleton_gof_registry & operator=( Singleton_gof_registry       && )               =delete;
             static  Singleton_name_a_ptr const* lookup(        std::string const & name ) noexcept;       // Invariant: Function return type should be const * const? but not allowed.
+            static  Singleton_gof_registry *    instance_(      std::string const & name );
+
 public:     static  bool                        add_singleton( std::string const & name, Singleton_gof_registry * singleton_ptr);  // Called "register" in GOF book we don't want keyword in a name.
-            static  Singleton_gof_registry *    instance(      std::string const & name );
                     std::string                 _name_COLLISION_with_derived {"singleton_got_registry_name"}; // Just testing the idea of having this data member. TODO??: Is it permissable for this to be non-static?
    friend     void  list_registry();  // Just for debugging.
 };
@@ -51,8 +53,9 @@ Singleton_gof_registry::Singleton_gof_registry() {
     //if ( nullptr == _registry ) {
         //_registry = new Registry;
     //}
-    auto instanciate_registry = [](){ _registry = new Registry; cout << "Instanciate registry."<< endl;};
-    try { std::call_once( _is_registry_instanciated, instanciate_registry );
+    cout << "I m in the constructor."<< endl;
+    auto instantiate_registry = [](){ _registry = new Registry; cout << "Instanciate registry new."<< endl;};
+    try { std::call_once( _is_registry_instanciated, instantiate_registry );
     } catch (...) { cerr<<"Throwing exception in Singleton constructor."; }
 }
 Singleton_gof_registry::~Singleton_gof_registry() noexcept {
@@ -93,7 +96,7 @@ bool Singleton_gof_registry::add_singleton( std::string const & name, Singleton_
 };
 /// Instanciates _instance
 /// Returns: named registry singleton_ptr OR NULL if name is not found.
-Singleton_gof_registry * Singleton_gof_registry::instance( std::string const & name ) {     cout << "instance()."<<endl;
+Singleton_gof_registry * Singleton_gof_registry::instance_( std::string const & name ) {     cout << "instance()."<<endl;
     assert( nullptr != _registry && "Should already have been created and loaded.");
     Singleton_gof_registry * result {nullptr};
     { std::scoped_lock<std::mutex> lock (_static_mtx);
@@ -108,16 +111,33 @@ class Singleton1: public Singleton_gof_registry {
 public: std::string  _name    {"Singleton1nameINIT"};
         int          _my_int  {25};  // TODO??: do I need to instanciate _instance constructor, OR will the parent's class constructor be called right afterward?
                      Singleton1();
-
-// *** NOTE: TODO??: I try two different ways to get return or assign the correct type to the derived Singleton, but both are ugly and require static_cast?
-//static  Singleton1 const  * const instance( std::string const & name );  // TODO??: But I want it const!  Can't get ref to work either.
+        Singleton1 * instance();
 };
 //Singleton1 const * const Singleton1::instance( std::string const & name ) {
     //Singleton_gof_registry const * const singleton_gof_registry_p { Singleton_gof_registry::instance( name ) };  // TODO??: we think this const does not fix the return type problem, correct?
     //return static_cast<Singleton1 const * const>(singleton_gof_registry_p);     // TODO??: why exactly can't I make this dynamic_cast? We do have inheritance here, but compiler says "not polymorphic"
 //};
 Singleton1::Singleton1() { Singleton_gof_registry::add_singleton( "my_singleton1", this ); cout<<"constructor1."<<endl; }
+Singleton1 * Singleton1::instance() {
 
+
+};
+
+/* /// First usable Singleton within the "registry", must be staticly instancated whether used or not.
+class Singleton1: public Singleton_gof_registry {
+                 public: std::string  _name    {"Singleton1nameINIT"};
+                     int          _my_int  {25};  // TODO??: do I need to instanciate _instance constructor, OR will the parent's class constructor be called right afterward?
+                     Singleton1();
+
+                     // *** NOTE: TODO??: I try two different ways to get return or assign the correct type to the derived Singleton, but both are ugly and require static_cast?
+                     //static  Singleton1 const  * const instance( std::string const & name );  // TODO??: But I want it const!  Can't get ref to work either.
+};
+//Singleton1 const * const Singleton1::instance( std::string const & name ) {
+//Singleton_gof_registry const * const singleton_gof_registry_p { Singleton_gof_registry::instance( name ) };  // TODO??: we think this const does not fix the return type problem, correct?
+//return static_cast<Singleton1 const * const>(singleton_gof_registry_p);     // TODO??: why exactly can't I make this dynamic_cast? We do have inheritance here, but compiler says "not polymorphic"
+//};
+Singleton1::Singleton1() { Singleton_gof_registry::add_singleton( "my_singleton1", this ); cout<<"constructor1."<<endl; }
+*/
 /// Another usable Singleton within the "registry", must be staticly instancated whether used or not.
 class Singleton2: public Singleton_gof_registry {
 public: std::string  _name    {"Singleton2nameINIT"};
@@ -127,7 +147,7 @@ static  Singleton2 * instance( std::string const & name );
 };
 Singleton2::Singleton2() { Singleton_gof_registry::add_singleton( "my_singleton2", this ); cout<<"constructor2."<<endl; }
 Singleton2 * Singleton2::instance( std::string const & name ) {
-    Singleton_gof_registry * singleton_gof_registry_p { Singleton_gof_registry::instance( name ) };
+Singleton_gof_registry * singleton_gof_registry_p { Singleton_gof_registry::instance_( name ) };
     return static_cast<Singleton2 *>(singleton_gof_registry_p);
 };
 
@@ -146,9 +166,12 @@ void test_singleton_gof_registry() {
     cout << sizeof(Singleton1)<<endl;
     list_registry();
 
+    /*
+     *
     //Singleton1 const *  my_singleton1 = Singleton1::instance( "my_singleton1");  // TODO??: A nicer appearing return value than equivalent example below in Singleton2.
-    Singleton1 * const  my_singleton1 = static_cast<Singleton1 * const>(Singleton1::instance( "my_singleton1"));  // TODO??: this is the wrong type! It does not have the data members I want in Singleton1.
-    assert( not (nullptr == my_singleton1) );
+
+    // *** Singleton1 * const  my_singleton1 = static_cast<Singleton1 * const>(Singleton1::instance_( "my_singleton1"));  // TODO??: this is the wrong type! It does not have the data members I want in Singleton1.
+    // ***assert( not (nullptr == my_singleton1) );
     cout << "my_singleton1->my_int:" <<                     my_singleton1->_my_int <<endl;
     cout << "my_singleton1->name:" <<                       my_singleton1->_name <<endl;
     cout << "my_singleton1->name_COLLISION_with_derived:"<< my_singleton1->_name_COLLISION_with_derived <<endl;
@@ -172,4 +195,5 @@ void test_singleton_gof_registry() {
     list_registry();
 
     //"main"_test = [] { 0_i == 0; };
+    */
 }
