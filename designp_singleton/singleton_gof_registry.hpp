@@ -15,7 +15,7 @@
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl;
 using namespace std::string_literals;
 
-/// More modern implementation of: Design Patterns, Gamma et al. GOF p130 under SS 2.C (2.C or 3rd option): "registry of singletons".
+/// More modern implementations of: Design Patterns, Gamma et al. GOF p130 under SS 2.C (2.C or 3rd option): "registry of singletons".
 /// TODO??: We hope this code is good quality "production" ready and also for multithreading,
 ///           even if Singleton1 and Singletion2 are defined in separate compilation units.
 /// TODO:   Refactor to use shared_pointer's?? and possibly ref's.
