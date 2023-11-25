@@ -6,6 +6,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+/// NOT DONE YET!!
 /* template <typename T>
 class Singleton_base_t_ref {           // NOTE: In fact since I have more than one singletons in here it is more of a registry as mentioned in GOF.
 protected:

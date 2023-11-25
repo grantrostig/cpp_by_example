@@ -3,14 +3,16 @@
 /// In 2009, the authors of the original design patterns said the only pattern they would consider removing from the original list is Singleton.
 /// This is because it is essentially a way to store global data and tends to be an indicator of poor design.
 /// There are several alternatives to the Singleton pattern:  dependency injection, Monostate pattern, session context.
-/// grostig: yes, but which one is better?
+/// TODO??: grostig: yes perhaps, but which one is better, and where are good examples?
 
 #include "singleton_gof_with_ptr.hpp"
 #include "singleton_gof_t_decided_in_base_constr.hpp"
-
-#include "singleton_derived_t_ref.hpp"
 //#include "singleton_gof_t_derived_link_time.hpp"
 #include "singleton_gof_registry.hpp"
+
+/// Other ideas for Singletons by grostig.
+//#include "singleton_derived_t_ref.hpp"
+//#include "singleton_di.hpp"
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -98,9 +100,12 @@ int main() {
     //test_singleton_gof_with_ptr();
     //test_singleton_gof_with_ref();
     //test_singleton_gof_t_decided_in_base_constr();
-    //test_singleton_gof_t_derived_link_time();  // not finished, don't undserstand
+    // test_singleton_gof_t_derived_link_time();  // not finished, don't undserstand
+
     test_singleton_gof_registry();
-    //test_singleton_derived_t_ref();
+
+    // test_singleton_derived_t_ref();
+    // test_singleton_di();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }

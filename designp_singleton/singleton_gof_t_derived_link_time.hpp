@@ -3,6 +3,7 @@
 #pragma once
 #include <bits/stdc++.h>
 using namespace std;
+/// NOT DONE YET!!
 
 /* /// TODO??: NOT FINSHED, don't understand
 class Singleton_gof_t_derived_link_time {  // Called Maze_factory in GOF book p132
