@@ -24,7 +24,8 @@ SOURCES += \
         singleton_gof_registry.cpp \
         singleton_gof_t_decided_in_base_constr.cpp \
         singleton_gof_t_derived_link_time.cpp \
-        singleton_gof_with_ptr.cpp
+        singleton_gof_with_ptr.cpp \
+        singleton_grants_wish.cpp
 
 HEADERS += \
     singleton_derived_t_ref.hpp \
@@ -33,4 +34,5 @@ HEADERS += \
     singleton_gof_registry_copy.hpp \
     singleton_gof_t_decided_in_base_constr.hpp \
     singleton_gof_t_derived_link_time.hpp \
-    singleton_gof_with_ptr.hpp
+    singleton_gof_with_ptr.hpp \
+    singleton_grants_wish.hpp

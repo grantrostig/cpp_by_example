@@ -140,8 +140,9 @@ Singleton1::Singleton1() { Singleton_gof_registry::add_singleton( "my_singleton1
 */
 /// Another usable Singleton within the "registry", must be staticly instancated whether used or not.
 class Singleton2: public Singleton_gof_registry {
-public: std::string  _name    {"Singleton2nameINIT"};
-    int              _my_int  {35};
+public: std::string  _name     {"Singleton2nameINIT"};
+    int              _my_int   {35};
+    int              _my_fn()  {};
                      Singleton2();                       // {  Singleton_gof_registry::add_singleton( "my_singleton2", this ); cout<<"constructor2."<<endl;}
 static  Singleton2 * instance( std::string const & name );
 };
