@@ -210,7 +210,34 @@ class C {
     static int n();  //
            int o();  // TODO??: when would one do this and what does it do?
 };
+
+//int const &         REF1 {42};
+//int       &         REF2 {42};
+//int const &         REF3 = {};
+//int const * const   PTR2 {43};
+
+int         * const ptr1 {};
+int  const  *       ptr2 {};
+
+int       y() {
+   return 89;
+}
+string const s() {
+   return "str99";
+}
+int const x() {
+   return 99;
+}
+
 int main() {
+//           cout << REF3 << endl;
+
+   int j = ++(y());
+   ++j;
+
+   int i = ++(x());
+   string my_s = s();
+
     extern int f();  // TODO??: when would one do this and what does it do?
     extern int m();  //
     extern int n();  //
