@@ -1,7 +1,18 @@
-/* (c) Cppmsg.com License Boost 1.0 */
+/* (c) Cppmsg.com License Boost 1.0
+   Usage:
+    - CTRL-C to exit, then at the shell prompt
+        $stty sane
+        # to fix the tty character handling back to "cooked mode".
+    - run and enter just ESC.
+    - run and enter just the F1 key.
+    - above two give different results.
+*/
 //#include <bits/stdc++.h>
 //#include <istream>
 #include <array>
+#include <cassert>
+#include <chrono>
+#include <thread>
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -11,11 +22,11 @@ using namespace std;
 // Bad file global I know... just for fun and learning/renaming "static"
 #define STATIC_GLOBAL_HIDER static     // similar to $ namespace {}
 STATIC_GLOBAL_HIDER streamsize position {};  // here static just hides the obj from linker, same as unnamed namespace TODO:??
-inline constexpr   ssize_t     POSIX_ERROR =       -1;  /// yes, believe it or not, it is not zero, which I think is good. :)
+inline constexpr ssize_t POSIX_ERROR{-1};  /// yes, believe it or not, it is not zero, which we think is good. :)
 /// C++ class name capitalization convention of the POSIX C type.
 using Termios = termios;    // Tty terminal IO & speed structure, used for getting and setting them. // Enforcing the C++ struct type name capitalization convention for the POSIX C type.  I like it that way.
 
-Termios & termio_get() { // uses POSIX  // TODO TODO: what are advantages of other version of this function?
+Termios & termio_get() { // uses POSIX
     static Termios termios;
     if (auto result = tcgetattr( fileno(stdin), &termios); result == POSIX_ERROR) { // TODO: throw() in signature?
         int errno_save = errno;
@@ -26,11 +37,11 @@ Termios & termio_get() { // uses POSIX  // TODO TODO: what are advantages of oth
     return termios;  // copy of POD?
 }
 
-/// We set POSIX terminal with Termios control attributes.
-/// Applications that need ALL of the requested changes to work properly should follow tcsetattr()
-/// with a call to tcgetattr() and compare then appropriate field values.
-/// We do the check after this call within the caller.  TODO consider doing it in here.
-/// TODO not called yet, refactor for 3 uses.
+/** We set POSIX terminal with Termios control attributes.
+    Applications that need ALL of the requested changes to work properly should follow tcsetattr()
+    with a call to tcgetattr() and compare then appropriate field values.
+    We do the check after this call within the caller.  TODO consider doing it in here.
+    TODO not called yet, refactor for 3 uses. */
 void termio_set( Termios const & termios_new ) { // uses POSIX
     if ( auto result = tcsetattr( fileno(stdin), TCSADRAIN, /*IN*/ &termios_new );
         result == POSIX_ERROR ) {
@@ -105,45 +116,78 @@ void print_iosbase() {
         _S_ios_iostate_min = ~__INT_MAX__ }
     */;
     auto rds = cin.rdstate();
-    cout<< "\n:rds:" << rds << endl;
-    if (cin.rdstate() == std::ios_base::goodbit) cout<< "\ngoodbit" << endl;
-    if (cin.rdstate() == std::ios_base::badbit) cout<< "\nbadbit" << endl;
-    if (cin.rdstate() == std::ios_base::eofbit) cout<< "\neofbit" << endl;
+    cout<< "\n\r:rds:" << rds << endl;
+    if (cin.rdstate() == std::ios_base::goodbit) cout<< "\n\rgoodbit" << endl;
+    if (cin.rdstate() == std::ios_base::badbit) cout<< "\n\rbadbit" << endl;
+    if (cin.rdstate() == std::ios_base::eofbit) cout<< "\n\reofbit" << endl;
 }
 void print_tellg() {  // This code can help you to check existence of data in the stdin without blocking: // https://stackoverflow.com/questions/3317740/checking-data-availability-before-calling-stdgetline
     //streamsize position{std::cin.tellg()};
     position = std::cin.tellg();
-    if (position < 0) cout << "\n:no chars available" << endl;
+    if (position < 0) cout << "\n\r:no chars available" << endl;
     else {
-        cout <<"\n:length:"<<position<<endl;
+        cout <<"\n\r:length:"<<position<<endl;
         std::cin.seekg( 0, std::cin.beg );      // If stdin has some data - don't forget to set the position back to the beginning.
                                                 // TODO??: why called "seekdir"?
                                                 // what offset the position? tellg? or just a pre-caution
     }
 } // end stackoverflow example EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEe
 
-int main() { char my_char{}, my_c_string[100]{""}; streamsize in_avail_count{}; std::vector<char> char_vec(1024); string  my_string{}; basic_streambuf<char> * cin_streambuf{};
+int main() { unsigned char my_char{255}, my_c_string[100]{""}; streamsize in_avail_count{}; std::vector<char> char_vec(1024); string  my_string{};
+    basic_streambuf<char> *                             cin_streambuf{};
+    std::chrono::time_point<std::chrono::steady_clock>  clock_start{}, clock_end{};
+    std::chrono::duration<long, std::micro>             duration_passed{};
+    // Some other ways to read cin
+    // - cin.read( char_vec.data(), 1 )
+    // - cin.readsome(my_c_string, 2);
     termio_set_raw();
-    print_tellg(); if (not(position < 0)) cin.read( char_vec.data(), 1 ); cout << "\n:*char_vec.begin():" << *char_vec.begin() << endl; // You can then read all data including \0 (can be more than one) at the end of the buffer:
-
     cin.sync_with_stdio(false);  // Required for in_avail() to work TODO??:
-    cout << "\nEnter keyboard input:";
 
-    print_tellg(); if (not(position < 0)) cin.read( char_vec.data(), 1 ); cout << "\n:*char_vec.begin():" << *char_vec.begin() << endl; // You can then read all data including \0 (can be more than one) at the end of the buffer:
+    cout << "\n\rEnter keyboard input:";
+    my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
+    clock_start = std::chrono::steady_clock::now();
+    if (my_char == 27) {
+        cout << "\n\rgot ESC\n\r" <<endl;
+        print_tellg(); if (not(position < 0)) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+        // Determine if other chars of a multi-byte sequence are coming, criteria is that they must arrive withing 100 milli-seconds. 1/10 th of a second.
+        do {
+            std::this_thread::sleep_for(10ms);
+            cin_streambuf = cin.rdbuf();
+            in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
+            clock_end = std::chrono::steady_clock::now();
+            duration_passed = std::chrono::duration_cast<std::chrono::microseconds>(clock_end - clock_start);
+            assert( in_avail_count>=0 && "ERROR: We don't have logic for -1 or lower.");
+        } while ( duration_passed < 100ms && in_avail_count == 0 );
+        if (duration_passed < 100ms)
+            cout << "\n\r:We have a multi-byte sequence!.\n\r" << endl;
+        else
+            cout << "\n\r:We have a single ESC, NOT a multi-byte sequence!.\n\r" << endl;
 
-    cin  >> my_char; cout << "\n:Got my_char input."<<endl;
-    cout << "\n:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+    } else {
+        print_tellg(); if (not(position < 0)) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+        cin_streambuf = cin.rdbuf();
+        in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
 
-    cin.readsome(my_c_string, 1); // reads 'This ' and stores in c[0] .. c[4]
-    cout << "\n:my_c_string:" << my_c_string << endl;
+    }
+
+    my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
+    cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+    print_tellg(); if (not(position < 0)) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
     cin_streambuf = cin.rdbuf();
-    in_avail_count = cin_streambuf->in_avail(); cout << "\n:in_avail_count:" << in_avail_count << endl;
+    in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
 
-    cin  >> my_string;
-    cout << "\n:text:" << my_string << endl;
+    my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
+    cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+    print_tellg(); if (not(position < 0)) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
     cin_streambuf = cin.rdbuf();
-    in_avail_count = cin_streambuf->in_avail(); cout << "\n:in_avail_count:" << in_avail_count << endl;
+    in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
 
-    cout << "\n###" << endl;
+    my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
+    cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+    print_tellg(); if (not(position < 0)) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+    cin_streambuf = cin.rdbuf();
+    in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
+
+    cout << "\n\r###" << endl;
     return 0;
 }
