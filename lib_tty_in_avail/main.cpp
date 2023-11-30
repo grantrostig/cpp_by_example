@@ -140,7 +140,7 @@ int main() { unsigned char my_char{255}, my_c_string[100]{""}; streamsize in_ava
     // Some other ways to read cin
     // - cin.read( char_vec.data(), 1 )
     // - cin.readsome(my_c_string, 2);
-    termio_set_raw();
+    Termios & termios_orig{termio_set_raw()};
     cin.sync_with_stdio(false);  // Required for in_avail() to work TODO??:
 
     cout << "\n\rEnter keyboard input:";
@@ -187,7 +187,7 @@ int main() { unsigned char my_char{255}, my_c_string[100]{""}; streamsize in_ava
     print_tellg(); if (not(position < 0)) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
     cin_streambuf = cin.rdbuf();
     in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
-
+    termio_set(termios_orig);
     cout << "\n\r###" << endl;
     return 0;
 }
