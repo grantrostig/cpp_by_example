@@ -1,11 +1,12 @@
 /* (c) Cppmsg.com License Boost 1.0
    Usage:
+    - run and enter just ESC.
+    - OR run and enter just the F1 key.
+    - above two give different results.
     - CTRL-C to exit, then at the shell prompt
         $stty sane
         # to fix the tty character handling back to "cooked mode".
-    - run and enter just ESC.
-    - run and enter just the F1 key.
-    - above two give different results.
+    - or just type junk characters and <ENTER> to get out.
 */
 //#include <bits/stdc++.h>
 //#include <istream>
@@ -18,10 +19,9 @@
 #include <sstream>
 #include <termios.h>
 using namespace std;
-
 // Bad file global I know... just for fun and learning/renaming "static"
 #define STATIC_GLOBAL_HIDER static     // similar to $ namespace {}
-STATIC_GLOBAL_HIDER streamsize position {};  // here static just hides the obj from linker, same as unnamed namespace TODO:??
+STATIC_GLOBAL_HIDER streamsize position{};  // here static just hides the obj from linker, same as unnamed namespace TODO:??
 inline constexpr ssize_t POSIX_ERROR{-1};  /// yes, believe it or not, it is not zero, which we think is good. :)
 /// C++ class name capitalization convention of the POSIX C type.
 using Termios = termios;    // Tty terminal IO & speed structure, used for getting and setting them. // Enforcing the C++ struct type name capitalization convention for the POSIX C type.  I like it that way.
@@ -137,9 +137,9 @@ int main() { unsigned char my_char{255}, my_c_string[100]{""}; streamsize in_ava
     basic_streambuf<char> *                             cin_streambuf{};
     std::chrono::time_point<std::chrono::steady_clock>  clock_start{}, clock_end{};
     std::chrono::duration<long, std::micro>             duration_passed{};
-    // Some other ways to read cin
-    // - cin.read( char_vec.data(), 1 )
-    // - cin.readsome(my_c_string, 2);
+        // Some other ways to read cin
+        // - cin.read( char_vec.data(), 1 )
+        // - cin.readsome(my_c_string, 2);
     Termios & termios_orig{termio_set_raw()};
     cin.sync_with_stdio(false);  // Required for in_avail() to work TODO??:
 
@@ -149,13 +149,13 @@ int main() { unsigned char my_char{255}, my_c_string[100]{""}; streamsize in_ava
     if (my_char == 27) {
         cout << "\n\rgot ESC\n\r" <<endl;
         print_tellg(); if (not(position < 0)) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
-        // Determine if other chars of a multi-byte sequence are coming, criteria is that they must arrive withing 100 milli-seconds. 1/10 th of a second.
+        // *** Determine if other chars of a multi-byte sequence are coming, criteria is that they must arrive withing 100 milli-seconds. 1/10 th of a second.
         do {
             std::this_thread::sleep_for(10ms);
             cin_streambuf = cin.rdbuf();
             in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
-            clock_end = std::chrono::steady_clock::now();
-            duration_passed = std::chrono::duration_cast<std::chrono::microseconds>(clock_end - clock_start);
+            clock_end =       std::chrono::steady_clock::now();
+            duration_passed = std::chrono::duration_cast<std::chrono::microseconds>( clock_end - clock_start );
             assert( in_avail_count>=0 && "ERROR: We don't have logic for -1 or lower.");
         } while ( duration_passed < 100ms && in_avail_count == 0 );
         if (duration_passed < 100ms)
