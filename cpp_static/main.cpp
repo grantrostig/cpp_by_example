@@ -9,30 +9,81 @@
 #include "scope_test.hpp"
 #include <bits/stdc++.h>
 using namespace std;
-/* Document Key: "===ditto; //"===ditto; [.*]===not covered here; ~.*~===type comment only  "class --> struct also"
+/* Document Key: "===ditto; //"===ditto; [...]===not covered here; ~.*~===type comment only  "class --> struct also"
 
-   Scope types 11:              Function_parameter_scope
-                                Template_parameter_scope
+
+Declaration
+
+                                              /Declaration Specifiers 5:
+                                                                                                                    /Declarator with Init
+
+
+
+
+
+Definition
+Do these in this order:         Scope         /FN spec.  /Linkage   /Storage  /Type /TypeMOD? /additional_type_info /Name_Declarator /direct_abstract_declarator /Initializer
+                                namespace N {  inline    extern     static    int   const      *   const            my_int           []                          {98,99}         ;}
+                                               virtual                        class mutable    &                                                                 ={}
+                                                                                              &&                                                                <>()=new
+
+"Scope" types for VARs and FNs and CLASSs ?? types: 7 (plus 3 my_subtypes??) :
+                                Function_parameter_scope
+                                Template_parameter_scope (including Concepts_scope?, if there is such a thing?)
                                 Point_of_declartion_scope (many subtypes see cppref)
-                                Block                       //(local?)
                                 Block.nested
+                                Block                       //(local?)
                                 Enumeration
                                 Class
                                 Namespace
                                 Namespace.unnamed
-                                Namespace.global           // file scope in C
-                                Concepts_scope??
-  Storage Class Specifiers:
-                                extern
-                                static
-                                static_internal
-                                static_thread_local
-                                dynamic
-                                [mutable]
-                                [auto-OLD-deprecated]
-                                [register-OLD-deprecated]
+                                Namespace.global           // "File" scope in C
 
-   Linkage types 3:
+"Storage Classes" for VARs and FNs.
+  ** VARs "Storage Classes": 2 categories
+    1) Automatic "Storage Class Specifiers" keywords: 2:
+                                <NULL> = DEFAULT is "Automatic" in block_scope AKA [auto]-OLD-deprecated
+                                [register]-OLD-deprecated
+
+    2) LDF_Data_Segment{new term} (AKA "Static Storage Class")
+        >>> !! CONST !!
+                                <NULL> = DEFAULT in namespace_scope (redundant:for VARs only)
+                                "static"
+                                    - DEFAULT
+                                    - all threads
+                                "thread_local"  (not sure if this is in the LDF data segment. TODO??: How and when is thread local memory allocated?
+
+  ** FNs  "Storage Classes":
+    1) LDF Data_Segment VARs (true static) Only requires its fellow class members of type data also be static.
+
+Another Stroage Duration for VARs type 1:
+    1) Dynamic via new()/delete();
+Weird One:                      [mutable]
+
+OTHERS??
+                                const?
+                                [volatile]-OLD-deprecated
+
+   "Linkage" types 4 on 7 things: objects, reference, function, type, template, namespace, value(const var?) 7:
+    1) External Linkage references seen by linker/loader between Translation Units.
+                                "extern"
+    2) Internal Linkage references seen by compiler, resolved only within Translation Unit.
+    3) No Linkage       references seen
+    4) Module linkage   import and export modules...
+    ??) Translation-unit-local Entities?? in C++20.
+    ??) "inline"??
+
+
+
+
+
+
+
+
+
+
+
+Linkage types 3:
     external            linkage required   in hpp, prohibited in cpp
     static ie. internal linkage prohibited in hpp, prohibited mention in cpp, even though it is static if so in hpp.
     internal            linkage unavailabe in hpp, but can be expressed in cpp.
