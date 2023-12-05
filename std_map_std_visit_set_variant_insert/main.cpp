@@ -1,5 +1,5 @@
-//  created as part of 'Password Manager' application by Grant Rostig
-//  We have mostly fixed this, but the solution is in this project: map_insert_struct.pro
+//  created as part of 'Password_Manager' AKA 'file_maintenance' application by Grant Rostig
+//  IGNORE this Broken code, we have mostly fixed this, but the solution is in this project: map_insert_struct.pro
 #include <iostream>
 #include <string>
 #include <variant>
@@ -8,6 +8,17 @@
 #include <memory>
 #include <tuple>
 using std::endl, std::cout, std::cerr;
+
+template<typename Key, typename Value>
+void print_result( std::pair<Key,Value> const & pair, bool is_inserted ) {
+    cerr<<"is_inserted:"<<is_inserted<<", key.key_part1:"<<pair.first.key_part1<<", key.key_part2:"<<pair.first.key_part2<<", value.s1_str1:"<<pair.second.value_part1<<endl;
+}
+
+template< typename Map>
+void print_map( Map const & my_map ) {
+    for (auto & [key,value]:my_map )
+        cerr<< "key.key_part1:"<<key.key_part1<<", key.key_part2:"<<key.key_part2<<", value.s1_str1:"<<value.value_part1<<endl;
+}
 
 /*struct Struct1 { // old version only works for vector of variant
     int 		s1_int1 {};
@@ -61,17 +72,6 @@ struct Struct1 {
     }
 };
 
-template<typename Key, typename Value>
-void print_result( std::pair<Key,Value> const & pair, bool is_inserted ) {
-    cerr<<"is_inserted:"<<is_inserted<<", key.key_part1:"<<pair.first.key_part1<<", key.key_part2:"<<pair.first.key_part2<<", value.s1_str1:"<<pair.second.value_part1<<endl;
-}
-
-template< typename Map>
-void print_map( Map const & my_map ) {
-    for (auto & [key,value]:my_map )
-        cerr<< "key.key_part1:"<<key.key_part1<<", key.key_part2:"<<key.key_part2<<", value.s1_str1:"<<value.value_part1<<endl;
-}
-
 struct Struct2 {
     int 		s2_int1 {};
     std::string s2_str1 {};
@@ -89,7 +89,7 @@ struct Struct3 {
         std::string S3_str1 {};
     } value;
 };
-Struct3 junk3 { {1,2},"junk"};
+Struct3 junk3 { {1,2},{"junk"}};
 
 struct Struct4 {
     struct Key {
@@ -177,11 +177,13 @@ struct IndexStruct3_compare {
         return std::tie( lhs.s3_int1, lhs.s3_int1 ) < std::tie( rhs.s3_int1, rhs.s3_int2 );
     }
 };
+
 struct IndexStruct4_compare {
     bool operator()( Struct4::Key const & lhs, Struct4::Key const & rhs) const {
         return std::tie( lhs.s4_int1, lhs.s4_int1 ) < std::tie( rhs.s4_int1, rhs.s4_int2 );
     }
 };
+
 struct IndexStruct5_compare {
     bool operator()( Struct5::Key const & lhs, Struct5::Key const & rhs) const {
         return std::tie( lhs.s5_int1, lhs.s5_int2 ) < std::tie( rhs.s5_int1, rhs.s5_int2 );
@@ -305,8 +307,8 @@ void insert_test5() {
 int main()
 {
     insert_test1();
-    insert_test5();
     //insert_test3();
+    insert_test5();
 
     Visit_vector_test test {};
     test.insert_struct();
@@ -318,9 +320,9 @@ int main()
     Visit_map_test test2 {};
     test2.insert_struct();
     cout << "test2.structs_container.size(): "<< test2.structs_container.size()<<endl<<"Print final results:\n";
-    for (auto & [ key,value ]: test2.structs_container )
+    //for (auto & [ key,value ]: test2.structs_container )
         // std::visit( [] (auto & s) { *value.print(); }, value);
-    cout << "###" << endl;
 
+    cout << "###" << endl;
     return 0;
 }

@@ -1,5 +1,7 @@
-//  created as part of 'Password Manager' application by Grant Rostig
-//  fixes problems in this project: set_variant_insert_visit.pro
+//  Test std::map
+//  Created as part of 'password_manager' AKA 'file_maintenace' application by Grant Rostig
+//  Fixes problems in this project: set_variant_insert_visit.pro
+//  TODO: fix poorly named Struct2 members.
 #include <iostream>  // c++17 gcc 8.3.0-6 debian
 #include <map>
 #include <tuple>
@@ -59,13 +61,12 @@ template<typename Key, typename Value>
 void print_result( std::pair<Key,Value> const & pair, bool is_inserted ) {
     cerr<<"is_inserted:"<<is_inserted<<", key.key_part1:"<<pair.first.key_part1<<", key.key_part2:"<<pair.first.key_part2<<", value.s1_str1:"<<pair.second.value_part1<<endl;
 }
-template< typename Map>
+template<typename Map>
 void print_map( Map const & my_map ) {
     for (auto & [key,value]:my_map )
         cerr<< "key.key_part1:"<<key.key_part1<<", key.key_part2:"<<key.key_part2<<", value.s1_str1:"<<value.value_part1<<endl;
 }
-int main()
-{
+int main() {
     std::map<Struct1::Key, Struct1::Value, Struct1::Compare > my_map {};
     Struct1 map_value1 {11,12,"s13"}, map_value2 = {21,22,"s23"};
 //    map_value1.print("map_value :11");
@@ -76,7 +77,7 @@ int main()
 
     map_value1.print("map_value :12a");
     // auto const r1a = my_map.insert( std::make_pair( Struct1::Key {map_value1.s1_int1, map_value1.s1_int2}, map_value1.value) );
-    Struct1::Key key = {map_value1.s1_int1, map_value1.s1_int2};
+    Struct1::Key key{map_value1.s1_int1, map_value1.s1_int2};
     auto const r1a = my_map.insert( std::make_pair( key, map_value1.value) );
     print_result( *r1a.first, r1a.second ); print_map( my_map );
 
@@ -93,6 +94,7 @@ int main()
     key.key_part2 = map_value1.s1_int2;
     auto const r3 = my_map.insert( std::make_pair( key, map_value1.value) );
     print_result( *r3.first, r3.second ); print_map( my_map );
+
     // +++++++++++ use Struct2 in another/new context {} +++++++
   {
     std::map< Struct2::Key, Struct2::Value, Struct2::Compare > my_map {};

@@ -45,7 +45,7 @@ Do these in this order:         Scope         /FN spec.  /Linkage   /Storage  /T
                                 <NULL> = DEFAULT is "Automatic" in block_scope AKA [auto]-OLD-deprecated
                                 [register]-OLD-deprecated
 
-    2) LDF_Data_Segment{new term} (AKA "Static Storage Class")
+    2) ELF_Data{new term} (AKA "Static Storage Class")
         >>> !! CONST !!
                                 <NULL> = DEFAULT in namespace_scope (redundant:for VARs only)
                                 "static"
@@ -54,7 +54,7 @@ Do these in this order:         Scope         /FN spec.  /Linkage   /Storage  /T
                                 "thread_local"  (not sure if this is in the LDF data segment. TODO??: How and when is thread local memory allocated?
 
   ** FNs  "Storage Classes":
-    1) LDF Data_Segment VARs (true static) Only requires its fellow class members of type data also be static.
+    1) ELF_Data VARs (true static) Only requires its fellow class members of type data also be static.
 
 Another Stroage Duration for VARs type 1:
     1) Dynamic via new()/delete();
@@ -156,7 +156,7 @@ KEY INSIGHT 1) Objects and Funtions have: Scope, Storage_Duration & Linkage.  me
             3) static:                  "Can" affect function type, NO "this" implicit parameter.
             4) SCOPE is just for one TU. Linker requires external linkage to see globals and namespaced objects and funtions.
 
-Object File Format (LDF/ELF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars). https://en.wikipedia.org/wiki/Executable_and_Linkable_Format  https://en.wikipedia.org/wiki/Object_file
+Object File Format (ELF):  code/text (machine instructions) &  literal/rodata (const vars) ) & data (init'ed vars) & bss (non-init'ed vars). https://en.wikipedia.org/wiki/Executable_and_Linkable_Format  https://en.wikipedia.org/wiki/Object_file
 One Definition Rule (ODR).
 Object File:     Defn === Definition that has a Declaration also. IE. has { ... }; "Definition"
                  Decl === Declaration that does not have the Definition.           "Non-defining declaration"
