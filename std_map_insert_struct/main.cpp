@@ -1,6 +1,6 @@
 //  Test std::map
 //  Created as part of 'password_manager' AKA 'file_maintenace' application by Grant Rostig
-//  Fixes problems in this project: set_variant_insert_visit.pro
+//  Fixes problems in this project: std_map_std_visit_set_variant_nsert // was set_variant_insert_visit.pro
 //  TODO: fix poorly named Struct2 members.
 #include <iostream>  // c++17 gcc 8.3.0-6 debian
 #include <map>
