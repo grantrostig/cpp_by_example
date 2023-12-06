@@ -1,12 +1,12 @@
-module;                     // Optional keyword used to put old headers on subsequent lines, ONLY if necessary.
+//module;                     // Optional keyword used to put old headers on subsequent lines, ONLY if necessary.
 //#include "my_module.hpp"
-#include <iostream>
+//#include <iostream>
 
 export module   My_module;  // No headers below (unless wanting only copy paste text inclusion.
 
 //import <iostream>;        // No yet.
-//import <std>;             // No yet.
-//import <std.compat>;      // No yet.
+//import std;               // No yet.
+//import std.compat;        // No yet.
 
 export int f( int );
 
