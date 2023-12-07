@@ -1,4 +1,7 @@
-/* NOT PRODUCTION CODE, just playing around */
+/* NOT PRODUCTION CODE, just playing around
+   Study: std::visit std::variant with inheritance and running function objects.
+   Preparation for password_manager and file_maintenance projects.
+*/
 #include <iostream>
 #include <vector>
 #include <variant>
@@ -6,62 +9,36 @@
 #include <queue>
 using std::cout, std::endl, std::cin, std::cerr;
 
-using InteractionResultData_Vrnt = std::variant< std::monostate, bool, char, int >;
-struct InteractionResult {
-        InteractionResultData_Vrnt  	data 		{};  // the most important data value of the item processed. ie. name or code or ID.
-        int		   						error 		{};	 // any error that occurred.
-       };
-
-template<class... Ts>  				// variadic ie. any number of any type are handled. Below we use several in the contructor of our one object. // ... is a parameter pack.
-struct Overloaded_visitor : Ts... { 		// inherit from all those types  todo:  how does this work??
-    using Ts::operator()...;  		// all of those operator()s.  // new in c++17.
+template<class... Ts>  				    // variadic ie. any number of any type are handled. Below we use several in the contructor of our one object. // ... is a parameter pack.
+struct Overloaded_visitor : Ts... {	    // inherit from all those types  todo:  how does this work??
+    using Ts::operator()...;  		    // all of those operator()s.  // new in c++17.
 };
 template<class... Ts>
-Overloaded_visitor(Ts...) -> Overloaded_visitor<Ts...>;  // deduction guide.  -> = returns.
+Overloaded_visitor(Ts...) -> Overloaded_visitor<Ts...>;  // deduction guide.  -> === returns.
 
-template<class... Ts2>  				// variadic ie. any number of any type are handled. Below we use several in the contructor of our one object. // ... is a parameter pack.
-struct Match_target : Ts2... { 		// inherit from all those types  todo:  how does this work??
-    using Ts2::operator()...;  		// all of those operator()s.  // new in c++17.
+template<class... Ts2>  				// Similar to Overloaded above.
+struct Match_target : Ts2... {
+    using Ts2::operator()...;
 };
 template<class... Ts2>
-Match_target(Ts2...) -> Match_target<Ts2...>;  // deduction guide.  -> = returns.
-
-
-using    Priority 	= int;
+Match_target(Ts2...) -> Match_target<Ts2...>;
 
 class User {
 public:
     std::string user_id;
-    std::string passw;  // no pw if user is a target user we have right to see.
+    std::string passw;      // no pw if user is a target user we have right to see.
 };
 class User_target {
 public:
-    User user;		// our user account for entry into the system.
-    User target;  	// the user which has the data, if other than ourselves.
+    User user;		        // our user account for entry into the system.
+    User target;  	        // the user which has the data, if other than ourselves.
 };
-/*class Retrieve_rss {
-    std::string		url;
-};
-class Retrieve_yt // user vs channel?
-{
-    User_target 	user_and_target;
-    std::string		pw;
-};
-class Retrieve_tw {
-    User_target 	user_and_target;
-};
-class Retrieve_plain_wsite {
-    std::string		url;
-    // plain vs wix vs wpress vs ...
-};
-class Retrieve_wpress_wsite : Retrieve_plain_wsite {
-    User_target 	user_and_target;
-};
-class Retrieve_fs {
-    User			super_user;
-    std::string		file_name;
-};*/
 
+using  InteractionResultData_Vrnt = std::variant< std::monostate, bool, char, int >;
+struct InteractionResult {
+        InteractionResultData_Vrnt  	data 		{};  // the most important data value of the item processed. ie. name or code or ID.
+        int		   						error 		{};	 // any error that occurred.
+       };
 class Dropbox {
 public:
             User_target 	user_and_target;
@@ -108,6 +85,28 @@ InteractionResult const process_task( Task & task ) {
     auto action_result = task.action_fn(task);
     return action_result;
 }
+class Retrieve_rss {
+    std::string		url;
+};
+class Retrieve_yt // user vs channel?
+{
+    User_target 	user_and_target;
+    std::string		pw;
+};
+class Retrieve_tw {
+    User_target 	user_and_target;
+};
+class Retrieve_plain_wsite {
+    std::string		url;
+    // plain vs wix vs wpress vs ...
+};
+class Retrieve_wpress_wsite : Retrieve_plain_wsite {
+    User_target 	user_and_target;
+};
+class Retrieve_fs {
+    User			super_user;
+    std::string		file_name;
+};
 
 // function is std::function
 struct Task_sfn;  	//  _sfn : std::function member which does the work for that type of argument
@@ -131,17 +130,19 @@ InteractionResult const process_task_sfn( Task_sfn & task ) {  // from RED book 
 } */
 
 // function is operator() //  _o : overload on operator() member which does the work for that type of argument
+
 using  Target_vrnt_o 	= std::variant< Dropbox, Facebook >; // Type represents one set of possible classes (sum type, discriminated union), these classes will be visited by the appropiately matched function having the individualized code for the task to be performed.
 
 struct Task_o 		{
     int 			    priority 				{99};
-    float 			    received_time_of_day 	{99};   // todo: change this to int and try to use it ;)
+    float 			    received_time_of_day 	{99};   // TODO: change this to int and try to use it ;)
     std::string 	    region					{"*init*"};
     Target_vrnt_o		target_fo_vrnt;
 };
 using  Queue_o 		= std::vector< Task_o >;
 
-InteractionResult const process_task_overloaded( Task_o & task ) {
+InteractionResult const
+process_task_overloaded( Task_o & task ) {
     // unseen examples using function objects
     // unusual examples using classes which support operator() without parameters
     auto fo_overload_set0 = Overloaded_visitor < Dropbox, Facebook > {  										// debugging initializers: User 	u1 	{"name1","pass1"}; //User_target ut1 {u1,u1};
@@ -189,10 +190,11 @@ InteractionResult const process_task_overloaded( Task_o & task ) {
                         []( Facebook	const & arg)->InteractionResult { cout<<"pto::lambda: retrieving o3 facebook\n"; return {3,4};}
                       }, task.target_fo_vrnt );
 
-    // todofirst:non-typical examples using lambdas 	ie. 2) operator() is used only, with two parameters.  2 different attempts, one of which is commented out line by line.
-    /* 																		// std::variant< decltype (Task_o::priority) , decltype (Task_o::region) > my_targetA_p_vrnt {task.priority};
-                                                                            // std::variant< decltype (Task_o::priority) , decltype (Task_o::region) > my_targetA_r_vrnt {task.region};
-                                                                            // class My_c { public: decltype (Task_o::priority) m1 ; decltype (Task_o::region) m2; };
+    /* TODO:non-typical examples using lambdas 	ie. 2) operator() is used only, with two parameters.  2 different attempts, one of which is commented out line by line.
+
+    std::variant< decltype (Task_o::priority) , decltype (Task_o::region) > my_targetA_p_vrnt {task.priority};
+    // std::variant< decltype (Task_o::priority) , decltype (Task_o::region) > my_targetA_r_vrnt {task.region};
+    // class My_c { public: decltype (Task_o::priority) m1 ; decltype (Task_o::region) m2; };
     My_c	my_c { task.priority, task.region};
     std::variant< My_c > my_targetA_vrnt {my_c};
     InteractionResult action_resultA = std::visit( Overloaded_visitor {
@@ -209,6 +211,7 @@ InteractionResult const process_task_overloaded( Task_o & task ) {
     // using auto templating??
     InteractionResult action_result5 = std::visit( Overloaded_visitor {	[] (auto const & arg )->InteractionResult
                       { cout<<"pto::lambda:r5 retrieving overloaded auto Company, calling doit.\n";	auto ret = arg.doit( 42 ); return ret; }, }, task.target_fo_vrnt );  // Overloaded not needed in auto template case  [
+
     InteractionResult action_result6 = std::visit( [] (auto const & arg )->InteractionResult
                       { cout<<"pto::lambda:r6 retrieving auto Company, calling doit.\n"; 			auto ret = arg.doit(441); return ret; }, task.target_fo_vrnt );
     InteractionResult action_result7 = std::visit( [] (auto const & arg )->InteractionResult
@@ -234,7 +237,8 @@ InteractionResult const process_task_overloaded( Task_o & task ) {
     return action_result; */
 }
 
-/* InteractionResult const process_task_2param( Task_o & task ) {
+/* using    Priority 	= int;
+   InteractionResult const process_task_2param( Task_o & task ) {
     using Fo_args 	= std::variant< {Just_company, Priority}, {Just_company} >;
     Priority 		priority 		{-2};
     Fo_args		my_fo_args { priority, task };
@@ -246,9 +250,9 @@ InteractionResult const process_task_overloaded( Task_o & task ) {
         []( 		      Facebook 	   const & arg, int priority )->InteractionResult { auto ret = arg.doit( 42 ); cout<<"retrieving o4 lamba dropbox\n"; return ret; },
                       }, 1, variant_with_single_and_multiple_prameter_fn_signature );
     return action_result1;
-}*/
+}
 
-/* void process_queue( Queue queue_tasks ) {
+void process_queue( Queue queue_tasks ) {
     for ( Task & task : queue_tasks ) {
         cout << "process t   ++++++" << endl;
         auto interaction_result = process_task( task );
@@ -261,18 +265,19 @@ InteractionResult const process_task_overloaded( Task_o & task ) {
         auto interaction_result = process_task_sfn( task_sfn );
         cout << std::get<int>( interaction_result.data ) <<","<<interaction_result.error << endl << "++++++" << endl;
     }
-}; */
+};
 
-/*void process_queue_o( Queue_o queue_tasks_o ) {  // https://stackoverflow.com/questions/66961406/c-variant-visit-overloaded-function
+//void process_queue_o( Queue_o queue_tasks_o ) {  // https://stackoverflow.com/questions/66961406/c-variant-visit-overloaded-function
 //    for ( Task_o & task_o : queue_tasks_o ) {
 //        cout << "process t_o ++++++" << endl;
 //        auto interaction_result = process_task_overloaded( task_o );
 //        cout << std::get<int>( interaction_result.data ) <<","<< interaction_result.error << endl << "++++++" << endl;
 //    }
-//}; */
+//};
 
 //#define LET  auto;
 //try_it( Possibility_variant  state ) -> int {
+*/
 
 class Possibility_base {
 public:
@@ -343,7 +348,7 @@ int main() {
     South my_south;
     res = try_it( my_south );
 
-/*    if ( std::holds_alternative< North >( res )) {
+/*  if ( std::holds_alternative< North >( res )) {
         cerr<< "In main(North)::get<>::to_string():" << std::get<North>(res).to_string() << endl;
     } else if ( std::holds_alternative< East >( res )) {
         cerr<< "In main(East )::get<>::to_string() :" << std::get<East>(res).to_string() << endl;
@@ -354,25 +359,22 @@ int main() {
     cout << std::visit( []( auto arg ) { return arg.to_string(); } , try_it( my_north ) ) << endl;
     // cout << try_it( my_north ).to_string() << endl;  // todo: why can't I do this?  Scalla can.
 
-
-
-    /*auto junk1 = std::get< res.index() >(res);
+    /* auto junk1 = std::get< res.index() >(res);
 
     auto junk2 = std::get< 0 >(res);
     //size_t my_index { res.index() };
     size_t constexpr my_index { 1 };
     auto junk3 = std::get< my_index >(res);
-    */
 
-    /********************;  // todo: why doesn't a C style cast just shut up and work??
+    ////////////////////////  // todo: why doesn't a C style cast just shut up and work??
     //auto k1 = reinterpret_cast<East>(res);
     //auto k3 = static_cast<East>(res);
     //auto k2 = dynamic_cast<East>(res); // todo: NO - works on pointers dummy!
     //auto kkkk = dynamic_cast<East>(res).to_string();
     //cout << res.to_string() << endl;
-    //cout << res.to_string() << endl; */
+    //cout << res.to_string() << endl;
 
-    /* union Example_union {  // to contrast to std::variant
+    union Example_union {  // to contrast to std::variant
         std::string 		my_string;
         int 				my_int; // ordering matters
         //double			my_double;
@@ -396,8 +398,9 @@ int main() {
     //Example_union my_u.my_int  = 10;
     my_u.my_int = 42;  // need "placement new"
     cerr << "my_int   :" << my_u.my_int<< endl;
-    cerr << "my_string:" << my_u.my_string << endl; */
-    /* Retrieve_dropbox  	retrieve_dropbox 	{};
+    cerr << "my_string:" << my_u.my_string << endl;
+
+    Retrieve_dropbox  	retrieve_dropbox 	{};
     Retrieve_fb  		retrieve_fb			{};
     Queue 				queue_tasks {};
     Task 				my_task;
@@ -410,14 +413,14 @@ int main() {
     queue_tasks.push_back(my_task);
     process_queue( queue_tasks ); */
 
-    /* Dropbox  	dropbox_o 					{};
+    Dropbox  	dropbox_o 					{};
     Facebook  	facebook_o 					{};
     Task_o 		my_task_o 					{ 9, 1, "CDT", dropbox_o };
     Queue_o 	queue_tasks_o 				{ my_task_o };
     my_task_o							=   { 3, 5, "IST", facebook_o};
     queue_tasks_o.push_back( my_task_o );  // todo: could I use emplace? or is that only during init? */
+    // process_queue_o( queue_tasks_o );
 
-//    process_queue_o( queue_tasks_o );
     cout << "###" << endl;
     return 0;
 }
