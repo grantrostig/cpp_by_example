@@ -1,4 +1,7 @@
 /* NOT PRODUCTION CODE, just playing around */
+   Study: std::visit std::variant with inheritance and running function objects.
+   Preparation for password_manager and file_maintenance projects.
+*/
 #include <iostream>
 #include <vector>
 #include <variant>
@@ -33,9 +36,9 @@ public:
 };
 
 class Shape {
-    // virtual Shape () = 0;
-    //virtual int display () = 0;
-    //virtual int move ( int x, int y) = 0;
+    //virtual Shape ()                  =0;
+    //virtual int display ()            =0;
+    //virtual int move ( int x, int y)  =0;
 };
 
 class Square : public Shape {

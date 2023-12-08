@@ -1,6 +1,8 @@
 /* NOT PRODUCTION QUALITY CODE, just shows learning/teaching example, not real programming, don't copy this style, just playing around
- * author: Grant Rostig
- * license: BOOST
+   Study: std::visit std::variant with inheritance and running function objects.
+   Preparation for password_manager and file_maintenance projects.
+ * Author: Grant Rostig
+ * License: BOOST
 #include <iostream>
 #include <vector>
 #include <variant>
@@ -8,6 +10,7 @@
 #include <queue>*/
 #include <bits/stdc++.h>
 using std::cout, std::endl, std::cin, std::cerr;
+
 template<class... Ts>  				// variadic ie. any number of any type are handled. Below we use several in the contructor of our one object. // ... is a parameter pack.
 struct Overloaded_visitor : Ts... { 		// inherit from all those types  todo:  how does this work??
     using Ts::operator()...;  		// all of those operator()s.  // new in c++17.
@@ -22,7 +25,8 @@ struct InteractionResult {
         InteractionResult( InteractionResultData_Vrnt data, double error ): data{data}, error(error) {};
         //InteractionResult( InteractionResultData_Vrnt data, long double error ): data(data), error{error} {};  // todo: narrowing error! does anyone use {} here?  I thought () was required!!
        };
-            /* not used class User {
+
+/* not used class User {
 public:
     std::string user_id;
     std::string passw;  // no pw if user is a target user we have right to see.
@@ -31,12 +35,14 @@ class User_target {
 public:
     User user;		// our user account for entry into the system.
     User target;  	// the user which has the data, if other than ourselves.
-}; */
-            /* not used class Shape {
+};
+
+//not used class Shape {
     // virtual Shape () = 0;
     //virtual int display () = 0;
     //virtual int move ( int x, int y) = 0;
 };*/
+
 class Square // : public Shape
 {
 public:
@@ -121,19 +127,20 @@ InteractionResult const process_shape_overloaded( Queue_vrnts_record queue_vrnts
     //InteractionResult action_result1 = std::visit( fo_overload_set1, queue_vrnts_record.shape_vrnt, queue_vrnts_record.motion_vrnt );
     //InteractionResult action_result2 = std::visit( fo_overload_set2, queue_vrnts_record.shape_vrnt, queue_vrnts_record.motion_vrnt );
     InteractionResult action_result3 = std::visit( fo_overload_set3, queue_vrnts_record.shape_vrnt, queue_vrnts_record.motion_vrnt );
-//    InteractionResult action_result5 = std::visit(  // todo: WOW!! Overloaded not needed in auto template case.
-//                          [] (auto const& shape, auto const& motion ) -> InteractionResult {
-//                              cout<<"auto templating overloaded_visitor: why same address??? "<< &shape <<".\n";
-//                              InteractionResult ret { 				//InteractionResult ret (  	 // todo: simple "(" works, why can't I use "= ("?
-//                                  "Auto lambda5-return value preparation::auto templating lamda set5:look at Motion to deduce type: ",
-//                                   motion  				// todo: note I'm cheating here, where I have two constructors each handling the two variants.
-//                                                        //       Somehow it converts a un-get'ed variant to a number! or is it the int or double???
-//                              };
-//                              return ret;
-//                          },
-//                          queue_vrnts_record.shape_vrnt,
-//                          queue_vrnts_record.motion_vrnt
-//                      );
+/*  //InteractionResult action_result5 = std::visit(  // todo: WOW!! Overloaded not needed in auto template case.
+                          [] (auto const& shape, auto const& motion ) -> InteractionResult {
+                              cout<<"auto templating overloaded_visitor: why same address??? "<< &shape <<".\n";
+                              InteractionResult ret { 				//InteractionResult ret (  	 // todo: simple "(" works, why can't I use "= ("?
+                                  "Auto lambda5-return value preparation::auto templating lamda set5:look at Motion to deduce type: ",
+                                   motion  				// todo: note I'm cheating here, where I have two constructors each handling the two variants.
+                                                        //       Somehow it converts a un-get'ed variant to a number! or is it the int or double???
+                              };
+                              return ret;
+                          },
+                          queue_vrnts_record.shape_vrnt,
+                          queue_vrnts_record.motion_vrnt
+                      ); */
+
     //return action_result1;
     //return action_result2;
     return action_result3;
@@ -155,8 +162,10 @@ int main() {
     Moving				my_moving_motion 	{2};
     Not_moving			my_not_moving_motion {22.22};
     Queue_vrnts_records	queue_vrnts_records {};
+
     queue_vrnts_records.push_back( {my_square_shape, my_moving_motion} );
     queue_vrnts_records.push_back( {my_square_shape, my_not_moving_motion} );
+
     my_moving_motion 						= {3};
     my_not_moving_motion 					= {33.33};
     queue_vrnts_records.push_back( {my_circle_shape, my_moving_motion} );

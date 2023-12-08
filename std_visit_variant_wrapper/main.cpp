@@ -1,4 +1,8 @@
-//  created as part of 'Password Manager' application by Grant Rostig
+/* Created as part of 'Password Manager' application by Grant Rostig
+ * Study: std::visit std::variant
+   Preparation for password_manager and file_maintenance projects.
+ * Author: Grant Rostig
+ * License: BOOST */
 #include <iostream>
 #include <string>
 #include <variant>
