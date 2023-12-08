@@ -5,48 +5,49 @@ CONFIG += console
 
 CONFIG -= app_bundle
 CONFIG -= qt
-
 CONFIG += c++latest
 #CONFIG += c++20
 CONFIG += warn_on
 CONFIG += thread
+#TARGET = eigen_playground
 # ??CONFIG += QMAKE_CFLAGS_WARN_ON
 # ??CONFIG += QMAKE_CXXFLAGS_WARN_ON
 # // Compiler to use (comment out to use default one).
+#DEFINES =
+#QMAKE_LFLAGS += -static  # actually makes a static object.
+#CONFIG += static wrong? why?
 #QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += \
-        -std=gnu++23		\
-        -O0 		        \
-        -g3 		        \
-        #-ggdb 		        \
-        #-ggdb3 	        \
+        -std=gnu++23		    \
+        -O0 		            \
+        -g3 		            \
+        #-ggdb 		            \
+        #-ggdb3 	            \
         -fconcepts              \
         #-pedantic              \
         #-pedantic-errors       \
-        -Wall   		\  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-        -Wextra   		\
+        -Wall   		        \  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+        -Wextra   		        \
         -Wdeprecated-declarations\
-        #-Weffc++ \
-        #-Wno-comment 		\
+        #-Weffc++               \
+        #-Wno-comment 		    \
         #-Wno-uninitialized 	\
-        #-Wno-reorder 		\
+        #-Wno-reorder 		    \
         #-Wno-unused-parameter 	\
         #-Wno-unused-variable   \
-#            -std=c++17 \
-#            -std=c++1z \
-#            -std=gnu++17 \
-#            -std=gnu++1z \
-#            -std=c++2a \
-#            -std=gnu++2a \
-#            -std=c++20 \
-#            -std=gnu++20 \
-#            -std=c++2b \
-#            -std=gnu++2b \
+        #-std=c++17             \
+        #-std=c++1z             \
+        #-std=gnu++17           \
+        #-std=gnu++1z           \
+        #-std=c++2a             \
+        #-std=gnu++2a           \
+        #-std=c++20             \
+        #-std=gnu++20           \
+        #-std=c++2b             \
+        #-std=gnu++2b           \
+        #-DBOOST_LOG_DYN_LINK   \  		# on compile line not link line.
+        #-DBOOST_SYSTEM_NO_DEPRECATED \  	# not sure what it does.
 
-#       -DBOOST_LOG_DYN_LINK \  		# on compile line not link line.
-#       -DBOOST_SYSTEM_NO_DEPRECATED \  	# not sure what it does.
-#QMAKE_LFLAGS += -static  # actually makes a static object.
-#CONFIG += static wrong? why?
 LIBS += \
         -lpthread               \
         -lrt                    \
@@ -58,15 +59,12 @@ LIBS += \
 
 #INCLUDEPATH += $$PWD/../lib_tty
 #INCLUDEPATH += $$PWD/.
-#DEPENDPATH += $$PWD/../lib_tty
+#DEPENDPATH  += $$PWD/../lib_tty
 #SUBDIRS +=
 #if (!include(../../config.txt)) {
 #	error("Failed to open config.txt")
 #}
-#TARGET = eigen_playground
-#DEFINES =
-
-HEADERS += \
+#HEADERS += \
 #       $$PWD/..h               \ # probably wrong
 
 SOURCES += \

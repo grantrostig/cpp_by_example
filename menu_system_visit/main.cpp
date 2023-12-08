@@ -18,6 +18,29 @@ Note: UDTs have initial capitalization. */
 #include <bits/stdc++.h>
 using std::cout, std::cin, std::cerr, std::endl;
 
+/** Utility to print all container members.
+/// Requires that a type has insertion operator
+/// Concept definition - used by a template below.
+template <typename Container>
+concept Insertable = requires( std::ostream & out ) {
+    requires not std::same_as<std::string, Container>;                                    // OR $ std::is_same <std::string, Container>::value OR std::is_same_v<std::string, Container>;
+    { out << typename Container::value_type {} } -> std::convertible_to<std::ostream & >; // OR just $ { out << typename Container::value_type {} };
+};
+/// Prints contents of a container such as a vector of int's.
+/// Insertable Concept used by Templated Function definition
+template<typename Container>                        //template<insertable Container>        // OR these 2 lines currently being used.
+    requires Insertable<Container>
+std::ostream &
+operator<<( std::ostream & out, Container const & c) {
+    if ( not c.empty()) {
+        out << "[<";   //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
+        std::copy(c.begin(), c.end(), std::ostream_iterator< typename Container::value_type >( out, ">,<" ));
+        out << "\b\b\b>]"; out.width(); out << std::setw(0);
+    } else out << "[CONTAINTER IS EMPTY]";
+    return out;
+}
+*/
+
 template<class... Ts> struct Overloaded : Ts... {	using Ts::operator()...; };
 template<class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;  // deduction guide.  -> = returns.  TODO??: explain: what returns what to whom?
 
@@ -61,7 +84,7 @@ using Menu_action_1value_signature_5 = Action_return_1value( Menu_state &, doubl
 using Menu_action_1value_signature_6 = Action_return_1value( Menu_state &, int&, std::string &);
 using Menu_action_1value_signature_7 = Action_return_1value( Menu_state &, int&, int&, std::string &);
 /// specify the std::functions to hold the above variations of FN signature&return.
-using Menu_action_1value_ret_fn_1 = std::function< Menu_action_1value_signature_1>;
+using Menu_action_1value_ret_fn_1 = std::function< Menu_action_1value_signature_1>;     // TODO?: Can we use templates to generate using declarations?
 using Menu_action_1value_ret_fn_2 = std::function< Menu_action_1value_signature_2>;
 using Menu_action_1value_ret_fn_3 = std::function< Menu_action_1value_signature_3>;
 using Menu_action_1value_ret_fn_4 = std::function< Menu_action_1value_signature_4>;
@@ -87,7 +110,19 @@ using Menu_action_2values_ret_fn_6 = std::function< Menu_action_2value_signature
 using Menu_action_2values_ret_fn_7 = std::function< Menu_action_2value_signature_7>;
 
 /// Menu actions can have all of the above combinations of signature&returns.
-struct Menu_action {
+struct Menu_action1 {
+    std::string name { "Init'ed menu action name." };
+    std::variant< Menu_action_1value_ret_fn_1,
+                  Menu_action_1value_ret_fn_2,
+                  Menu_action_1value_ret_fn_3,
+                  Menu_action_1value_ret_fn_4,
+                  Menu_action_1value_ret_fn_5,
+                  Menu_action_1value_ret_fn_6
+                  //Menu_action_1value_ret_fn_7,
+    > action_fn_variant;
+};
+/// Menu actions can have all of the above combinations of signature&returns.
+struct Menu_action2 {
     std::string name { "Init'ed menu action name." };
     std::variant< Menu_action_1value_ret_fn_1,
                   Menu_action_1value_ret_fn_2,
@@ -95,83 +130,83 @@ struct Menu_action {
                   Menu_action_1value_ret_fn_4,
                   Menu_action_1value_ret_fn_5,
                   Menu_action_1value_ret_fn_6,
-                  Menu_action_1value_ret_fn_7,
-
+                  //Menu_action_1value_ret_fn_7,
                   Menu_action_2values_ret_fn_1,
                   Menu_action_2values_ret_fn_2,
                   Menu_action_2values_ret_fn_3,
                   Menu_action_2values_ret_fn_4,
                   Menu_action_2values_ret_fn_5,
                   Menu_action_2values_ret_fn_6
+                  //Menu_action_2values_ret_fn_7
     > action_fn_variant;
 };
 
 struct Menu {
-    std::string 				name { "init'ed menu name."};
-    std::vector< Menu_action > 	action {};
+    std::string                     name{"Init'ed menu name."};
+    std::vector< Menu_action1 >     action{};
 };
 
 /** The various action functions invoked on running a Menu action.
     The return values are also varied for testing purposes. */
 Action_return_1value action1_1( int & i) {
-    cout << "action_int				 :"<<i<<endl; i++;
+    cout << ":action_int             :"<<i<<endl; i++;
     return Action_return_1value{Functions_menu_intent::prior_menu};
 }
 Action_return_1value action1_2( double&  i) {
-    cout << "action double			 :"<<i<<endl; i++;
+    cout << ":action:double			 :"<<i<<endl; i++;
     return Action_return_1value{Functions_menu_intent::terminate};
 }
 Action_return_1value action1_3( int&  i, std::string&  sval) {
-    cout << "action_int_string		 :"<<i<<", "<<sval<<endl; i++;
+    cout << ":action:int,string		 :"<<i<<", "<<sval<<endl; i++; sval=sval+sval;
     return Action_return_1value{Functions_menu_intent::retain_menu};
 }
 Action_return_1value action1_4(Menu_state & s, int&  i) {
-    cout << "action_state_int		 :"<<s.my_int<<i<<endl; i++;
+    cout << ":action:menu_state,int		 :"<<s.my_int<<", "<<i<<endl; i++;
     return Action_return_1value{Functions_menu_intent::prior_menu};
 }
-Action_return_1value action1_5(Menu_state & s, double&  i) {
-    cout << "action_state_double	 :"<<s.my_int<<", "<<i<<endl; i++;
+Action_return_1value action1_5(Menu_state & s, double&  d) {
+    cout << "action:menu_state,double	 :"<<s.my_int<<", "<<d<<endl; d++;
     return Action_return_1value{Functions_menu_intent::terminate};
 }
 Action_return_1value action1_6(Menu_state & s, int &  i, std::string&  sval) {
-    cout << "action_state_int_string :"<<s.my_int<<", "<<i<<", "<<sval<<endl; i++;
+    cout << ":action:menu_state,int,string :"<<s.my_int<<", "<<i<<", "<<sval<<endl; i++; sval=sval+sval;
     return Action_return_1value{Functions_menu_intent::retain_menu};
 }
 Action_return_1value action1_7(Menu_state & s, int &  i, int & i2, std::string&  sval) {
-    cout << "action_state_2int_string:"<<s.my_int<<", "<<i<<", "<<i2<<", "<<sval<<endl; i++;
+    cout << ":action:menu_state,int2,string:"<<s.my_int<<", "<<i<<", "<<i2<<", "<<sval<<endl; i++; i2++;
     return Action_return_1value{Functions_menu_intent::retain_menu};
 }
 
 Action_return_2values action2_1( int&  i) {
-    cout << "action_int2			 :"<<i<<endl; i++;
+    cout << ":action2:int                   :"<<i<<endl; i++;
     return Action_return_2values{Functions_menu_intent::prior_menu, "1"};
 }
-Action_return_2values action2_2( double&  i) {
-    cout << "action double2			 :"<<i<<endl; i++;
+Action_return_2values action2_2( double&  d) {
+    cout << ":action2:double                :"<<d<<endl; d++;
     return Action_return_2values{Functions_menu_intent::prior_menu, "2"};
 }
 Action_return_2values action2_3( int&  i, std::string& sval) {
-    cout << "action_int_string2		 :"<<i<<", "<<sval<<endl; i++;
+    cout << ":action2:int,string		    :"<<i<<", "<<sval<<endl; i++;
     return Action_return_2values{Functions_menu_intent::prior_menu, "3"};
 }
 Action_return_2values action2_4(Menu_state & s, int& i) {
-    cout << "action_state_int2		 :"<<s.my_int<<", "<<i<<endl; i++;
+    cout << ":action2:menu_state, int		:"<<s.my_int<<", "<<i<<endl; i++;
     return Action_return_2values{Functions_menu_intent::prior_menu, "4"};
 }
-Action_return_2values action2_5(Menu_state & s, double& i) {
-    cout << "action_state_double2    :"<<s.my_int<<", "<<i<<endl; i++;
+Action_return_2values action2_5(Menu_state & s, double& d) {
+    cout << ":action2:menu_state,double     :"<<s.my_int<<", "<<d<<endl; d++;
     return Action_return_2values{Functions_menu_intent::prior_menu, "5"};
 }
 Action_return_2values action2_6(Menu_state & s, int & i, std::string& sval) {
-    cout << "action_state_int_string2:"<<s.my_int<<", "<<i<<", "<<sval<<endl; i++;
+    cout << ":action2:menu_state, int,string:"<<s.my_int<<", "<<i<<", "<<sval<<endl; i++;
     return Action_return_2values{Functions_menu_intent::prior_menu, "6"};
 }
 Action_return_2values action2_7(Menu_state & s, int & i, int & i2, std::string& sval) {
-    cout << "action_state_2int_string2:"<<s.my_int<<", "<<i<<", "<<i2<<", "<<sval<<endl; i++;
+    cout << ":action2:menu_state,2int,string:"<<s.my_int<<", "<<i<<", "<<i2<<", "<<sval<<endl; i++; i2++;
     return Action_return_2values{Functions_menu_intent::prior_menu, "7"};
 }
 
-Action_return_value_variant call_menu_option_ifs( Menu_action const & menu_option, Menu_state & menu_state, int & ival, int & ival2, double &  dval, std::string &  sval ) {  // some of these are const because they will not change.
+Action_return_value_variant call_menu_option_ifs_1valret( Menu_action1 const & menu_option, Menu_state & menu_state, int & ival, int & ival2, double &  dval, std::string &  sval ) {  // some of these are const because they will not change.
     if (       std::holds_alternative< Menu_action_1value_ret_fn_1 >( menu_option.action_fn_variant)) {  // NOTE: should have used std::get_if<> !!
         auto af = std::get< Menu_action_1value_ret_fn_1 >( menu_option.action_fn_variant);
         //auto af = constexpr if can be used here ....< Menu_action_1value_ret_fn >( m_opt.action_fn_variant);
@@ -191,65 +226,61 @@ Action_return_value_variant call_menu_option_ifs( Menu_action const & menu_optio
     } else if (std::holds_alternative< Menu_action_1value_ret_fn_6 >( menu_option.action_fn_variant)) {
         auto af = std::get< Menu_action_1value_ret_fn_6 >( menu_option.action_fn_variant);
         return af( menu_state, ival, sval );
-    } else if (std::holds_alternative< Menu_action_1value_ret_fn_7 >( menu_option.action_fn_variant)) {
-        auto af = std::get< Menu_action_1value_ret_fn_7 >( menu_option.action_fn_variant);
-        return af( menu_state, ival, ival2, sval );
-    }
+/*    } //else if (std::holds_alternative< Menu_action_1value_ret_fn_7 >( menu_option.action_fn_variant)) {
+        //auto af = std::get< Menu_action_1value_ret_fn_7 >( menu_option.action_fn_variant);
+        //return af( menu_state, ival, ival2, sval );
+    //}
     // 2 values return type
-      else if (std::holds_alternative< Menu_action_2values_ret_fn_1 >( menu_option.action_fn_variant)) {
-        auto af = std::get< Menu_action_2values_ret_fn_1 >( menu_option.action_fn_variant);
-        return af( ival );
-    } else if (std::holds_alternative< Menu_action_2values_ret_fn_2 >( menu_option.action_fn_variant)) {
-        auto af = std::get< Menu_action_2values_ret_fn_2 >( menu_option.action_fn_variant);
-        return af( dval );
-    } else if (std::holds_alternative< Menu_action_2values_ret_fn_3 >( menu_option.action_fn_variant)) {
-        auto af = std::get< Menu_action_2values_ret_fn_3 >( menu_option.action_fn_variant);
-        return af( ival, sval );
-    } else if (std::holds_alternative< Menu_action_2values_ret_fn_4 >( menu_option.action_fn_variant)) {
-        auto af = std::get< Menu_action_2values_ret_fn_4 >( menu_option.action_fn_variant);
-        return af( menu_state, ival );
-    } else if (std::holds_alternative< Menu_action_2values_ret_fn_5 >( menu_option.action_fn_variant)) {
-        auto af = std::get< Menu_action_2values_ret_fn_5 >( menu_option.action_fn_variant);
-        return af( menu_state, dval );
-    } else if (std::holds_alternative< Menu_action_2values_ret_fn_6 >( menu_option.action_fn_variant)) {
-        auto af = std::get< Menu_action_2values_ret_fn_6 >( menu_option.action_fn_variant);
-        return af( menu_state, ival, sval );
+//      else if (std::holds_alternative< Menu_action_2values_ret_fn_1 >( menu_option.action_fn_variant)) {
+//        auto af = std::get< Menu_action_2values_ret_fn_1 >( menu_option.action_fn_variant);
+//        return af( ival );
+//    } else if (std::holds_alternative< Menu_action_2values_ret_fn_2 >( menu_option.action_fn_variant)) {
+//        auto af = std::get< Menu_action_2values_ret_fn_2 >( menu_option.action_fn_variant);
+//        return af( dval );
+//    } else if (std::holds_alternative< Menu_action_2values_ret_fn_3 >( menu_option.action_fn_variant)) {
+//        auto af = std::get< Menu_action_2values_ret_fn_3 >( menu_option.action_fn_variant);
+//        return af( ival, sval );
+//    } else if (std::holds_alternative< Menu_action_2values_ret_fn_4 >( menu_option.action_fn_variant)) {
+//        auto af = std::get< Menu_action_2values_ret_fn_4 >( menu_option.action_fn_variant);
+//        return af( menu_state, ival );
+//    } else if (std::holds_alternative< Menu_action_2values_ret_fn_5 >( menu_option.action_fn_variant)) {
+//        auto af = std::get< Menu_action_2values_ret_fn_5 >( menu_option.action_fn_variant);
+//        return af( menu_state, dval );
+//    } else if (std::holds_alternative< Menu_action_2values_ret_fn_6 >( menu_option.action_fn_variant)) {
+//        auto af = std::get< Menu_action_2values_ret_fn_6 >( menu_option.action_fn_variant);
+//        return af( menu_state, ival, sval );
     //} else if (std::holds_alternative< Menu_action_2values_ret_fn_7 >( menu_option.action_fn_variant)) {  // TODO?: two int's are not allowed
         //auto af = std::get< Menu_action_2values_ret_fn_7 >( menu_option.action_fn_variant);
         //return af( menu_state, ival, ival2, sval );
+*/
     }
     else assert( false && ":didn't check all alternatives");
 }
 
-Action_return_value_variant call_menu_option_no_visit_1valret( Menu_action const & menu_option, Menu_state & menu_state, int & ival, int & ival2, double &  dval, std::string &  sval ) {  // some of these are const because they will not change.
+Action_return_value_variant call_menu_option____visit_1valret( Menu_action1 const & menu_option, Menu_state & menu_state, int & ival, int & ival2, double &  dval, std::string &  sval ) {  // some of these are const because they will not change.
     auto function_object_overload_set = Overloaded { // Note: Notice that the ival and dval are captured by reference even though the signatures of the functions are capture by value.
-        //       This requirement is inconsistent with the above example/ugly code. todo: TODO does this cause indefined behavior?
-        // duplicates make it ambigious [&ival]            (Menu_action_1value_ret_fn &af)  { Action_return_1 r = af(ival); return r; }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
-        [&ival]            		(Menu_action_1value_ret_fn_1 const &af) ->Action_return_1value { Action_return_1value r = af(ival); return r; }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
-        [&dval]            		(Menu_action_1value_ret_fn_2 const &af) ->Action_return_1value { Action_return_1value r = af(dval); return r; },
-        [&ival,&sval]      		(Menu_action_1value_ret_fn_3 const &af) ->Action_return_1value { Action_return_1value r = af(ival,sval); return r; },
+        [&ival]                 (Menu_action_1value_ret_fn_1 const &af) ->Action_return_1value { Action_return_1value r = af(ival); return r; }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
+        [&dval]                 (Menu_action_1value_ret_fn_2 const &af) ->Action_return_1value { Action_return_1value r = af(dval); return r; },
+        [&ival,&sval]           (Menu_action_1value_ret_fn_3 const &af) ->Action_return_1value { Action_return_1value r = af(ival,sval); return r; },
         [&menu_state,&ival]     (Menu_action_1value_ret_fn_4 const &af) ->Action_return_1value { Action_return_1value r = af(menu_state,ival); return r; },
         [&menu_state,&dval]     (Menu_action_1value_ret_fn_5 const &af) ->Action_return_1value { Action_return_1value r = af(menu_state,dval); return r; },
-        //[&menu_state,&ival,&sval](Menu_action_1value_ret_fn_6 const &af)->Action_post_return_value1{ Action_post_return_value1 r = af(menu_state,ival,sval); return r; }
-        [&]                         (Menu_action_1value_ret_fn_6 const &af) 							{                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-        [&]                         (Menu_action_1value_ret_fn_7 const &af) 							{                      auto r = af(menu_state,ival,ival2,sval); return r; },  // todo: does using "&" waste resources?
-        //[&]                         (Menu_action_1value_ret_fn_6 const &af) 								{                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-        //[&]                         (Menu_action_1value_ret_fn_6 const &af)     ->Action_post_return_value1 {                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-        //[&]                         (Menu_action_1value_ret_fn_6 const &af)->Action_post_return_value1{                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-        //#ifndef ONE_RETURN_TYPE
-        [&ival]            		(Menu_action_2values_ret_fn_1 const &af) { Action_return_2values r = af(ival); return r; },
-        //[&ival]            			(Menu_action_2values_ret_fn_1 const &af) { return std::move( af(ival) ); },
-        [&dval]            		(Menu_action_2values_ret_fn_2 const &af) { Action_return_2values r = af(dval); return r; },
-        [&ival,&sval]      		(Menu_action_2values_ret_fn_3 const &af) { Action_return_2values r = af(ival,sval); return r; },
-        [&menu_state,&ival]     (Menu_action_2values_ret_fn_4 const &af) { Action_return_2values r = af(menu_state,ival); return r; },
-        [&menu_state,&dval]     (Menu_action_2values_ret_fn_5 const &af) { Action_return_2values r = af(menu_state,dval); return r; },
-        //[&menu_state,&ival,&sval](Menu_action_2values_ret_fn_6 const &af){ Action_return_2values r = af(menu_state,ival,sval); return r; }
-        [&menu_state,&ival,&sval](Menu_action_2values_ret_fn_6 const &af){                      	 return af(menu_state,ival,sval);}
+        [&menu_state,&ival,&sval](Menu_action_1value_ret_fn_6 const&af) ->Action_return_1value { Action_return_1value r = af(menu_state,ival,sval); return r; }
+      //[&]                     (Menu_action_1value_ret_fn_6 const &af)                        {                 auto r = af(menu_state,ival,sval); return r; },       // todo: does using "&" waste resources?
+      //[&]                     (Menu_action_1value_ret_fn_7 const &af)                        {                 auto r = af(menu_state,ival,ival2,sval); return r; }, // todo: does using "&" waste resources?
+      //[&]                     (Menu_action_1value_ret_fn_6 const &af)                        {                 auto r = af(menu_state,ival,sval); return r; },       // todo: does using "&" waste resources?
+      //[&]                     (Menu_action_1value_ret_fn_6 const &af) ->Action_return_1value {                 auto r = af(menu_state,ival,sval); return r; },       // todo: does using "&" waste resources?
+      //[&]                     (Menu_action_1value_ret_fn_6 const &af) ->Action_return_1value {                 auto r = af(menu_state,ival,sval); return r; },       // todo: does using "&" waste resources?
     };
     Action_return_1value 	action_result_1value {};
-    //action_result = std::visit( function_object_overload_set, 																		current_menu_option.action_fn_variant );  // todo: why must lambda funtion argument be const for only this line, not the others?
-    action_result_1value = std::visit( [&](auto... args) -> Action_return_1value { return function_object_overload_set( args...); }, menu_option.action_fn_variant );
-    // Now comes the part of seeing what I got back.
+    // https://cpplang.slack.com/archives/C21PKDHSL/p1569203158330600
+    // Required to avoid ambiguity when calling the function we must wrap the overload_set with another lambda that allows for the return value's type being of more than one type.  // todo: TODO does this additional wrapping lambda cause another level of pointer indirection?
+    //action_result_1value = std::visit( [&](auto... args) -> Action_return_1value
+                                         //{ return function_object_overload_set( args...); },
+                                       //menu_option.action_fn_variant );
+    auto fo_return_type_overload_set = [&](auto ... args) -> Action_return_1value
+                                            { return function_object_overload_set( args...); }; // todo: TODO is there a better way to do this?  Also I think I want to pass by reference?
+    action_result_1value = std::visit( fo_return_type_overload_set, menu_option.action_fn_variant );
+
     switch ( action_result_1value.fns_menu_intent ) {
     case Functions_menu_intent::terminate:
         cout << "return: terminate.\n";
@@ -267,132 +298,117 @@ Action_return_value_variant call_menu_option_no_visit_1valret( Menu_action const
     return action_result_1value;
 }
 
-Action_return_value_variant call_menu_option_no_visit_2valsret( Menu_action const & menu_option, Menu_state & menu_state, int & ival, int & ival2, double &  dval, std::string &  sval ) {  // some of these are const because they will not change.
-    auto function_object_overload_set = Overloaded { // Note: Notice that the ival and dval are captured by reference even though the signatures of the functions are capture by value.
-            //       This requirement is inconsistent with the above example/ugly code. todo: TODO does this cause indefined behavior?
-            // duplicates make it ambigious [&ival]            (Menu_action_1value_ret_fn &af)  { Action_return_1 r = af(ival); return r; }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
-                                                   [&ival]            		(Menu_action_1value_ret_fn_1 const &af) ->Action_return_1value { Action_return_1value r = af(ival); return r; }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
-                                                   [&dval]            		(Menu_action_1value_ret_fn_2 const &af) ->Action_return_1value { Action_return_1value r = af(dval); return r; },
-                                                   [&ival,&sval]      		(Menu_action_1value_ret_fn_3 const &af) ->Action_return_1value { Action_return_1value r = af(ival,sval); return r; },
-                                                   [&menu_state,&ival]     (Menu_action_1value_ret_fn_4 const &af) ->Action_return_1value { Action_return_1value r = af(menu_state,ival); return r; },
-                                                   [&menu_state,&dval]     (Menu_action_1value_ret_fn_5 const &af) ->Action_return_1value { Action_return_1value r = af(menu_state,dval); return r; },
-            //[&menu_state,&ival,&sval](Menu_action_1value_ret_fn_6 const &af)->Action_post_return_value1{ Action_post_return_value1 r = af(menu_state,ival,sval); return r; }
-            [&]                         (Menu_action_1value_ret_fn_6 const &af) 							{                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-            [&]                         (Menu_action_1value_ret_fn_7 const &af) 							{                      auto r = af(menu_state,ival,ival2,sval); return r; },  // todo: does using "&" waste resources?
-            //[&]                         (Menu_action_1value_ret_fn_6 const &af) 								{                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-            //[&]                         (Menu_action_1value_ret_fn_6 const &af)     ->Action_post_return_value1 {                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-            //[&]                         (Menu_action_1value_ret_fn_6 const &af)->Action_post_return_value1{                      auto r = af(menu_state,ival,sval); return r; },  // todo: does using "&" waste resources?
-
-            [&ival]            		(Menu_action_2values_ret_fn_1 const &af) { Action_return_2values r = af(ival); return r; },
-            //[&ival]            			(Menu_action_2values_ret_fn_1 const &af) { return std::move( af(ival) ); },
-            [&dval]            		(Menu_action_2values_ret_fn_2 const &af) { Action_return_2values r = af(dval); return r; },
-            [&ival,&sval]      		(Menu_action_2values_ret_fn_3 const &af) { Action_return_2values r = af(ival,sval); return r; },
-            [&menu_state,&ival]     (Menu_action_2values_ret_fn_4 const &af) { Action_return_2values r = af(menu_state,ival); return r; },
-            [&menu_state,&dval]     (Menu_action_2values_ret_fn_5 const &af) { Action_return_2values r = af(menu_state,dval); return r; },
-            //[&menu_state,&ival,&sval](Menu_action_2values_ret_fn_6 const &af){ Action_return_2values r = af(menu_state,ival,sval); return r; }
-            [&menu_state,&ival,&sval](Menu_action_2values_ret_fn_6 const &af){                      	 return af(menu_state,ival,sval);}
-    };
-    Action_return_value_variant action_result_2values {};
-    // https://cpplang.slack.com/archives/C21PKDHSL/p1569203158330600
-    // Required to avoid ambiguity when calling the function we must wrap the overload_set with another lambda that allows for the return value's type being of more than one type.  // todo: TODO does this additional wrapping lambda cause another level of pointer indirection?
-    auto fo_return_type_overload_set = [&](auto ... args) -> Action_return_value_variant { return function_object_overload_set( args...); }; // todo: TODO is there a better way to do this?  Also I think I want to pass by reference?
-    // Back to the pattern from the book.
-    action_result_2values = std::visit( fo_return_type_overload_set, menu_option.action_fn_variant );
-
-    // Now comes the part of seeing what I got back. todo: There is probably a better way to do this?
-    if      (std::holds_alternative< Action_return_2values >( action_result_2values )) {
-        cout << "return: int "<< std::get< Action_return_2values >( action_result_2values )<<"."<<endl;
-    }
-    else if (std::holds_alternative< Action_return_1value >( action_result_2values )) {
-        switch (std::get< Action_return_1value>( action_result_2values ).fns_menu_intent) {
-        case Functions_menu_intent::terminate:
-            cout << "return: terminate.\n";
-            break;
-        case Functions_menu_intent::prior_menu:
-            cout << "return: prior_menu.\n";
-            break;
-        case Functions_menu_intent::retain_menu:
-            cout << "return: retain_menu.\n";
-            break;
-        default:
-            assert(false && "missing enum.");
-            break;
-        }
-    }
-    else assert(false);
-    return action_result_2values;
-}
-
 void test_1value_returned() {
     Menu_state 	menu_state 	{};  // state value
-    cout << menu_state.my_int << endl;
+    cout <<":test_1value_returned:menu_state:"<< menu_state.my_int << endl;
     Menu 		menu_main 		{};
     menu_main.name = "main_menu";  // TODO??: note how the menu does not bind the menu_state and application state variables it will need when running.
-    menu_main.action.emplace_back(Menu_action {"Int             ", Menu_action_1value_ret_fn_1 {action1_1}});
-    menu_main.action.emplace_back(Menu_action {"Double          ", Menu_action_1value_ret_fn_2 {action1_2}});
-    menu_main.action.emplace_back(Menu_action {"String          ", Menu_action_1value_ret_fn_3 {action1_3}});
-    menu_main.action.emplace_back(Menu_action {"State_int       ", Menu_action_1value_ret_fn_4 {action1_4}});
-    menu_main.action.emplace_back(Menu_action {"State_double    ", Menu_action_1value_ret_fn_5 {action1_5}});
-    menu_main.action.emplace_back(Menu_action {"State_int_string", Menu_action_1value_ret_fn_6 {action1_6}});
-    menu_main.action.emplace_back(Menu_action {"State_int2_string", Menu_action_1value_ret_fn_7 {action1_7}});
-//#endif
+    menu_main.action.emplace_back(Menu_action1 {"Int             ", Menu_action_1value_ret_fn_1 {action1_1}});
+    menu_main.action.emplace_back(Menu_action1 {"Double          ", Menu_action_1value_ret_fn_2 {action1_2}});
+    menu_main.action.emplace_back(Menu_action1 {"String          ", Menu_action_1value_ret_fn_3 {action1_3}});
+    menu_main.action.emplace_back(Menu_action1 {"State_int       ", Menu_action_1value_ret_fn_4 {action1_4}});
+    menu_main.action.emplace_back(Menu_action1 {"State_double    ", Menu_action_1value_ret_fn_5 {action1_5}});
+    menu_main.action.emplace_back(Menu_action1 {"State_int_string", Menu_action_1value_ret_fn_6 {action1_6}});
+  //menu_main.action.emplace_back(Menu_action {"State_int2_string", Menu_action_1value_ret_fn_7 {action1_7}});
     // The long and ugly way to call these the menu_option action_functions using if statements. Shown for comparision to a better way below.
     cout << "\n***  The long and ugly way to call these the menu_option action_functions using if statements. ***\n";
     int ival {1}, ival2 {20}; double dval {12}; std::string sval {"an_sval_"};
-    for (auto & menu_option : menu_main.action) {  // test with all the various possibilities.
+    for (auto & menu_option : menu_main.action) {
         ++ival; ++ival2; ++dval; menu_state.my_int++; sval += "an_sval_";
-        cout << ">> ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
-        Action_return_value_variant r = call_menu_option_ifs(   menu_option, menu_state, ival, ival2, dval, sval );
+        cout << ":ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
+        Action_return_value_variant r = call_menu_option_ifs_1valret(   menu_option, menu_state, ival, ival2, dval, sval );
     }
     // ***** NOW - A nicer way to call these the menu_option action_functions.
     cout << "\n*** A nicer way to do the above with std::visit.  ***\n";
-    ival  = 10; ival2 = 300; dval  = 222.0; sval  = "an_sval_";
+    ival  = 10; ival2 = 200; dval  = 122; sval  = "an_sval_";
     for (auto & menu_option : menu_main.action) {  // test with all the various possibilities.
         ++ival; ++ival2; ++dval; menu_state.my_int++; sval += "an_sval_";
-        cout << ">> ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
-        Action_return_value_variant r = call_menu_option_no_visit_1valret( menu_option, menu_state, ival, ival2, dval, sval );
+        cout << ":ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
+        Action_return_value_variant r = call_menu_option____visit_1valret( menu_option, menu_state, ival, ival2, dval, sval );
     }
 }
 
-void test_2values_returned() {
-    Menu_state 	menu_state 	{};  // state value
-    cout << menu_state.my_int << endl;
-    Menu menu_main{};
-    menu_main.name = "main_menu";  // todo: note how the menu does not bind the menu_state and application state variables it will need when running.
-    menu_main.action.emplace_back(Menu_action {"Int             ", Menu_action_1value_ret_fn_1 {action1_1}});
-    menu_main.action.emplace_back(Menu_action {"Double          ", Menu_action_1value_ret_fn_2 {action1_2}});
-    menu_main.action.emplace_back(Menu_action {"String          ", Menu_action_1value_ret_fn_3 {action1_3}});
-    menu_main.action.emplace_back(Menu_action {"State_int       ", Menu_action_1value_ret_fn_4 {action1_4}});
-    menu_main.action.emplace_back(Menu_action {"State_double    ", Menu_action_1value_ret_fn_5 {action1_5}});
-    menu_main.action.emplace_back(Menu_action {"State_int_string", Menu_action_1value_ret_fn_6 {action1_6}});
-    menu_main.action.emplace_back(Menu_action {"State_int2_string", Menu_action_1value_ret_fn_7 {action1_7}});
-    menu_main.action.emplace_back(Menu_action {"Int            2", Menu_action_2values_ret_fn_1 {action2_1}});
-    menu_main.action.emplace_back(Menu_action {"Double         2", Menu_action_2values_ret_fn_2 {action2_2}});
-    menu_main.action.emplace_back(Menu_action {"String         2", Menu_action_2values_ret_fn_3 {action2_3}});
-    menu_main.action.emplace_back(Menu_action {"State_int      2", Menu_action_2values_ret_fn_4 {action2_4}});
-    menu_main.action.emplace_back(Menu_action {"State_double   2", Menu_action_2values_ret_fn_5 {action2_5}});
-    menu_main.action.emplace_back(Menu_action {"State_int_strin2", Menu_action_2values_ret_fn_6 {action2_6}});
-    // The long and ugly way to call these the menu_option action_functions using if statements. Shown for comparision to a better way below.
-    cout << "\n***  The long and ugly way to call these the menu_option action_functions using if statements. ***\n";
-    int ival {1}, ival2 {20}; double dval {12}; std::string sval {"an_sval_"};
-    for (auto & menu_option : menu_main.action) {  // test with all the various possibilities.
-        ++ival; ++ival2; ++dval; menu_state.my_int++; sval += "an_sval_";
-        cout << ">> ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
-        Action_return_value_variant r = call_menu_option_ifs(   menu_option, menu_state, ival, ival2, dval, sval );
-    }
-    // ***** NOW - A nicer way to call these the menu_option action_functions.
-    cout << "\n*** A nicer way to do the above with std::visit.  ***\n";
-    ival  = 10; ival2 = 300; dval  = 222.0; sval  = "an_sval_";
-    for (auto & menu_option : menu_main.action) {  // test with all the various possibilities.
-        ++ival; ++ival2; ++dval; menu_state.my_int++; sval += "an_sval_";
-        cout << ">> ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
-        Action_return_value_variant r = call_menu_option_no_visit_2valsret( menu_option, menu_state, ival, ival2, dval, sval );
-    }
-}
+/*Action_return_value_variant call_menu_option____visit_2valsret( Menu_action2 const & menu_option, Menu_state & menu_state, int & ival, int & ival2, double &  dval, std::string &  sval ) {  // some of these are const because they will not change.
+//    auto function_object_overload_set = Overloaded { // Note: Notice that the ival and dval are captured by reference even though the signatures of the functions are capture by value.
+//        [&ival]            		 (Menu_action_2values_ret_fn_1 const &af) { Action_return_2values r = af(ival); return r; },
+//      //[&ival]                  (Menu_action_2values_ret_fn_1 const &af) {                           return std::move( af(ival) ); },  // TODO??: does std::move help?
+//        [&dval]            		 (Menu_action_2values_ret_fn_2 const &af) { Action_return_2values r = af(dval); return r; },
+//        [&ival,&sval]      		 (Menu_action_2values_ret_fn_3 const &af) { Action_return_2values r = af(ival,sval); return r; },
+//        [&menu_state,&ival]      (Menu_action_2values_ret_fn_4 const &af) { Action_return_2values r = af(menu_state,ival); return r; },
+//        [&menu_state,&dval]      (Menu_action_2values_ret_fn_5 const &af) { Action_return_2values r = af(menu_state,dval); return r; },
+//        [&menu_state,&ival,&sval](Menu_action_2values_ret_fn_6 const &af) { Action_return_2values r = af(menu_state,ival,sval); return r; }
+//      //[&menu_state,&ival,&sval](Menu_action_2values_ret_fn_6 const &af) {                      	  return af(menu_state,ival,sval);}
+//      //[&menu_state,&ival,&sval](Menu_action_2values_ret_fn_7 const &af) {                      	  return af(menu_state,ival,sval);}
+//    };
+//    Action_return_value_variant action_result_2values {};
+//    // https://cpplang.slack.com/archives/C21PKDHSL/p1569203158330600
+//    // Required to avoid ambiguity when calling the function we must wrap the overload_set with another lambda that allows for the return value's type being of more than one type.  // todo: TODO does this additional wrapping lambda cause another level of pointer indirection?
+//    auto fo_return_type_overload_set = [&](auto ... args) -> Action_return_2values
+//                                            { return function_object_overload_set( args...); }; // todo: TODO is there a better way to do this?  Also I think I want to pass by reference?
+//    action_result_2values = std::visit( fo_return_type_overload_set, menu_option.action_fn_variant );
+
+//    //if      (std::holds_alternative< Action_return_2values >( action_result_2values )) {
+//        //cout << "return: int "<< std::get< Action_return_2values >( action_result_2values ).my_string <<"."<<endl;
+//    //}
+//    //else if (std::holds_alternative< Action_return_1value >( action_result_2values )) {
+//        switch (std::get< Action_return_1value>( action_result_2values ).fns_menu_intent) {
+//        case Functions_menu_intent::terminate:
+//            cout << "return: terminate.\n";
+//            break;
+//        case Functions_menu_intent::prior_menu:
+//            cout << "return: prior_menu.\n";
+//            break;
+//        case Functions_menu_intent::retain_menu:
+//            cout << "return: retain_menu.\n";
+//            break;
+//        default:
+//            assert(false && "missing enum.");
+//            break;
+//        }
+//    //}
+//    //else assert(false);
+//    return action_result_2values;
+//}
+
+//void test_2values_returned() {
+//    Menu_state 	menu_state 	{};  // state value
+//    cout <<":test_2values_returned:menu_state:"<< menu_state.my_int << endl;
+//    Menu menu_main{};
+//    menu_main.name = "main_menu";  // todo: note how the menu does not bind the menu_state and application state variables it will need when running.
+//    menu_main.action.emplace_back(Menu_action {"Int             ", Menu_action_1value_ret_fn_1 {action1_1}});
+//    menu_main.action.emplace_back(Menu_action {"Double          ", Menu_action_1value_ret_fn_2 {action1_2}});
+//    menu_main.action.emplace_back(Menu_action {"String          ", Menu_action_1value_ret_fn_3 {action1_3}});
+//    menu_main.action.emplace_back(Menu_action {"State_int       ", Menu_action_1value_ret_fn_4 {action1_4}});
+//    menu_main.action.emplace_back(Menu_action {"State_double    ", Menu_action_1value_ret_fn_5 {action1_5}});
+//    menu_main.action.emplace_back(Menu_action {"State_int_string", Menu_action_1value_ret_fn_6 {action1_6}});
+//  //menu_main.action.emplace_back(Menu_action {"State_int2_string", Menu_action_1value_ret_fn_7 {action1_7}});
+//    menu_main.action.emplace_back(Menu_action {"Int            2", Menu_action_2values_ret_fn_1 {action2_1}});
+//    menu_main.action.emplace_back(Menu_action {"Double         2", Menu_action_2values_ret_fn_2 {action2_2}});
+//    menu_main.action.emplace_back(Menu_action {"String         2", Menu_action_2values_ret_fn_3 {action2_3}});
+//    menu_main.action.emplace_back(Menu_action {"State_int      2", Menu_action_2values_ret_fn_4 {action2_4}});
+//    menu_main.action.emplace_back(Menu_action {"State_double   2", Menu_action_2values_ret_fn_5 {action2_5}});
+//    menu_main.action.emplace_back(Menu_action {"State_int_strin2", Menu_action_2values_ret_fn_6 {action2_6}});
+//    cout << "\n***  The long and ugly way to call these the menu_option action_functions using if statements. ***\n";
+//    int ival {1}, ival2 {20}; double dval {12}; std::string sval {"an_sval_"};
+//    for (auto & menu_option : menu_main.action) {  // test with all the various possibilities.
+//        ++ival; ++ival2; ++dval; menu_state.my_int++; sval += "an_sval_";
+//        cout << ":ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
+//        Action_return_value_variant r = call_menu_option_ifs(   menu_option, menu_state, ival, ival2, dval, sval );
+//    }
+//    // ***** NOW - A nicer way to call these the menu_option action_functions.
+//    cout << "\n*** A nicer way to do the above with std::visit.  ***\n";
+//    ival  = 10; ival2 = 300; dval  = 222; sval  = "an_sval_";
+//    for (auto & menu_option : menu_main.action) {  // test with all the various possibilities.
+//        ++ival; ++ival2; ++dval; menu_state.my_int++; sval += "an_sval_";
+//        cout << ":ival: "<<ival<<", dval: "<<dval<< ",  menu_state.a:"<<menu_state.my_int<< endl;
+//        Action_return_value_variant r = call_menu_option____visit_2valsret( menu_option, menu_state, ival, ival2, dval, sval );
+//    }
+//}
+*/
 
 int main() {
     test_1value_returned();
-    test_2values_returned();
+    //test_2values_returned();
     cout << "###" << endl;
     return 0;
 }

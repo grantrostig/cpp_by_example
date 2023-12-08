@@ -37,7 +37,7 @@ operator<<( std::ostream & out, Container const & c) {
         out << "Lenght:"<<c.size()<<",";
         out << "[";   //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
         std::copy(c.begin(), c.end(), std::ostream_iterator< typename Container::value_type >( out, "," ));
-        //out << "\b]"; out.width(); out << std::setw(0);
+        out << "\b]"; out.width(); out << std::setw(0);
     } else out << "[CONTAINTER IS EMPTY]";
     return out;
 }
