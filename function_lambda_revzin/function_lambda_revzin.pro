@@ -7,4 +7,4 @@ SOURCES += \
         main.cpp
 
 QMAKE_CXXFLAGS += \
-        -std=c++2a
+        -std=c++23

@@ -16,6 +16,16 @@
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 
+/* Another approach to print, from: Josuttis
+template <class T>
+inline void PRINT_ELEMENTS (const T& coll, string optcstr="") {
+    typename T::const_iterator pos;
+    std::cout << optcstr;
+    for (pos=coll.begin(); pos!=coll.end(); ++pos)
+        std::cout << *pos << ' ';
+    std::cout << std::endl;
+}*/
+
 /// Requires that a type has insertion operator
 /// Concept definition - used by a template below.
 template<typename Container>
@@ -36,7 +46,7 @@ operator<<( std::ostream & out, Container const & c) {
     if ( not c.empty()) {
         out << "Lenght:"<<c.size()<<",";
         out << "[";   //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
-        std::copy(c.begin(), c.end(), std::ostream_iterator< typename Container::value_type >( out, "," ));
+        std::copy(c.begin(), c.end(), std::ostream_iterator< typename Container::value_type >( out, "," ));  // TODO??: How can we apply std::quoted before printing? Would this only help printing strings? What about printing control chars in a unsigned char?
         out << "\b]"; out.width(); out << std::setw(0);
     } else out << "[CONTAINTER IS EMPTY]";
     return out;

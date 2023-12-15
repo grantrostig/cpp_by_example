@@ -4,7 +4,7 @@
  * © Copyright Nicolai M. Josuttis 1999
  * page 303-305.
  * and some GCC stuff.
- * modfied by Grant
+ * modfied by Grant Rostig
  */
 #include <iostream>
 #include <list>
@@ -25,18 +25,18 @@ class Nth_fo {    // function object that returns true for the nth call
     int count;     // call counter
   public:
     Nth_fo(int n) : nth(n), count(0) { cout << "I'm in Nth_fo() constructor now.\n"; }
-    bool operator() (int not_used) {
+    bool operator() (int not_used_but_required_dt_remove_if) {
         return ++count == nth;
     }
 };
 
-bool Nth_fn(int junk) {    // function only
+bool Nth_fn(int not_used) {    // function only
     static int nth   {3};       // call for which to return true
-    static int count {0};     // call counter
+    static int count {0};       // call counter
     return ++count == nth;
 };
 
-/** GCC
+/** GCC  // remove_if
    *  @brief Remove elements from a sequence using a predicate.
    *  @ingroup mutating_algorithms
    *  @param  __first  A forward iterator.
@@ -94,15 +94,20 @@ _ForwardIterator remove_if3(_ForwardIterator __first, _ForwardIterator __last, _
 };
 
 int main() {
-    list<int> coll1 { 0,1,2,3,4,5,6,7,8,9 }, coll2 {coll1}, coll3 {coll1}, coll4 {coll1};
+    list<int> coll0 { 0,1,2,3,4,5,6,7,8,9 }, coll1{coll0}, coll2 {coll0}, coll3 {coll0}, coll4 {coll0}, coll5{coll0};
     PRINT_ELEMENTS( coll1, "orig        : "); cout << "Remove third element, not also the 6th!\n";
-    auto pos1 = remove_if1( coll1.begin(), coll1.end(), Nth_fo(3) ); 		// remove third element
-    auto pos2 = remove_if2( coll2.begin(), coll2.end(), Nth_fo(3) ); 		// remove third element, try again!
-    auto pos3 = remove_if3( coll3.begin(), coll3.end(), Nth_fo(3) ); 		// remove third element, try again!
-    //auto pos4 = remove_if4( coll3.begin(), coll3.end(), Nth_fn(0) ); 		// remove third element, try again!
+    //auto pos0 = remove_if(  coll0.begin(), coll0.end(), Nth_fo{3} ); 		// remove third element
+    //auto pos1 = remove_if1( coll1.begin(), coll1.end(), Nth_fo{3}(999) ); 		// remove third element, try again!
+    auto pos1 = remove_if1( coll1.begin(), coll1.end(), Nth_fo{3}() ); 		// remove third element, try again!
+    //auto pos2 = remove_if2( coll2.begin(), coll2.end(), Nth_fo(3) ); 		// remove third element, try again!
+    //auto pos3 = remove_if3( coll3.begin(), coll3.end(), Nth_fo(3) ); 		// remove third element, try again!
+    //auto pos4 = remove_if4( coll4.begin(), coll4.end(), Nth_fn(0) ); 		// remove third element, try again!
+    //auto pos5 = remove_if5( coll5.begin(), coll5.end(), Nth_fn(0) ); 		// remove third element, try again!
+    //coll0.erase( pos0, coll0.end() );	// why is this needed? what does remove_if do? why? strange name?
     coll1.erase( pos1, coll1.end() );	// why is this needed? what does remove_if do? why? strange name?
-    coll2.erase( pos2, coll2.end() );
-    coll2.erase( pos3, coll3.end() );
-    //coll2.erase( pos4, coll4.end() );
-    PRINT_ELEMENTS( coll1, "nth removed1: "); PRINT_ELEMENTS( coll2, "nth removed2: "); PRINT_ELEMENTS( coll3, "nth removed3: "); //PRINT_ELEMENTS( coll4, "nth removed4: ");
+    //coll2.erase( pos2, coll2.end() );
+    //coll3.erase( pos3, coll3.end() );
+    //coll4.erase( pos4, coll4.end() );
+    //coll5.erase( pos5, coll5.end() );
+    PRINT_ELEMENTS( coll0, "0,nth removed1: "); PRINT_ELEMENTS( coll1, "1,nth removed1: "); PRINT_ELEMENTS( coll2, "2,nth removed2: "); PRINT_ELEMENTS( coll3, "3,nth removed3: "); //PRINT_ELEMENTS( coll4, "4,nth removed4: ");
 }
