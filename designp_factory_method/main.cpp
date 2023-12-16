@@ -87,17 +87,21 @@ protected:  class Token {
             };
 
             virtual void post_initialize() {            // Called right after construction
-                /* ... */
+                /* ... */  // TODO??: What is a good example of what should be done here?
+                cerr << ":Base::post_initialize() starting run."<<endl;
                 setup_object_before_use_Zcalled_withinZ_post_initialize();                                    // GOOD: virtual dispatch is safe
-                /* ... */
+                cerr << ":Base::post_initialize() has run."<<endl;
+                /* ... */  // TODO??: What is a good example of what should be done here?
             }
 public:     explicit Base( Token my_token ) {           // Create an imperfectly initialized object
                 cerr << ":constructor of Base( Token ) has started running."<<endl;
-                if (  my_token.token_kind_as_an_enum == Kind::my_kind_of_token_1 ) {};
-                my_base_int = 11;  ++my_base_int; my_base_string = "base data member inited in constructor";
+                if (  my_token.token_kind_as_an_enum == Kind::my_kind_of_token_1 ) {
+                    /* ... */  // TODO??: What is a good example of what should be done here?
+                };
+                my_base_int = 11;  ++my_base_int; my_base_string = "base data member inited in constructor";  // TODO??: Is this a good example of what should be done here?
                 cerr << ":constructor of Base( Token ) has run."<<endl;
             }
-            virtual void setup_object_before_use_Zcalled_withinZ_post_initialize() =0;
+            virtual void setup_object_before_use_Zcalled_withinZ_post_initialize() =0;  // Called f() in CppCoreGuidelines C.50
 
             template<class T> static std::unique_ptr<T> create_u() {        // Interface for creating unique objects
                 cerr << ":Base::create_u() starting run."<<endl;
@@ -120,29 +124,32 @@ public:     explicit Base( Token my_token ) {           // Create an imperfectly
 
 class Derived_1 : public Base {                           // User derived class
 protected:  class Token {
-            public: Token() {
-                        cerr << ":Constructor of Derived_1::Token() started running."<<endl;
-                        cerr << ":Constructor of Derived_1::Token() has run."<<endl;
-                    }
-                    Kind            token_kind_as_an_enum{Kind::not_set};
-                    std::string     token_value_as_a_string{"Derived_1::Token string data member inited"};
+                public: Token() {
+                    cerr << ":Constructor of Derived_1::Token() started running."<<endl;
+                    // TODO??: Probably nothing based on the source example, but what if anything, is a good example of what should be done here?
+                    cerr << ":Constructor of Derived_1::Token() has run."<<endl;
+                }
+                Kind            token_kind_as_an_enum{Kind::not_set};
+                std::string     token_value_as_a_string{"Derived_1::Token string data member inited"};
             };
             template<class T> friend std::unique_ptr<T> Base::create_u();
             template<class T> friend std::shared_ptr<T> Base::create_s();
 public:     explicit Derived_1( Token ) : Base { Base::Token{} } {
+                /* ... */  // TODO??: What is a good example of what should be done here?
                     cerr << ":constructor of Derived_1( Token ) has run."<<endl;
             }
-            void setup_object_before_use_Zcalled_withinZ_post_initialize() override {
-                /* ... */
+            void setup_object_before_use_Zcalled_withinZ_post_initialize() override final {  // Called f() in CppCoreGuidelines C.50
+                /* ... */  // TODO??: What is a good example of what should be done here?
                 my_derived_1_int = 101;  ++my_derived_1_int; my_derived_1_string = "derived_1 data member inited in constructor";
-                cerr << ":Derived_1::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
+                cerr << ":Derived_1::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;  // TODO??: Is this a good example of what should be done here?
             };
+            // *****  We consider this, below to be the functionality API of the class?  Not in the source example.
             int my_derived_1_int{100};
             std::string my_derived_1_string{"derived_1 data member inited"};
             int my_derived_fn() { return 150; }
 };
 
-class Derived_2 : public Base {                            // User derived class
+/* class Derived_2 : public Base {                            // User derived class
 protected:  class Token {
                 public: Token() {
                         cerr << ":Constructor of Derived_2::Token() started running."<<endl;
@@ -156,15 +163,14 @@ protected:  class Token {
 public:     explicit Derived_2( Token ) : Base{ Base::Token{} } {
                 cerr << ":Constructor of Derived_2( Token ) has run."<<endl;
             }
-            void setup_object_before_use_Zcalled_withinZ_post_initialize() override {
-                /* ... */
+            void setup_object_before_use_Zcalled_withinZ_post_initialize() override final {
                 my_derived_2_int = 201;  ++my_derived_2_int; my_derived_2_string = "derived_2 data member inited in constructor";
                 cerr << ":Derived_2::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
             };
             int my_derived_2_int{200};
             std::string my_derived_2_string{"derived_2 pata member inited"};
             int my_derived_fn() { return 250; }
-};
+}; */
 
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
     std::unique_ptr<Derived_1> uniq_ptr_1 { Derived_1::create_u<Derived_1>() };  // creating a Derived object
@@ -177,11 +183,11 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
     cout << uniq_ptr_1.get()->my_derived_1_string<< endl;;
     cout << uniq_ptr_1.get()->my_derived_fn()    << endl;;
 
-    std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
+    /* std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
     cout << ":*** Unique ptr 2 ***" << endl;;
     cout << uniq_ptr_2.get()->my_base_int       << endl;;
     cout << uniq_ptr_2.get()->my_derived_2_int  << endl;;
-    cout << uniq_ptr_2.get()->my_derived_fn()   << endl;;
+    cout << uniq_ptr_2.get()->my_derived_fn()   << endl;; */
 
     std::shared_ptr<Derived_1> shared_ptr_1 = Derived_1::create_u<Derived_1>();  // creating a Derived object
     cout << ":*** Shared ptr ***"    << endl;;
