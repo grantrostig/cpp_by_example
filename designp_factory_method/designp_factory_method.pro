@@ -6,8 +6,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        #main.cpp \
-        main_short.cpp \
+    main.cpp \
+    main_shortened.cpp
 
 HEADERS += \
 
@@ -18,6 +18,16 @@ QMAKE_CXXFLAGS += \
         # -Wno-uninitialized 	\
         # -Wno-reorder 		\
         # -Wno-unused-parameter 	\
+        -O0 		            \
+        -g3 		            \
+        #-ggdb 		            \
+        #-ggdb3 	            \
+        -pedantic              \
+        -pedantic-errors       \
+        -Wall   		        \  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+        -Wextra   		        \
+        -Wdeprecated-declarations\
+        -fconcepts              \
 
 STATECHARTS += \
     gr_state_chart.scxml

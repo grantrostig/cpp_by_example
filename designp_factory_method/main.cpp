@@ -70,117 +70,135 @@ operator<<( std::ostream & out, Container const & c) {
     } else out << "[CONTAINTER IS EMPTY]";
     return out;
 } */
-
-/************************** Begining of Example **************************************************************
-    https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
-*/
+// ************************** Beginning of Example **************************************************************
 
 enum class Kind {
+    not_set,
     my_kind_of_token_1,
     my_kind_of_token_2
 };
 
 class Base {
-protected:  class Token {                               // TODO??: What goes in here? Nothing? If not, show an example.
-                public: Token() { cout << ":constructor of Base::Token() has run."<<endl; }
-                    Kind            token_kind_as_an_enum{};
-                    std::string     token_value_as_a_string{};
+protected:  class Token {
+            public: Token() {
+                    cerr << ":constructor of Base::Token() started running."<<endl; }
+                    Kind            token_kind_as_an_enum{Kind::not_set};
+                    std::string     token_value_as_a_string{"base::Token string data member inited"};
             };
+
             virtual void post_initialize() {            // Called right after construction
                 /* ... */
                 setup_object_before_use_Zcalled_withinZ_post_initialize();                                    // GOOD: virtual dispatch is safe
                 /* ... */
             }
 public:     explicit Base( Token my_token ) {           // Create an imperfectly initialized object
-                cout << ":constructor of Base( Token ) has started running."<<endl;
+                cerr << ":constructor of Base( Token ) has started running."<<endl;
                 if (  my_token.token_kind_as_an_enum == Kind::my_kind_of_token_1 ) {};
-                my_base_int = 41;  ++my_base_int; my_base_string = "constructed inited";
+                my_base_int = 11;  ++my_base_int; my_base_string = "base data member inited in constructor";
+                cerr << ":constructor of Base( Token ) has run."<<endl;
             }
             virtual void setup_object_before_use_Zcalled_withinZ_post_initialize() =0;
 
-            template<class T>
-            static std::unique_ptr<T> create_u() {        // Interface for creating shared objects
-                cout << ":Base::create_u() has run."<<endl;
+            template<class T> static std::unique_ptr<T> create_u() {        // Interface for creating unique objects
+                cerr << ":Base::create_u() starting run."<<endl;
                 auto p = std::make_unique<T>( typename T::Token{} );
                 p->post_initialize();
+                cerr << ":Base::create_u() has run."<<endl;
                 return p;
             }
-            /*template<class T>
-            static std::shared_ptr<T> create_s() {        // Interface for creating shared objects
-                cout << ":Base::create_s() has run."<<endl;
+            template<class T> static std::shared_ptr<T> create_s() {        // Interface for creating shared objects
+                cerr << ":Base::create_s() started running."<<endl;
                 auto p = std::make_shared<T>( typename T::Token{} );
                 p->post_initialize();
+                cerr << ":Base::create_s() has run."<<endl;
                 return p;
-            }*/
-            int my_base_fn() { return 51; }
-            int         my_base_int{};
-            std::string my_base_string{"data member inited"};
+            }
+            int my_base_int{10};
+            std::string my_base_string{"base data member inited"};
+            int my_base_fn() { return 15; }
 };
 
-class Derived_1 : public Base {                           // Some derived class
+class Derived_1 : public Base {                           // User derived class
 protected:  class Token {
-                public: Token() { cout << ":constructor of Derived_1::Token() has run."<<endl;}
+            public: Token() {
+                        cerr << ":Constructor of Derived_1::Token() started running."<<endl;
+                        cerr << ":Constructor of Derived_1::Token() has run."<<endl;
+                    }
+                    Kind            token_kind_as_an_enum{Kind::not_set};
+                    std::string     token_value_as_a_string{"Derived_1::Token string data member inited"};
             };
-
-            template<class T>
-            friend std::unique_ptr<T> Base::create_u();
-            /*template<class T>
-            friend std::shared_ptr<T> Base::create_s();*/
-
-public:     explicit Derived_1( Token ) : Base{ Base::Token{} } { cout << ":constructor of Derived_1( Token ) has run."<<endl;}
+            template<class T> friend std::unique_ptr<T> Base::create_u();
+            template<class T> friend std::shared_ptr<T> Base::create_s();
+public:     explicit Derived_1( Token ) : Base { Base::Token{} } {
+                    cerr << ":constructor of Derived_1( Token ) has run."<<endl;
+            }
             void setup_object_before_use_Zcalled_withinZ_post_initialize() override {
                 /* ... */
-                my_derived_int = 41;  ++my_derived_int; my_derived_string = "constructed inited";
-                cout << ":Derived_1::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
+                my_derived_1_int = 101;  ++my_derived_1_int; my_derived_1_string = "derived_1 data member inited in constructor";
+                cerr << ":Derived_1::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
             };
-            int my_derived_fn() { return 541; }
-            int         my_derived_int{441};
-            std::string my_derived_string{"data member inted"};
+            int my_derived_1_int{100};
+            std::string my_derived_1_string{"derived_1 data member inited"};
+            int my_derived_fn() { return 150; }
 };
 
-class Derived_2 : public Base {                           // Some derived class
+class Derived_2 : public Base {                            // User derived class
 protected:  class Token {
-                public: Token() { cout << ":constructor of Derived_2::Token() has run."<<endl;}
+                public: Token() {
+                        cerr << ":Constructor of Derived_2::Token() started running."<<endl;
+                        cerr << ":Constructor of Derived_2::Token() has run."<<endl;
+                }
+                Kind            token_kind_as_an_enum{Kind::not_set};
+                std::string     token_value_as_a_string{"Derived_2::Token string data member inited"};
             };
-
-            template<class T>
-            friend std::unique_ptr<T> Base::create_u();
-            /*template<class T>
-            friend std::shared_ptr<T> Base::create_s();*/
-
-        public:     explicit Derived_2( Token ) : Base{ Base::Token{} } { cout << ":constructor of Derived_2( Token ) has run."<<endl;}
+            template<class T> friend std::unique_ptr<T> Base::create_u();
+            template<class T> friend std::shared_ptr<T> Base::create_s();
+public:     explicit Derived_2( Token ) : Base{ Base::Token{} } {
+                cerr << ":Constructor of Derived_2( Token ) has run."<<endl;
+            }
             void setup_object_before_use_Zcalled_withinZ_post_initialize() override {
                 /* ... */
-                my_derived_int = 41;  ++my_derived_int; my_derived_string = "constructed inited";
-                cout << ":Derived_2::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
+                my_derived_2_int = 201;  ++my_derived_2_int; my_derived_2_string = "derived_2 data member inited in constructor";
+                cerr << ":Derived_2::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
             };
-            int my_derived_fn() { return 541; }
-            int         my_derived_int{441};
-            std::string my_derived_string{"data member inted"};
+            int my_derived_2_int{200};
+            std::string my_derived_2_string{"derived_2 pata member inited"};
+            int my_derived_fn() { return 250; }
 };
 
-int main (int argc, char* arv[]) {string my_arv {*arv};cout<< "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    cout << "*** Unique ptr ***"        << endl;;
+int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
     std::unique_ptr<Derived_1> uniq_ptr_1 { Derived_1::create_u<Derived_1>() };  // creating a Derived object
-    cout << uniq_ptr_1.get()->my_base_int     << endl;;
-    cout << uniq_ptr_1.get()->my_derived_int  << endl;;
-    cout << uniq_ptr_1.get()->my_derived_fn() << endl;;
-    std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
-    cout << uniq_ptr_2.get()->my_base_int     << endl;;
-    cout << uniq_ptr_2.get()->my_derived_int  << endl;;
-    cout << uniq_ptr_2.get()->my_derived_fn() << endl;;
+    cout << ":*** Unique ptr_1 ***" << endl;;
+    cout << uniq_ptr_1.get()->my_base_int        << endl;;
+    cout << uniq_ptr_1.get()->my_base_string     << endl;;
+    cout << uniq_ptr_1.get()->my_base_fn()       << endl;;
 
-    cout << "*** Shared ptr ***"    << endl;;
+    cout << uniq_ptr_1.get()->my_derived_1_int   << endl;;
+    cout << uniq_ptr_1.get()->my_derived_1_string<< endl;;
+    cout << uniq_ptr_1.get()->my_derived_fn()    << endl;;
+
+    std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
+    cout << ":*** Unique ptr 2 ***" << endl;;
+    cout << uniq_ptr_2.get()->my_base_int       << endl;;
+    cout << uniq_ptr_2.get()->my_derived_2_int  << endl;;
+    cout << uniq_ptr_2.get()->my_derived_fn()   << endl;;
+
     std::shared_ptr<Derived_1> shared_ptr_1 = Derived_1::create_u<Derived_1>();  // creating a Derived object
+    cout << ":*** Shared ptr ***"    << endl;;
     cout << shared_ptr_1.get()->my_base_int     << endl;;
-    cout << shared_ptr_1.get()->my_derived_int  << endl;;
+    cout << shared_ptr_1.get()->my_derived_1_int<< endl;;
     cout << shared_ptr_1.get()->my_derived_fn() << endl;;
 
-    cout << "*** Unique ptr moved to Shared ptr ***"    << endl;;
     std::shared_ptr<Derived_1> moved_shared_ptr_1 { std::move(uniq_ptr_1) };
+    cout << ":*** Unique ptr moved to Shared ptr ***"    << endl;;
     cout << moved_shared_ptr_1.get()->my_base_int     << endl;;
-    cout << moved_shared_ptr_1.get()->my_derived_int  << endl;;
+    cout << moved_shared_ptr_1.get()->my_derived_1_int<< endl;;
     cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;;
+
+    /* Uncomment in main_short.cpp if running of more examples is wanted.
+    extern int main_long(int, char*[]);
+    main_long(argc,argv);
+    */
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
