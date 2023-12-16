@@ -105,33 +105,54 @@ public:     explicit Base( Token my_token ) {           // Create an imperfectly
                 p->post_initialize();
                 return p;
             }
-            template<class T>
+            /*template<class T>
             static std::shared_ptr<T> create_s() {        // Interface for creating shared objects
                 cout << ":Base::create_s() has run."<<endl;
                 auto p = std::make_shared<T>( typename T::Token{} );
                 p->post_initialize();
                 return p;
-            }
+            }*/
             int my_base_fn() { return 51; }
             int         my_base_int{};
             std::string my_base_string{"data member inited"};
 };
 
-class Derived : public Base {                           // Some derived class
+class Derived_1 : public Base {                           // Some derived class
 protected:  class Token {
-                public: Token() { cout << ":constructor of Derived::Token() has run."<<endl;}
+                public: Token() { cout << ":constructor of Derived_1::Token() has run."<<endl;}
             };
 
             template<class T>
             friend std::unique_ptr<T> Base::create_u();
-            template<class T>
-            friend std::shared_ptr<T> Base::create_s();
+            /*template<class T>
+            friend std::shared_ptr<T> Base::create_s();*/
 
-public:     explicit Derived( Token ) : Base{ Base::Token{} } { cout << ":constructor of Derived( Token ) has run."<<endl;}
+public:     explicit Derived_1( Token ) : Base{ Base::Token{} } { cout << ":constructor of Derived_1( Token ) has run."<<endl;}
             void setup_object_before_use_Zcalled_withinZ_post_initialize() override {
                 /* ... */
                 my_derived_int = 41;  ++my_derived_int; my_derived_string = "constructed inited";
-                cout << ":Derived::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
+                cout << ":Derived_1::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
+            };
+            int my_derived_fn() { return 541; }
+            int         my_derived_int{441};
+            std::string my_derived_string{"data member inted"};
+};
+
+class Derived_2 : public Base {                           // Some derived class
+protected:  class Token {
+                public: Token() { cout << ":constructor of Derived_2::Token() has run."<<endl;}
+            };
+
+            template<class T>
+            friend std::unique_ptr<T> Base::create_u();
+            /*template<class T>
+            friend std::shared_ptr<T> Base::create_s();*/
+
+        public:     explicit Derived_2( Token ) : Base{ Base::Token{} } { cout << ":constructor of Derived_2( Token ) has run."<<endl;}
+            void setup_object_before_use_Zcalled_withinZ_post_initialize() override {
+                /* ... */
+                my_derived_int = 41;  ++my_derived_int; my_derived_string = "constructed inited";
+                cout << ":Derived_2::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
             };
             int my_derived_fn() { return 541; }
             int         my_derived_int{441};
@@ -139,24 +160,27 @@ public:     explicit Derived( Token ) : Base{ Base::Token{} } { cout << ":constr
 };
 
 int main (int argc, char* arv[]) {string my_arv {*arv};cout<< "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    cout << "*** Unique ptr ***"    << endl;;
-    std::unique_ptr<Derived> uptr = Derived::create_u<Derived>();  // creating a Derived object
-    cout << uptr.get()->my_base_int     << endl;;
-    cout << uptr.get()->my_derived_int  << endl;;
-    cout << uptr.get()->my_derived_fn() << endl;;
-
+    cout << "*** Unique ptr ***"        << endl;;
+    std::unique_ptr<Derived_1> uniq_ptr_1 { Derived_1::create_u<Derived_1>() };  // creating a Derived object
+    cout << uniq_ptr_1.get()->my_base_int     << endl;;
+    cout << uniq_ptr_1.get()->my_derived_int  << endl;;
+    cout << uniq_ptr_1.get()->my_derived_fn() << endl;;
+    std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
+    cout << uniq_ptr_2.get()->my_base_int     << endl;;
+    cout << uniq_ptr_2.get()->my_derived_int  << endl;;
+    cout << uniq_ptr_2.get()->my_derived_fn() << endl;;
 
     cout << "*** Shared ptr ***"    << endl;;
-    std::shared_ptr<Derived> sptr = Derived::create_s<Derived>();  // creating a Derived object
-    cout << sptr.get()->my_base_int     << endl;;
-    cout << sptr.get()->my_derived_int  << endl;;
-    cout << sptr.get()->my_derived_fn() << endl;;
+    std::shared_ptr<Derived_1> shared_ptr_1 = Derived_1::create_u<Derived_1>();  // creating a Derived object
+    cout << shared_ptr_1.get()->my_base_int     << endl;;
+    cout << shared_ptr_1.get()->my_derived_int  << endl;;
+    cout << shared_ptr_1.get()->my_derived_fn() << endl;;
 
-    /* cout << "*** Unique ptr moved to Shared ptr ***"    << endl;;
-    std::shared_ptr<Derived> mptr { std::move(uptr) };
-    cout << mptr.get()->my_base_int     << endl;;
-    cout << mptr.get()->my_derived_int  << endl;;
-    cout << mptr.get()->my_derived_fn() << endl;; */
+    cout << "*** Unique ptr moved to Shared ptr ***"    << endl;;
+    std::shared_ptr<Derived_1> moved_shared_ptr_1 { std::move(uniq_ptr_1) };
+    cout << moved_shared_ptr_1.get()->my_base_int     << endl;;
+    cout << moved_shared_ptr_1.get()->my_derived_int  << endl;;
+    cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;;
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
