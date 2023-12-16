@@ -75,16 +75,16 @@ operator<<( std::ostream & out, Container const & c) {
     https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
 */
 
-enum class Token_category {
-    my_derived_1,
-    my_derived_2
+enum class Kind {
+    my_kind_of_token_1,
+    my_kind_of_token_2
 };
 
 class Base {
 protected:  class Token {                               // TODO??: What goes in here? Nothing? If not, show an example.
                 public: Token() { cout << ":constructor of Base::Token() has run."<<endl; }
-                Token_category  my_token_category{};
-                std::string     my_token_string{};
+                    Kind            token_kind_as_an_enum{};
+                    std::string     token_value_as_a_string{};
             };
             virtual void post_initialize() {            // Called right after construction
                 /* ... */
@@ -93,7 +93,7 @@ protected:  class Token {                               // TODO??: What goes in 
             }
 public:     explicit Base( Token my_token ) {           // Create an imperfectly initialized object
                 cout << ":constructor of Base( Token ) has started running."<<endl;
-                if (  my_token.my_token_category == Token_category::my_derived_1 ) {};
+                if (  my_token.token_kind_as_an_enum == Kind::my_kind_of_token_1 ) {};
                 my_base_int = 41;  ++my_base_int; my_base_string = "constructed inited";
             }
             virtual void setup_object_before_use_Zcalled_withinZ_post_initialize() =0;
