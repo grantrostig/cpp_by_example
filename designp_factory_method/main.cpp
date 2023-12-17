@@ -1,6 +1,6 @@
 /** Factory_Method - A Creational Pattern - Design Pattern example -- Gang of Four / book
     AKA:    Virtual_Constructor, Factory_Function??
-    Intent: Define and interface for creating objects, but let subclasses decide which class to instanciate
+    Intent: Define an interface for creating objects, but let subclasses decide which class to instanciate
             Factory_Method lets a class defer instanciation to subclasses.
     Not:    Abstract_Factory, Builder, Prototype, Singleton, and the generic term: factory.
     Uses:
@@ -57,11 +57,11 @@ protected:  class Token {  // Probably entirely misunderstood reason for this. W
                     //std::string     token_value_as_a_string{"base::Token string data member inited"};
             };
 
-            virtual void post_initialize() {            // Called right after construction
+            virtual void post_construction() {            // Called right after construction
                 /* ... */  // TODO??: What is a good example of what should be done here?
-                cerr << ":Base::post_initialize() starting run."<<endl;
+                cerr << ":Base::post_construction() starting run."<<endl;
                 setup_the_object_before_use();                                    // GOOD: virtual dispatch is safe
-                cerr << ":Base::post_initialize() has run."<<endl;
+                cerr << ":Base::post_construction() has run."<<endl;
                 /* ... */  // TODO??: What is a good example of what should be done here?
             }
 public:     explicit Base( Token my_token ) {           // Create an imperfectly initialized object
@@ -78,14 +78,14 @@ public:     explicit Base( Token my_token ) {           // Create an imperfectly
             template<class T> static std::unique_ptr<T> create_u() {        // Interface for creating unique objects
                 cerr << ":Base::create_u() starting run."<<endl;
                 auto p = std::make_unique<T>( typename T::Token{} );// TODO??: What exactly does this do here: $ typename T::Token{} // specifically  Token{}
-                p->post_initialize();
+                p->post_construction();
                 cerr << ":Base::create_u() has run."<<endl;
                 return p;
             }
             template<class T> static std::shared_ptr<T> create_s() {        // Interface for creating shared objects
                 cerr << ":Base::create_s() started running."<<endl;
                 auto p = std::make_shared<T>( typename T::Token{} );
-                p->post_initialize();
+                p->post_construction();
                 cerr << ":Base::create_s() has run."<<endl;
                 return p;
             }
