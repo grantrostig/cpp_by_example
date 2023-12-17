@@ -1,6 +1,9 @@
-/** Factory_Method Design Pattern example -- Gang of Four
-    AKA:
-    Know Uses:
+/** Factory_Method - A Creational Pattern - Design Pattern example -- Gang of Four / book
+    AKA:    Virtual_Constructor, Factory_Function??
+    Intent: Define and interface for creating objects, but let subclasses decide which class to instanciate
+            Factory_Method lets a class defer instanciation to subclasses.
+    Not:    Abstract_Factory, Builder, Prototype, Singleton, and the generic term: factory.
+    Uses:
 
     Related Patterns:
     Inspired by: (and possible copyright and LICENSE)
@@ -10,68 +13,21 @@
             Copyright (c) Grant Rostig, grantrostig.com 2023. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 
     NOT PRODUCTION QUALITY CODE, it is missing proper rigor, just shows learning/teaching example, not real programming, don't copy_paste this.
-
-    Reminder of usefull resources:
-        https://coliru.stacked-crooked.com/
-        https://godbolt.org/
-        https://cppinsights.io/
-        https://Wandbox.org
-        https://arnemertz.github.io/online-compilers/
-    [[maybe_unused]] int * my_new_var8 = ::new (22,int);
-    g++ -Werror -Weffc++ -Wextra -Wall -Wconversion -Wshadow -Wpedantic -Wold-style-cast -Wsign-promo -Wzero-as-null-pointer-constant -Wsuggest-override -Wnon-virtual-dtor \
-        -Wcast-align -Woverloaded-virtual -Wunused -pedantic -Wsign-conversion -Wmisleading-indentation -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wimplicit-fallthrough \
-        -Wuseless-cast -Wsuggest-final-types -Wsuggest-final-methods -Wduplicated-cond -Wduplicated-branches -Wlogical-op -std=gnuc++23 \
-        main.cpp <OTHER>.cpp -o <A.OUT>
-    std::string                 STRING_QQQ          {"qqq"};
-    std::vector<char>           QQQ                 {STRING_QQQ.begin(),STRING_QQQ.end()};
  */
 
 //#include <bits/stdc++.h>
-//#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
 #include <cassert>
 #include <chrono>
 #include <csignal>
 #include <iostream>
 #include <iterator>
 #include <memory>
-//#include <stacktrace>
 #include <string>
-//#include <source_location>
 #include <vector>
 
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
-/* #define   LOGGER_( msg )   using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:{" <<#msg<<          "}."    <<endl;cout.flush();cerr.flush();
-//#define LOGGER_( msg )   using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:{" <<#msg<<          "}.\r\n"<<endl;cout.flush();cerr.flush();
-#define   LOGGERX( msg, x )using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:{" <<#msg<<"},{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
-//#define LOGGERX( msg, x )using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:{" <<#msg<<"},{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
-
-// Gives a source location for printing.  Used for debugging.
-std::string source_loc();  // forward declaration
-//#define NDEBUG   // define if asserts are NOT to be checked.
-/// Concept definition - used by a template below.
-/// Requires that a type has insertion operator
-template <typename Container>
-concept Insertable = requires( std::ostream & out ) {
-    requires not std::same_as<std::string, Container>;                                    // OR $ std::is_same <std::string, Container>::value OR std::is_same_v<std::string, Container>;
-    { out << typename Container::value_type {} } -> std::convertible_to<std::ostream & >; // OR just $ { out << typename Container::value_type {} };
-};
-/// Prints contents of a container such as a vector of int's.
-/// Insertable Concept used by Templated Function definition
-template<typename Container>                        //template<insertable Container>        // OR these 2 lines currently being used.
-    requires Insertable<Container>
-std::ostream &
-operator<<( std::ostream & out, Container const & c) {
-    if ( not c.empty()) {
-        out << "[<";   //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
-        std::copy(c.begin(), c.end(), std::ostream_iterator< typename Container::value_type >( out, ">,<" ));
-        out << "\b\b\b>]"; out.width(); out << std::setw(0);
-    } else out << "[CONTAINTER IS EMPTY]";
-    return out;
-} */
-// ************************** Beginning of Example **************************************************************
-
 
 /* ## Bing "Definition of token"
 In computer programming, a token is the smallest individual element that is meaningful to the compiler. It's a single element of a programming
@@ -85,13 +41,12 @@ language. Tokens are the building blocks of a programming language. There are fi
 
 Tokens are used in many different contexts in programming. For example, in an authentication system, a token can represent the fact that a user
 is authenticated. In a programming language like C, tokens can be keywords, identifiers, constants, strings, and special symbols.
-*/
 
 enum class Kind {           // Probably entirely misunderstood.  Was thinking of parsing tokens. See above "Definition of token".
     not_set,
     my_kind_of_token_1,
     my_kind_of_token_2
-};
+}; */
 
 class Base {
 protected:  class Token {  // Probably entirely misunderstood reason for this. Was thinking of parsing tokens. May just be a "marker" or name "handle" for use in make_unique to specify a type?  See above "Definition of token".
@@ -105,7 +60,7 @@ protected:  class Token {  // Probably entirely misunderstood reason for this. W
             virtual void post_initialize() {            // Called right after construction
                 /* ... */  // TODO??: What is a good example of what should be done here?
                 cerr << ":Base::post_initialize() starting run."<<endl;
-                setup_object_before_use_Zcalled_withinZ_post_initialize();                                    // GOOD: virtual dispatch is safe
+                setup_the_object_before_use();                                    // GOOD: virtual dispatch is safe
                 cerr << ":Base::post_initialize() has run."<<endl;
                 /* ... */  // TODO??: What is a good example of what should be done here?
             }
@@ -118,7 +73,7 @@ public:     explicit Base( Token my_token ) {           // Create an imperfectly
                 my_base_int = 11;  ++my_base_int; my_base_string = "base data member inited in constructor";  // TODO??: Is this a good example of what should be done here?
                 cerr << ":constructor of Base( Token ) has run."<<endl;
             }
-            virtual void setup_object_before_use_Zcalled_withinZ_post_initialize() =0;  // Called f() in CppCoreGuidelines C.50
+            virtual void setup_the_object_before_use() =0;  // Called f() in CppCoreGuidelines C.50
 
             template<class T> static std::unique_ptr<T> create_u() {        // Interface for creating unique objects
                 cerr << ":Base::create_u() starting run."<<endl;
@@ -140,24 +95,24 @@ public:     explicit Base( Token my_token ) {           // Create an imperfectly
 };
 
 class Derived_1 : public Base {    // API User derived class
-protected:  class Token {          // TODO??: This hides Base::Token ! Was that intentional in source example?  Probably...some template magic?
-                public: Token() {
-                    // TODO??: Probably nothing based on the source example, but what if anything, is a good example of what should be done here?
-                    cerr << ":Constructor of Derived_1::Token() started running."<<endl;
-                }
-                //Kind            token_kind_as_an_enum{Kind::not_set};
-                //std::string     token_value_as_a_string{"Derived_1::Token string data member inited"};
-            };
+//protected:  class Token {          // TODO??: This hides Base::Token ! Was that intentional in source example?  Probably...some template magic?
+//                public: Token() {
+//                    // TODO??: Probably nothing based on the source example, but what if anything, is a good example of what should be done here?
+//                    cerr << ":Constructor of Derived_1::Token() started running."<<endl;
+//                }
+//                //Kind            token_kind_as_an_enum{Kind::not_set};
+//                //std::string     token_value_as_a_string{"Derived_1::Token string data member inited"};
+//            };
 protected:          template<class T> friend std::unique_ptr<T> Base::create_u();
-protected:          template<class T> friend std::shared_ptr<T> Base::create_s();
+                    template<class T> friend std::shared_ptr<T> Base::create_s();
 public:     explicit Derived_1( Token ) : Base { Base::Token{} } {  // TODO??: Is this :Base{} constructing the base classes' data structures? OR is it initializing member variables (with constants C.45)
                 /* ... */  // TODO??: What is a good example of what should be done here?
                     cerr << ":constructor of Derived_1( Token ) is/has run."<<endl;
             }
-            void setup_object_before_use_Zcalled_withinZ_post_initialize() override final {  // Called f() in CppCoreGuidelines C.50
+            void setup_the_object_before_use() override final {  // Called f() in CppCoreGuidelines C.50
                 /* ... */  // TODO??: What is a good example of what should be done here?
                 my_derived_1_int = 101;  ++my_derived_1_int; my_derived_1_string = "derived_1 data member inited in constructor";
-                cerr << ":Derived_1::setup_object_before_use_Zcalled_withinZ_post_initialize() is/has run."<<endl;  // TODO??: Is this a good example of what should be done here?
+                cerr << ":Derived_1::setup_the_object_before_use() is/has run."<<endl;  // TODO??: Is this a good example of what should be done here?
             };
             // *****  We consider this, below to be the functionality API of the class?  Not in the source example.
             int my_derived_1_int{100};
@@ -179,9 +134,9 @@ protected:  class Token {
 public:     explicit Derived_2( Token ) : Base{ Base::Token{} } {
                 cerr << ":Constructor of Derived_2( Token ) has run."<<endl;
             }
-            void setup_object_before_use_Zcalled_withinZ_post_initialize() override final {
+            void setup_the_object_before_use() override final {
                 my_derived_2_int = 201;  ++my_derived_2_int; my_derived_2_string = "derived_2 data member inited in constructor";
-                cerr << ":Derived_2::setup_object_before_use_Zcalled_withinZ_post_initialize() has run."<<endl;
+                cerr << ":Derived_2::setup_the_object_before_use() has run."<<endl;
             };
             int my_derived_2_int{200};
             std::string my_derived_2_string{"derived_2 pata member inited"};
@@ -203,7 +158,7 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
     cout << ":*** Unique ptr Derived_2 ***" << endl;;
     cout << uniq_ptr_2.get()->my_base_int       << endl;;
     cout << uniq_ptr_2.get()->my_derived_2_int  << endl;;
-    cout << uniq_ptr_2.get()->my_derived_fn()   << endl;; */
+    cout << uniq_ptr_2.get()->my_derived_fn()   << endl;;
 
     std::shared_ptr<Derived_1> shared_ptr_1 = Derived_1::create_s<Derived_1>();  // creating a Derived object
     cout << ":*** Shared ptr Derived_1 ***"    << endl;;
@@ -215,9 +170,10 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
     cout << ":*** Unique ptr moved to Shared ptr ***"    << endl;;
     cout << moved_shared_ptr_1.get()->my_base_int     << endl;;
     cout << moved_shared_ptr_1.get()->my_derived_1_int<< endl;;
-    cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;;
+    cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;; */
 
     /* Uncomment in main_short.cpp if running of more examples is wanted.
+       and rename the main() you want
     extern int main_long(int, char*[]);
     main_long(argc,argv);
     */
