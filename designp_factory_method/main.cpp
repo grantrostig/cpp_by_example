@@ -120,7 +120,7 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
 };
 
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    LOGGER_( Wrong_derived wd1{}; );
+    LOGGER_( ./Wrong_derived wd1{}; );
     Wrong_derived wd1{};
     LOGGERX(wd1.s_;, wd1.s_ );
     LOGGERX(      ;, wd1.derived_s_ );
