@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += console
+CONFIG += console c++20
 #CONFIG += console c++20
 CONFIG += warn_on
 CONFIG -= app_bundle
@@ -13,7 +13,7 @@ HEADERS += \
 
 QMAKE_CXXFLAGS += \
         # -std=c++2b 		\
-          -std=c++23 		\
+        # -std=c++23 		\
         # -std=gnu++23 		\
         # -Wno-comment 		\
         # -Wno-uninitialized 	\
