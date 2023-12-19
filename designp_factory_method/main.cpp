@@ -16,76 +16,77 @@
  */
 
 //#include <bits/stdc++.h>
-#include <cassert>
-#include <chrono>
-#include <csignal>
 #include <iostream>
-#include <iterator>
 #include <memory>
 #include <string>
-#include <vector>
+#include <iostream>
+#include <iomanip>
+#include <source_location>
+// Some crude logging that provides source location.
+//#define LOGGER_( msg )   using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<          "."    <<endl;cout.flush();cerr.flush();
+  #define LOGGER_( msg )   using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<          ".\r\n"<<endl;cout.flush();cerr.flush();
+//#define LOGGERX( msg, x )using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<"},{"<<x<<"."    <<endl;cout.flush();cerr.flush();
+  #define LOGGERX( msg, x )using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<"},{"<<x<<".\r\n"<<endl;cout.flush();cerr.flush();
 
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
-using namespace std::chrono_literals;
 
-/* ## Bing "Definition of token"
-In computer programming, a token is the smallest individual element that is meaningful to the compiler. It's a single element of a programming
-language. Tokens are the building blocks of a programming language. There are five categories of tokens:
-
-- Keywords: These are pre-defined or reserved words in a programming language. Each keyword is meant to perform a specific function in a program.
-- Identifiers: These are user-defined names used for naming variables, functions, and arrays.
-- Constants: These refer to the variables with fixed values.
-- Strings: These are arrays of characters ended with a null character (\\0).
-- Operators: These are symbols that perform operations on one or more operands.
-
-Tokens are used in many different contexts in programming. For example, in an authentication system, a token can represent the fact that a user
-is authenticated. In a programming language like C, tokens can be keywords, identifiers, constants, strings, and special symbols.
-
-enum class Kind {           // Probably entirely misunderstood.  Was thinking of parsing tokens. See above "Definition of token".
-    not_set,
-    my_kind_of_token_1,
-    my_kind_of_token_2
-}; */
+struct Wrong_base {
+    string s_{"definition inited"};
+    Wrong_base() =default;                      // TODO??: Why do we get warning without this line?
+    Wrong_base(string s): s_{s} {
+        LOGGERX("", s_);
+        ub_to_call_virtual_in_constructor();
+    }
+    virtual void ub_to_call_virtual_in_constructor() =0;         // BAD: C.82: Don't call virtual functions in constructors and destructors
+};
+struct Wrong_derived : public Wrong_base {
+    string derived_s_{"definition inited"};
+    Wrong_derived() =default;
+    Wrong_derived(string derived_s): derived_s_{derived_s+";constructor inited"} {
+        derived_s_ += ";constructor fn inited ";
+        LOGGERX("", derived_s_);
+        ub_to_call_virtual_in_constructor();
+    }
+    virtual void ub_to_call_virtual_in_constructor() override final {
+        derived_s_ += ";virtual function inited" ;
+        LOGGERX("", derived_s_);
+    };
+};
 
 class Base {
-protected:  class Token {  // Probably entirely misunderstood reason for this. Was thinking of parsing tokens. May just be a "marker" or name "handle" for use in make_unique to specify a type?  See above "Definition of token".
-            public: Token() {
-                    // TODO??: Probably nothing, based on the source example, but what if anything, is a good example of what should be done here?
-                    cerr << ":constructor of Base::Token() is/has run."<<endl; }
-                    //Kind            token_kind_as_an_enum{Kind::not_set};
-                    //std::string     token_value_as_a_string{"base::Token string data member inited"};
+protected:  class Protected_dummy_token {  // Exists soley to disable the API user from directly constructing the object since we want to run a virtual function right after construction, but not during construction.
+            public: Protected_dummy_token() {
+                    cerr << ":constructor of Base::Protected_dummy_token() is/has run."<<endl; }
             };
 
-            virtual void post_construction() {            // Called right after construction
+            virtual void actions_post_construction() {            // Is to be called right after construction, but not during, since it is virtual.
                 /* ... */  // TODO??: What is a good example of what should be done here?
-                cerr << ":Base::post_construction() starting run."<<endl;
-                setup_the_object_before_use();                                    // GOOD: virtual dispatch is safe
-                cerr << ":Base::post_construction() has run."<<endl;
+                cerr << ":Base::actions_post_construction() starting run."<<endl;
+                setup_the_object_before_use();                                    // GOOD: virtual dispatch is safe here
+                cerr << ":Base::actions_post_construction() has run."<<endl;
                 /* ... */  // TODO??: What is a good example of what should be done here?
             }
-public:     explicit Base( Token my_token ) {           // Create an imperfectly initialized object
-                cerr << ":constructor of Base( Token ) has started running."<<endl;
-                /* ... */  // TODO??: What if anything is a good example of what should be done here? Nothing except ... shown in source example.
-                /* if (  my_token.token_kind_as_an_enum == Kind::my_kind_of_token_1 ) {
-                    cerr << ":If within::constructor of Base( Token ) has started running."<<endl;
-                }; */
-                my_base_int = 11;  ++my_base_int; my_base_string = "base data member inited in constructor";  // TODO??: Is this a good example of what should be done here?
-                cerr << ":constructor of Base( Token ) has run."<<endl;
+public:     explicit Base( Protected_dummy_token ) {           // Create an incompletely initialized object
+                cerr << ":constructor of Base( Protected_dummy_token ) has started running."<<endl;
+                ++my_base_int; my_base_string = "inited in constructor"; // TODO??: What if anything is a good example of what should be done here? Note: source example expect something.
+                cerr << ":constructor of Base( Protected_dummy_token ) has run."<<endl;
             }
             virtual void setup_the_object_before_use() =0;  // Called f() in CppCoreGuidelines C.50
 
             template<class T> static std::unique_ptr<T> create_u() {        // Interface for creating unique objects
+            //class Derived_1;
+            //static std::unique_ptr<Derived_1> create_u() {        // Interface for creating unique objects
                 cerr << ":Base::create_u() starting run."<<endl;
-                auto p = std::make_unique<T>( typename T::Token{} );// TODO??: What exactly does this do here: $ typename T::Token{} // specifically  Token{}
-                p->post_construction();
+                auto p { std::make_unique<T>( typename T::Protected_dummy_token{} )};  // AKA std::unique_ptr<T> p { std::make_unique<T>( typename T::Protected_dummy_token{} )};
+                p->actions_post_construction();
                 cerr << ":Base::create_u() has run."<<endl;
                 return p;
             }
             template<class T> static std::shared_ptr<T> create_s() {        // Interface for creating shared objects
                 cerr << ":Base::create_s() started running."<<endl;
-                auto p = std::make_shared<T>( typename T::Token{} );
-                p->post_construction();
+                auto p = std::make_shared<T>( typename T::Protected_dummy_token{} );  // TODO??: why did CCG example use this '='?
+                p->actions_post_construction();
                 cerr << ":Base::create_s() has run."<<endl;
                 return p;
             }
@@ -95,19 +96,19 @@ public:     explicit Base( Token my_token ) {           // Create an imperfectly
 };
 
 class Derived_1 : public Base {    // API User derived class
-//protected:  class Token {          // TODO??: This hides Base::Token ! Was that intentional in source example?  Probably...some template magic?
-//                public: Token() {
-//                    // TODO??: Probably nothing based on the source example, but what if anything, is a good example of what should be done here?
-//                    cerr << ":Constructor of Derived_1::Token() started running."<<endl;
-//                }
-//                //Kind            token_kind_as_an_enum{Kind::not_set};
-//                //std::string     token_value_as_a_string{"Derived_1::Token string data member inited"};
-//            };
-protected:          template<class T> friend std::unique_ptr<T> Base::create_u();
-                    template<class T> friend std::shared_ptr<T> Base::create_s();
-public:     explicit Derived_1( Token ) : Base { Base::Token{} } {  // TODO??: Is this :Base{} constructing the base classes' data structures? OR is it initializing member variables (with constants C.45)
+protected:  class Protected_dummy_token {          // TODO??: This hides Base::Protected_dummy_token ! Was that intentional in source example?  Probably...some template magic?
+               public: Protected_dummy_token() {
+                   // TODO??: Probably nothing based on the source example, but what if anything, is a good example of what should be done here?
+                   cerr << ":Constructor of Derived_1::Protected_dummy_token() is/has run."<<endl;
+               }
+               //Kind            token_kind_as_an_enum{Kind::not_set};
+               //std::string     token_value_as_a_string{"Derived_1::Protected_dummy_token string data member inited"};
+           };
+protected:  template<class T> friend std::unique_ptr<T> Base::create_u();
+            template<class T> friend std::shared_ptr<T> Base::create_s();
+public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected_dummy_token{} } {  // TODO??: Is this :Base{} constructing the base classes' data structures? OR is it initializing member variables (with constants C.45)
                 /* ... */  // TODO??: What is a good example of what should be done here?
-                    cerr << ":constructor of Derived_1( Token ) is/has run."<<endl;
+                    cerr << ":constructor of Derived_1( Protected_dummy_token ) is/has run."<<endl;
             }
             void setup_the_object_before_use() override final {  // Called f() in CppCoreGuidelines C.50
                 /* ... */  // TODO??: What is a good example of what should be done here?
@@ -121,18 +122,18 @@ public:     explicit Derived_1( Token ) : Base { Base::Token{} } {  // TODO??: I
 };
 
 /* class Derived_2 : public Base {                            // User derived class
-protected:  class Token {
-                public: Token() {
-                        cerr << ":Constructor of Derived_2::Token() started running."<<endl;
-                        cerr << ":Constructor of Derived_2::Token() has run."<<endl;
+protected:  class Protected_dummy_token {
+                public: Protected_dummy_token() {
+                        cerr << ":Constructor of Derived_2::Protected_dummy_token() started running."<<endl;
+                        cerr << ":Constructor of Derived_2::Protected_dummy_token() has run."<<endl;
                 }
                 Kind            token_kind_as_an_enum{Kind::not_set};
-                std::string     token_value_as_a_string{"Derived_2::Token string data member inited"};
+                std::string     token_value_as_a_string{"Derived_2::Protected_dummy_token string data member inited"};
             };
             template<class T> friend std::unique_ptr<T> Base::create_u();
             template<class T> friend std::shared_ptr<T> Base::create_s();
-public:     explicit Derived_2( Token ) : Base{ Base::Token{} } {
-                cerr << ":Constructor of Derived_2( Token ) has run."<<endl;
+public:     explicit Derived_2( Protected_dummy_token ) : Base{ Base::Protected_dummy_token{} } {
+                cerr << ":Constructor of Derived_2( Protected_dummy_token ) has run."<<endl;
             }
             void setup_the_object_before_use() override final {
                 my_derived_2_int = 201;  ++my_derived_2_int; my_derived_2_string = "derived_2 data member inited in constructor";
@@ -144,15 +145,39 @@ public:     explicit Derived_2( Token ) : Base{ Base::Token{} } {
 }; */
 
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    std::unique_ptr<Derived_1> uniq_ptr_1 { Derived_1::create_u<Derived_1>() };  // creating a Derived object
-    cout << ":*** Unique ptr_1 ***" << endl;;
-    cout << uniq_ptr_1.get()->my_base_int        << endl;;
-    cout << uniq_ptr_1.get()->my_base_string     << endl;;
-    cout << uniq_ptr_1.get()->my_base_fn()       << endl;;
+    // std::unique_ptr<Derived_1> uniq_ptr_1  { Derived_1::create_u<Derived_1>() };  // creating a Derived object
+    // auto uniq_ptr_1a { Derived_1::create_u<Derived_1>() };  // creating a Derived object
+    // cout << ":*** Unique ptr_1 ***" << endl;;
+    // cout << uniq_ptr_1.get()->my_base_int        << endl;;
+    // cout << uniq_ptr_1.get()->my_base_string     << endl;;
+    // cout << uniq_ptr_1.get()->my_base_fn()       << endl;;
 
-    cout << uniq_ptr_1.get()->my_derived_1_int   << endl;;
-    cout << uniq_ptr_1.get()->my_derived_1_string<< endl;;
-    cout << uniq_ptr_1.get()->my_derived_fn()    << endl;;
+    // cout << uniq_ptr_1.get()->my_derived_1_int   << endl;;
+    // cout << uniq_ptr_1.get()->my_derived_1_string<< endl;;
+    // cout << uniq_ptr_1.get()->my_derived_fn()    << endl;;
+
+
+    Wrong_derived wd1{};
+    Wrong_derived wd2{"hello"};
+    //std::unique_ptr<Wrong_base>    wb_unique_ptr_a{std::unique_ptr<Wrong_base>(42)};
+    std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"hello"}};
+    std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
+    auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
+    //std::unique_ptr<Wrong_derived> wd_unique_ptr_a{std::unique_ptr<Wrong_derived>("hello")};
+    std::shared_ptr<Wrong_derived> wd_shared_ptr_c{std::unique_ptr<Wrong_derived>()};  // TODO??: why does this compile?
+    std::shared_ptr<Wrong_derived> wd_shared_ptr_b{std::shared_ptr<Wrong_derived>()};
+
+    //Derived_1 derived_1d{std::make_unique<Derived_1>()};
+    //Derived_1 derived_1a{Derived_1::Protected_dummy_token {}};
+    //int fake{};
+    //Derived_1 derived_1b{ (Derived_1::Protected_dummy_token) fake {}};
+
+    //std::unique_ptr<Derived_1> temp_uniq_ptr_1 { Derived_1::create_u<Derived_1>() };  // creating a Derived object
+    //auto temp{ *temp_uniq_ptr_1 };
+    //Derived_1 derived_1c{ temp };
+    //cout << derived_1c.my_derived_1_int << endl;
+    //cout << derived_1c.my_base_int << endl;
+
 
     /* std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
     cout << ":*** Unique ptr Derived_2 ***" << endl;;
