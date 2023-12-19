@@ -1,4 +1,4 @@
-/** Factory_Method - A Creational Pattern - Design Pattern example -- Gang of Four / book
+/** Factory_Method - A Creational Pattern - Design Patterns example -- Gang of Four / book
     AKA:    Virtual_Constructor, Factory_Function??
     Intent: Define an interface for creating objects, but let subclasses decide which class to instanciate
             Factory_Method lets a class defer instanciation to subclasses.
@@ -42,9 +42,10 @@ struct Wrong_base {
         LOGGERX("", s_);
         ub_to_call_virtual_in_constructor();
     }
-    virtual void ub_to_call_virtual_in_constructor() =0;         // BAD: C.82: Don't call virtual functions in constructors and destructors
-    void f() {
+    virtual void ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors
+    int f() {
         LOGGER_();
+        return 42;
     };
 };
 struct Wrong_derived : public Wrong_base {
@@ -121,6 +122,10 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
     LOGGER_( Wrong_derived wd1{}; );
     Wrong_derived wd1{};
+    LOGGERX(wd1.s_;, wd1.s_ );
+    LOGGERX(      ;, wd1.derived_s_ );
+    LOGGERX(      ;, wd1.f() );
+ // LOGGERX(wd1.s_;, Wrong_derived::ub_to_call_virtual_in_constructor() );
     /*LOGGER_();
     Wrong_derived wd2{"argument1"};
     LOGGER_();
