@@ -1,12 +1,12 @@
 /* (c) Cppmsg.com License Boost 1.0
    Usage:
     - Run and enter just ESC.
-    - OR run and enter just the F1 key.
+    - OR run and enter just the F1 and or DELETE key.
     - Above two give different results.
-    - CTRL-C to exit, then at the shell prompt
+    - CTRL-C to exit prematurely, then at the shell prompt must do:
         $stty sane
         # to fix the tty character handling back to "cooked mode".
-    - OR just type junk characters and <ENTER> multiple times to exit program.
+    - OR just type {junk characters and <ENTER>} multiple times to exit program.
 */
 //#include <bits/stdc++.h>
 //#include <array>
