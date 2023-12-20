@@ -22,12 +22,11 @@
 #include <iostream>
 #include <iomanip>
 #include <source_location>
-// Some crude logging that provides source location.
-  #define LOGGER_( msg )   using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
-//#define LOGGER_( msg )   using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
-  #define LOGGERX( msg, x )using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
-//#define LOGGERX( msg, x )using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
-  #define LOGGERR( msg, x )using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
+// Some crude logging that prints source location, where X prints a variable, and R adds \n\r (which is usefull when tty in in RAW or CBREAK mode. Requires C++20.
+  #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
+  #define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
+  #define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
+  #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
 
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
@@ -35,15 +34,15 @@ using namespace std::string_literals;
 struct Wrong_base {
     string s_{"Definition inited"};
     Wrong_base()  {
-        LOGGER_();
+        LOGGERX("", s_);
     //  ub_to_call_virtual_in_constructor();                    // TODO??: Won't link, but same line in string parameter constructor below does?
     }
     Wrong_base(string s): s_{s} {
         LOGGERX("", s_);
         ub_to_call_virtual_in_constructor();
     }
-    virtual void ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors
-    int f() {
+    virtual string ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors
+    virtual int f() {
         LOGGER_();
         return 42;
     };
@@ -59,9 +58,14 @@ struct Wrong_derived : public Wrong_base {
         ub_to_call_virtual_in_constructor();
         f();
     }
-    virtual void ub_to_call_virtual_in_constructor() override final {
+    virtual string ub_to_call_virtual_in_constructor() override final {
         derived_s_ += ";Virtual fn inited" ;
         LOGGERX("", derived_s_);
+        return derived_s_;
+    };
+    virtual int f() override final {
+        LOGGER_();
+        return 142;
     };
 };
 
@@ -123,9 +127,12 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
     LOGGER_( ./Wrong_derived wd1{}; );
     Wrong_derived wd1{};
     LOGGERX(wd1.s_;, wd1.s_ );
-    LOGGERX(      ;, wd1.derived_s_ );
-    LOGGERX(      ;, wd1.f() );
- // LOGGERX(wd1.s_;, Wrong_derived::ub_to_call_virtual_in_constructor() );
+    LOGGERX(wd1.derived_s_, wd1.derived_s_ );
+    LOGGER_(./wd1.f() );
+    wd1.f();
+    LOGGER_(./wd1.ub_to_call_virtual_in_constructor() );
+    wd1.ub_to_call_virtual_in_constructor();
+
     /*LOGGER_();
     Wrong_derived wd2{"argument1"};
     LOGGER_();
