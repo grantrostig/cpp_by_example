@@ -29,7 +29,7 @@ Termios & termio_get() { // uses POSIX
     static Termios termios;
     if (auto result = tcgetattr( fileno(stdin), &termios); result == POSIX_ERROR) { // TODO: throw() in signature?
         int errno_save = errno;
-        cerr << "We will exit( EXIT_FAILURE ) for this error."<<endl;
+        cerr << ":Not a tty:we will exit(EXIT_FAILURE)."<<endl;
         errno = errno_save;
         exit(EXIT_FAILURE);
     }
@@ -143,6 +143,12 @@ bool is_chars_available(streamsize position) {
         return false;
 }
 
+std::chrono::duration<long,std::micro>
+calc_duration(std::chrono::time_point<std::chrono::steady_clock> const clock_start) {
+    std::chrono::time_point<std::chrono::steady_clock> clock_end{std::chrono::steady_clock::now()};
+    return std::chrono::duration_cast<std::chrono::microseconds>( clock_end - clock_start );
+}
+
 std::chrono::milliseconds constexpr multibyte_sequence_time_min = 10ms;
 std::chrono::milliseconds constexpr multibyte_sequence_time_max = 100ms;
 int main() {                                    // Some other ways to read cin: - cin.read( char_vec.data(), 1 ) - cin.readsome(my_c_string, 2)
@@ -150,36 +156,42 @@ int main() {                                    // Some other ways to read cin: 
     streamsize                                          in_avail_count{};
     basic_streambuf<char> *                             cin_streambuf{};
     streamsize                                          position{};  // Number of bytes available on cin.  Zero origin, so need to +1.
-    std::chrono::time_point<std::chrono::steady_clock>  clock_start{}, clock_end{};
-    std::chrono::duration<long, std::micro>             duration_passed{};
     Termios &                                           termios_orig{ termio_set_raw() };
     cin.sync_with_stdio(false);                 // Required for in_avail() to work TODO??:
     cout << "\n\rEnter keyboard input:";
-    my_char = 255; cin  >> my_char;             cout << "\n\r:Got my_char input."<<endl;
-    clock_start = std::chrono::steady_clock::now();
+    cin >> my_char;
+    assert("cin is good." && cin.good() );
+    cout << "\n\r:Got my_char input."<<endl;
+    std::chrono::time_point<std::chrono::steady_clock> clock_start{std::chrono::steady_clock::now()};
     if (my_char == 27) {
                                                 cout << "\n\rgot ESC\n\r" <<endl;
-        if (is_chars_available( position )) cin >> my_char;
-        cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
         // *** Determine if other chars of a multi-byte sequence are coming, criteria is that they must arrive withing 100 milli-seconds. 1/10 th of a second.
+        std::chrono::duration<long, std::micro> duration_passed{};
         do {
             std::this_thread::sleep_for( multibyte_sequence_time_min );  // Wait for a multibyte sequence char, read above, then try to read it if one is available.
-            cin_streambuf = cin.rdbuf();
-            in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
-            clock_end =       std::chrono::steady_clock::now();
-            duration_passed = std::chrono::duration_cast<std::chrono::microseconds>( clock_end - clock_start );
-            assert( in_avail_count>=0 && "ERROR: We don't have logic for -1 or lower.");
+            cin_streambuf =     cin.rdbuf();
+                                                                        assert("cin is good." && cin.good() );
+            in_avail_count =    cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
+                                                                        assert("cin is good." && cin.good() );
+            duration_passed =   calc_duration( clock_start );
+                                                                        assert( in_avail_count>=0 && "ERROR: We don't have logic for -1 or lower.");
         } while ( duration_passed < multibyte_sequence_time_max && in_avail_count == 0 );
         if (duration_passed < multibyte_sequence_time_max )
-            cout << "\n\r:We have a multi-byte sequence!.\n\r" << endl;
+            cout << "\n\r:We have the CSI from a multi-byte sequence. Although we are not sure that the rest of the sequence will be correct.\n\r" << endl;
         else
             cout << "\n\r:We have a single ESC, NOT a multi-byte sequence!.\n\r" << endl;
-    } else {
-        if (is_chars_available( position )) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
-        cin_streambuf = cin.rdbuf();
-        in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
-
     }
+    /* PROBABLY BAD LOGIC commented out: else {
+        if (is_chars_available( position )) {
+            cin >> my_char;
+            assert("cin is good." && cin.good() );
+            cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+        }
+        cin_streambuf = cin.rdbuf();
+        assert("cin is good." && cin.good() );
+        in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
+        assert("cin is good." && cin.good() );
+    } */
 
     my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
     cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
