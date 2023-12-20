@@ -20,9 +20,6 @@
 #include <thread>
 using namespace std;
 
-// Bad file global I know... just for fun and learning/renaming "static"
-#define STATIC_GLOBAL_HIDER static     // similar to $ namespace {}
-
 inline constexpr ssize_t POSIX_ERROR{-1};  // Yes, believe it or not, it is not zero, which we think is good. :)
 
 /// C++ class name capitalization convention of the POSIX C type.
@@ -177,7 +174,6 @@ int main() {                                    // Some other ways to read cin: 
             cout << "\n\r:We have a multi-byte sequence!.\n\r" << endl;
         else
             cout << "\n\r:We have a single ESC, NOT a multi-byte sequence!.\n\r" << endl;
-
     } else {
         if (is_chars_available( position )) cin >> my_char; cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
         cin_streambuf = cin.rdbuf();
