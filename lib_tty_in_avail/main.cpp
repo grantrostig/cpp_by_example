@@ -125,13 +125,13 @@ void print_iosbase() {
 }
 
 /// Checks existence of data within stdin without blocking: https://stackoverflow.com/questions/3317740/checking-data-availability-before-calling-stdgetline
-streamsize reset_cin( streamsize position ) {  // TODO: we don't need this parameter, could refactor out.
+streamsize find_position_cin( streamsize position ) {  // TODO: we don't need this parameter, could refactor out.
     position = std::cin.tellg();
     if (position < 0)
         cout << "\n\r:no chars available" << endl;
     else {
-        cout <<"\n\r:length:"<<position<<endl;
-        std::cin.seekg( 0, std::cin.beg );      // If stdin has some data - don't forget to set the position back to the beginning.
+        cout <<"\n\r:position:"<<position<<endl;
+     // std::cin.seekg( 0, std::cin.beg );      // If stdin has some data - don't forget to set the position back to the beginning.
                                                 // TODO??: why called "seekdir"?
                                                 // what offset the position? tellg? or just a pre-caution
     }
@@ -139,7 +139,7 @@ streamsize reset_cin( streamsize position ) {  // TODO: we don't need this param
     return position;
 }
 bool is_chars_available(streamsize position) {
-    position = reset_cin(position);
+    position = find_position_cin(position);
     if (not(position < 0))
         return true;
     else
@@ -152,7 +152,7 @@ int main() {                                    // Some other ways to read cin: 
     unsigned char                                       my_char{255};             // $ unsigned char my_c_string[100]{""}; $ std::vector<char> char_vec(1024);
     streamsize                                          in_avail_count{};
     basic_streambuf<char> *                             cin_streambuf{};
-    streamsize                                          position{};  // here static just hides the obj from linker, same as unnamed namespace TODO:??
+    streamsize                                          position{};  // Number of bytes available on cin.  Zero origin, so need to +1.
     std::chrono::time_point<std::chrono::steady_clock>  clock_start{}, clock_end{};
     std::chrono::duration<long, std::micro>             duration_passed{};
     Termios &                                           termios_orig{ termio_set_raw() };
@@ -166,7 +166,7 @@ int main() {                                    // Some other ways to read cin: 
         cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
         // *** Determine if other chars of a multi-byte sequence are coming, criteria is that they must arrive withing 100 milli-seconds. 1/10 th of a second.
         do {
-            std::this_thread::sleep_for( multibyte_sequence_time_min );  // Wait for a multibyte sequence char then try to read it if one is available.
+            std::this_thread::sleep_for( multibyte_sequence_time_min );  // Wait for a multibyte sequence char, read above, then try to read it if one is available.
             cin_streambuf = cin.rdbuf();
             in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
             clock_end =       std::chrono::steady_clock::now();
@@ -187,21 +187,19 @@ int main() {                                    // Some other ways to read cin: 
 
     my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
     cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
-    if (is_chars_available( position )) cin >> my_char;
-    cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+    if (is_chars_available( position )) {
+        cin >> my_char;
+        cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
+    }
     cin_streambuf = cin.rdbuf();
     in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
 
     my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
     cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
-    if (is_chars_available( position )) cin >> my_char;
-    cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
     cin_streambuf = cin.rdbuf();
     in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
 
     my_char = 255; cin  >> my_char; cout << "\n\r:Got my_char input."<<endl;
-    cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
-    if (is_chars_available( position )) cin >> my_char;
     cout << "\n\r:my_char as int, then char:" << (int)my_char <<","<< my_char << endl;
     cin_streambuf = cin.rdbuf();
     in_avail_count = cin_streambuf->in_avail(); cout << "\n\r:in_avail_count:" << in_avail_count << endl;
