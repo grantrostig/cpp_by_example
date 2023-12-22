@@ -2,7 +2,7 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
-CONFIG += c++latest
+#CONFIG += c++latest
 #CONFIG += c++20
 CONFIG += warn_on
 # ??CONFIG += QMAKE_CFLAGS_WARN_ON
@@ -10,7 +10,7 @@ CONFIG += warn_on
 
 QMAKE_CXXFLAGS += \
 # could be wrong:
-        -std=gnu++2b 		\
+        -std=c++23 		\
         -g3 		        \
         -O0 		        \
         -Wno-comment 		\
