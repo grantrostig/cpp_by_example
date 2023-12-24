@@ -6,10 +6,14 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+    animal_types.cpp \
+    animals.cpp \
     main.cpp \
     main_shortened.cpp
 
 HEADERS += \
+    animal_types.hpp \
+    animals.hpp
 
 QMAKE_CXXFLAGS += \
         # -std=c++2b 		\

@@ -37,12 +37,13 @@ struct Wrong_base {
         LOGGERX( , s_);
  //     ub_to_call_virtual_in_constructor();                    // TODO??: Won't link, but same line in string parameter constructor below does?
     }
+    ~Wrong_base() =default;
     Wrong_base(string s): s_{s} {
         LOGGERX(, s_);
         ub_to_call_virtual_in_constructor();  // *** Undefined behaviour
     }
 #define BAD_C_82
-#ifdef BAD_C_82
+#ifdef  BAD_C_82
     virtual string ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors or you will get UB.
 #else
     virtual string ub_to_call_virtual_in_constructor();
@@ -51,7 +52,9 @@ struct Wrong_base {
         LOGGER_();
         return 42;
     };
+#ifndef BAD_C_82
  // virtual int g() =0;
+#endif
 };
 #ifndef BAD_C_82
     string Wrong_base::ub_to_call_virtual_in_constructor() {       // BAD: C.82: Don't call virtual functions in constructors and destructors
@@ -140,18 +143,18 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
     Wrong_derived wd1{};
     LOGGERX( wd1.s_;,        wd1.s_ );
     LOGGERX( wd1.derived_s_, wd1.derived_s_ );
-    LOGGER_( ./wd1.f() );
-    wd1.f();
-    LOGGER_(./wd1.ub_to_call_virtual_in_constructor() );
-    wd1.ub_to_call_virtual_in_constructor();
+    LOGGERX(./wd1.ub_to_call_virtual_in_constructor()
+            , wd1.ub_to_call_virtual_in_constructor());
+    LOGGERX(./wd1.f()
+            , wd1.f() );
 
     Wrong_derived wd2{"argument1"};
-    //std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument1"}};
-    //LOGGER_();
-    //std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
-    //LOGGER_();
-    //auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
- // std::unique_ptr<Wrong_derived> wd_unique_ptr_a{std::unique_ptr<Wrong_derived>("hello")};
+    std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument1"}};         // TODO??: Note warning.
+    std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
+    auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
+
+//  std::unique_ptr<Wrong_derived> wd_unique_ptr_a{std::unique_ptr<Wrong_derived>("hello")};
+//  std::unique_ptr<Wrong_derived> wd_unique_ptr_h{std::unique_ptr<Wrong_derived>(){"hello"};
  // std::unique_ptr<Wrong_derived> wd_unique_ptr_g{std::unique_ptr<Wrong_derived>()("hello")};
 
 /*  std::unique_ptr<Derived_1> uniq_ptr_1  { Derived_1::create_u<Derived_1>() };  // creating a Derived object
