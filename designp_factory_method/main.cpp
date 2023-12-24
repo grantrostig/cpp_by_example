@@ -23,10 +23,10 @@
 #include <iomanip>
 #include <source_location>
 // Some crude logging that prints source location, where X prints a variable, and R adds \n\r (which is usefull when tty in in RAW or CBREAK mode. Requires C++20.
-  #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
-  #define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
-  #define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
-  #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(3)<<loc::current().line()<<','<<std::setw(2)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
+  #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
+  #define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
+  #define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
+  #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
 
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
@@ -34,19 +34,31 @@ using namespace std::string_literals;
 struct Wrong_base {
     string s_{"Definition inited"};
     Wrong_base()  {
-        LOGGERX("", s_);
-    //  ub_to_call_virtual_in_constructor();                    // TODO??: Won't link, but same line in string parameter constructor below does?
+        LOGGERX( , s_);
+ //     ub_to_call_virtual_in_constructor();                    // TODO??: Won't link, but same line in string parameter constructor below does?
     }
     Wrong_base(string s): s_{s} {
-        LOGGERX("", s_);
-        ub_to_call_virtual_in_constructor();
+        LOGGERX(, s_);
+        ub_to_call_virtual_in_constructor();  // *** Undefined behaviour
     }
-    virtual string ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors
+#define BAD_C_82
+#ifdef BAD_C_82
+    virtual string ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors or you will get UB.
+#else
+    virtual string ub_to_call_virtual_in_constructor();
+#endif
     virtual int f() {
         LOGGER_();
         return 42;
     };
+ // virtual int g() =0;
 };
+#ifndef BAD_C_82
+    string Wrong_base::ub_to_call_virtual_in_constructor() {       // BAD: C.82: Don't call virtual functions in constructors and destructors
+        return "Virtual in constructor";
+    };
+#endif
+
 struct Wrong_derived : public Wrong_base {
     string derived_s_{"Definition inited"};
     Wrong_derived() {
@@ -126,33 +138,31 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
     LOGGER_( ./Wrong_derived wd1{}; );
     Wrong_derived wd1{};
-    LOGGERX(wd1.s_;, wd1.s_ );
-    LOGGERX(wd1.derived_s_, wd1.derived_s_ );
-    LOGGER_(./wd1.f() );
+    LOGGERX( wd1.s_;,        wd1.s_ );
+    LOGGERX( wd1.derived_s_, wd1.derived_s_ );
+    LOGGER_( ./wd1.f() );
     wd1.f();
     LOGGER_(./wd1.ub_to_call_virtual_in_constructor() );
     wd1.ub_to_call_virtual_in_constructor();
 
-    /*LOGGER_();
     Wrong_derived wd2{"argument1"};
-    LOGGER_();
-    std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument1"}};
-    LOGGER_();
-    std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
-    LOGGER_();
-    auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
+    //std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument1"}};
+    //LOGGER_();
+    //std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
+    //LOGGER_();
+    //auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
  // std::unique_ptr<Wrong_derived> wd_unique_ptr_a{std::unique_ptr<Wrong_derived>("hello")};
  // std::unique_ptr<Wrong_derived> wd_unique_ptr_g{std::unique_ptr<Wrong_derived>()("hello")};
 
-    /*std::unique_ptr<Derived_1> uniq_ptr_1  { Derived_1::create_u<Derived_1>() };  // creating a Derived object
+/*  std::unique_ptr<Derived_1> uniq_ptr_1  { Derived_1::create_u<Derived_1>() };  // creating a Derived object
     auto uniq_ptr_1a { Derived_1::create_u<Derived_1>() };  // creating a Derived object
     cout << ":*** Unique ptr_1 ***" << endl;;
     cout << uniq_ptr_1.get()->my_base_string     << endl;
     cout << uniq_ptr_1.get()->my_base_fn()       << endl;
     cout << uniq_ptr_1.get()->my_derived_1_string<< endl;
-    cout << uniq_ptr_1.get()->my_derived_fn()    << endl;*/
+    cout << uniq_ptr_1.get()->my_derived_fn()    << endl;
 
-    /* Derived_1 derived_1d{std::make_unique<Derived_1>()};
+    Derived_1 derived_1d{std::make_unique<Derived_1>()};
     Derived_1 derived_1a{Derived_1::Protected_dummy_token {}};
     int fake{};
     Derived_1 derived_1b{ (Derived_1::Protected_dummy_token) fake {}};
@@ -161,8 +171,9 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
     auto temp{ *temp_uniq_ptr_1 };
     Derived_1 derived_1c{ temp };
     cout << derived_1c.my_derived_1_int << endl;
-    cout << derived_1c.my_base_int << endl; */
-    /* std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
+    cout << derived_1c.my_base_int << endl;
+
+    std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
     cout << ":*** Unique ptr Derived_2 ***" << endl;;
     cout << uniq_ptr_2.get()->my_base_int       << endl;;
     cout << uniq_ptr_2.get()->my_derived_2_int  << endl;;
@@ -178,11 +189,12 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
     cout << ":*** Unique ptr moved to Shared ptr ***"    << endl;;
     cout << moved_shared_ptr_1.get()->my_base_int     << endl;;
     cout << moved_shared_ptr_1.get()->my_derived_1_int<< endl;;
-    cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;; */
-    /* Uncomment in main_short.cpp if running of more examples is wanted.
-       and rename the main() you want
-    extern int main_long(int, char*[]);
-    main_long(argc,argv);
+    cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;;
+ */
+
+ /* Uncomment in main_shortened.cpp if running of that code is also wanted. And, or, rename the main() you want
+    extern int main_not_shortened(int, char*[]);
+    main_not_shortened(argc,argv);
     */
 
     cout << "###" << endl;

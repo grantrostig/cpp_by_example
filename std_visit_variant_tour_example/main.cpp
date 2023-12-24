@@ -1,13 +1,11 @@
-// copyright grant rostig
+// copyright grant rostig  Boost 1.0 license
 // inspired by Stroustrup TOUR2 book
-
 #include <string>
 #include <vector>
 #include <iostream>
 #include <sstream>
 #include <variant>
 #include <memory>
-
 using namespace std;
 
 string itoa(int x) {
@@ -71,21 +69,42 @@ void runtime_polymorphism_variant_whattype_dispatch() {
     }
 }
 
-// overloaded is a pattern that could have been standardized as per Stroustup.
+// Overloaded is a pattern that could have been standardized as per Stroustup.
 template<class... Ts>  			// variadic ie. any number of any type are handled. Below we use only 2 in the contructor of our one object.
-struct overloaded : Ts...{ 		// inherit from all those types
+struct Overloaded : Ts...{ 		// inherit from all those types
     using Ts::operator()...;  	// all of those operator()s.
 };
 
 template<class... Ts>
-    overloaded(Ts...) -> overloaded<Ts...>;  // deduction guide.  -> = returns.  todo: what returns what to whom?
+    Overloaded(Ts...) -> Overloaded<Ts...>;  // deduction guide.  -> = returns.  todo: what returns what to whom?
+                                             // explicit deduction guide (not needed as of C++20)
 
 void runtime_polymorphism_variant_direct_dispatch() {  // faster because we don't have to dereference a function pointer.
     using V = std::variant<Square,Circle>;
     vector<V> shape_vs;
     shape_vs.emplace_back(Square {});
     shape_vs.emplace_back(Circle {});
-    auto o = overloaded
+    auto o = Overloaded
+                 {
+                   [] (Square & v) { v.f(); }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
+                   [] (Circle & v) { v.f(); }
+                 };
+
+    for (auto v : shape_vs) {
+        //std::visit( o, v );
+        std::visit( Overloaded {
+                   [] (Square & v) { v.f(); }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
+                   [] (Circle & v) { v.f(); }
+                 } , v );
+    }
+}
+
+void runtime_polymorphism_variant_direct_dispatch2() {  // faster because we don't have to dereference a function pointer.
+    using V = std::variant<Square,Circle>;
+    vector<V> shape_vs;
+    shape_vs.emplace_back(Square {});
+    shape_vs.emplace_back(Circle {});
+    auto o = Overloaded
                  {
                    [] (Square & v) { v.f(); }, // to be invoked via operator() on the function object (AKA lambda) or any callable object.
                    [] (Circle & v) { v.f(); }
