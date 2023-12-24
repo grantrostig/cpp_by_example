@@ -3,22 +3,12 @@
 #include <iostream>
 
 using namespace std;
-
 class Dog : public Animal {
 public:
-    virtual void speak() override {
-        cout << "Woof!" << endl;
-    }
+    void speak();
 };
 
 class Cat : public Animal {
 public:
-    virtual void speak() override {
-        cout << "Meow!" << endl;
-    }
+    void speak();
 };
-
-// class Animal_types {
-// public:
-//     Animal_types();
-// };
