@@ -15,8 +15,8 @@
     NOT PRODUCTION QUALITY CODE, it is missing proper rigor, just shows learning/teaching example, not real programming, don't copy_paste this.
  */
 
-#include <animal_types.hpp>
-#include <animals.hpp>
+#include "animal_types.hpp"
+#include "animals.hpp"
 
 //#include <bits/stdc++.h>
 #include <iostream>
@@ -144,7 +144,7 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
 
     //Animal a;  // TODO??: fails because pure virtual? or no constructor?  What would be required to fix it?
-    Animal * dog_ptr = Animal::create(Animal_type::dog);
+    Animal * dog_ptr = Animal::create(Animal_type::dog); // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
     dog_ptr->speak();
     Animal::create(Animal_type::cat)->speak();
     delete dog_ptr;

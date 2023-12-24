@@ -5,6 +5,10 @@
 //Animals::Animals() {}
 
 //Animal Animal::create(int a)
+Animal::~Animal() {
+
+}
+
 Animal * Animal::create(Animal_type a) {
     switch (a) {
     case Animal_type::dog :
@@ -14,5 +18,5 @@ Animal * Animal::create(Animal_type a) {
         return new Cat();
         break;
     };
-//    assert( false );
+    assert( false );
 }
