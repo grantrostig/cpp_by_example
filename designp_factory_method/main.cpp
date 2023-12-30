@@ -15,7 +15,6 @@
     NOT PRODUCTION QUALITY CODE, it is missing proper rigor, just shows learning/teaching example, not real programming, don't copy_paste this.
  */
 
-#include "animal_types.hpp"
 #include "animals.hpp"
 
 //#include <bits/stdc++.h>

@@ -67,7 +67,7 @@ concept Insertable = requires( std::ostream & out ) {
     }
 */
 template<typename Container>                        //template<insertable Container>        // OR these 2 lines currently being used.
-    requires Insertable<Container>
+     requires Insertable<Container>
 std::ostream &
 operator<<( std::ostream & out, Container const & c) {
     if ( not c.empty()) {
@@ -79,7 +79,7 @@ operator<<( std::ostream & out, Container const & c) {
 }
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
+// ++++++++++++++++ EXAMPLE begins ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class Base {
 public:
     virtual ~Base();

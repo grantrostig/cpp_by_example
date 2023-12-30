@@ -1,13 +1,9 @@
 #include "animals.hpp"
-#include "animal_types.hpp"
 #include <cassert>
+#include <iostream>
+using namespace std;
 
-//Animals::Animals() {}
-
-//Animal Animal::create(int a)
-Animal::~Animal() {
-
-}
+Animal::~Animal() { }
 
 Animal * Animal::create(Animal_type a) {
     switch (a) {
@@ -19,4 +15,12 @@ Animal * Animal::create(Animal_type a) {
         break;
     };
     assert( false );
+}
+
+void Dog::speak() {
+    cout << "Woof!" << endl;
+}
+
+void Cat::speak() {
+     cout << "Meow!" << endl;
 }
