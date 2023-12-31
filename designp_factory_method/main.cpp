@@ -14,25 +14,53 @@
 
     NOT PRODUCTION QUALITY CODE, it is missing proper rigor, just shows learning/teaching example, not real programming, don't copy_paste this.
  */
-
-#include "animals.hpp"
-
 //#include <bits/stdc++.h>
+#include <cassert>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <iostream>
 #include <iomanip>
 #include <source_location>
+//#include "animals.hpp"
 // Some crude logging that prints source location, where X prints a variable, and R adds \n\r (which is usefull when tty in in RAW or CBREAK mode. Requires C++20.
-  #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
-  #define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
-  #define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
-  #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
-
+#define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
+#define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
+#define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
+#define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 
+// ********** Example 1 **********************
+enum class Animal_type { cat, dog };
+class Animal {
+public:
+    static Animal * create(Animal_type a);
+    Animal()        =default;           // TODO??: Why not needed? What does it do/mean here?
+    virtual         ~Animal();
+  //virtual         ~Animal()   =0;     //
+  //virtual void    speak();
+    virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any function to make it an abstract_class or Interface?
+};
+
+  class Dog : public Animal { public: void speak(); }; void  Dog::speak() { cout << "Woof!" << endl; }
+  class Cat : public Animal { public: void speak(); }; void  Cat::speak() { cout << "Meow!" << endl; }
+//class Cat : public Animal { };
+
+Animal::~Animal() {}
+Animal * Animal::create(Animal_type a) {
+    switch (a) {
+    case Animal_type::dog :
+        return new Dog();
+        break;
+    case Animal_type::cat :
+        return new Cat();
+        break;
+    };
+    assert( false );
+}
+void Animal::speak() { cout << "Generic Animal Call!" << endl; };
+// ********** Example 2 **********************
 struct Wrong_base {
     string s_{"Definition inited"};
     Wrong_base()  {
@@ -44,7 +72,7 @@ struct Wrong_base {
         LOGGERX(, s_);
         ub_to_call_virtual_in_constructor();  // *** Undefined behaviour
     }
-#define BAD_C_82
+//#define BAD_C_82
 #ifdef  BAD_C_82
     virtual string ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors or you will get UB.
 #else
@@ -141,13 +169,15 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
 };
 
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-
-    //Animal a;  // TODO??: fails because pure virtual? or no constructor?  What would be required to fix it?
+    // *** Example 1
+    // Animal a;           // TODO??: fails because pure virtual or no constructor.
     Animal * dog_ptr = Animal::create(Animal_type::dog); // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
     dog_ptr->speak();
-    Animal::create(Animal_type::cat)->speak();
     delete dog_ptr;
+    Animal::create(Animal_type::cat)->speak();  // TODO??: What happens to this memory?  When new called in a temporary?  I can't delete it.
 
+
+    // *** Example 2
     LOGGER_( ./Wrong_derived wd1{}; );
     Wrong_derived wd1{};
     LOGGERX( wd1.s_;,        wd1.s_ );
@@ -158,13 +188,13 @@ int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv
             , wd1.f() );
 
     Wrong_derived wd2{"argument1"};
-    std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument1"}};         // TODO??: Note warning.
-    std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
-    auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
+    //std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument2"}};         // TODO??: Note warning.
+    //std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
+    //auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
 
 //  std::unique_ptr<Wrong_derived> wd_unique_ptr_a{std::unique_ptr<Wrong_derived>("hello")};
 //  std::unique_ptr<Wrong_derived> wd_unique_ptr_h{std::unique_ptr<Wrong_derived>(){"hello"};
- // std::unique_ptr<Wrong_derived> wd_unique_ptr_g{std::unique_ptr<Wrong_derived>()("hello")};
+//  std::unique_ptr<Wrong_derived> wd_unique_ptr_g{std::unique_ptr<Wrong_derived>()("hello")};
 
 /*  std::unique_ptr<Derived_1> uniq_ptr_1  { Derived_1::create_u<Derived_1>() };  // creating a Derived object
     auto uniq_ptr_1a { Derived_1::create_u<Derived_1>() };  // creating a Derived object
