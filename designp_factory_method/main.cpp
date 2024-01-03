@@ -4,13 +4,14 @@
             Factory_Method lets a class defer instanciation to subclasses.
     Not:    Abstract_Factory, Builder, Prototype, Singleton, and the generic term: factory.
     Uses:
-
     Related Patterns:
     Inspired by: (and possible copyright and LICENSE)
-        https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
+    C.50: Use a factory function if you need “virtual behavior” during initialization https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
+    C.82: Don’t call virtual functions in constructors and destructors https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c82-dont-call-virtual-functions-in-constructors-and-destructors
+
     Edited by: Grant Rostig 2023
         Any additional beyond those that inspired this code is:
-            Copyright (c) Grant Rostig, grantrostig.com 2023. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+        Copyright (c) Grant Rostig, grantrostig.com 2023. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 
     NOT PRODUCTION QUALITY CODE, it is missing proper rigor, just shows learning/teaching example, not real programming, don't copy_paste this.
  */
@@ -22,6 +23,7 @@
 #include <iostream>
 #include <iomanip>
 #include <source_location>
+#include <boost/functional/factory.hpp>
 //#include "animals.hpp"
 // Some crude logging that prints source location, where X prints a variable, and R adds \n\r (which is usefull when tty in in RAW or CBREAK mode. Requires C++20.
 #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
@@ -30,6 +32,35 @@
 #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
+
+// ********** Example 0 using types in Ex 1. **********************
+enum class BAnimal_type { cat, dog };
+class BAnimal {
+public:
+    static BAnimal * create(BAnimal_type a);
+    BAnimal()        =default;          // TODO??: Why not needed? What does it do/mean here?
+    virtual         ~BAnimal();
+    virtual void    speak() { cout << "BGeneric Animal Call!" << endl; };
+  //virtual         ~BAnimal()  =0;     //
+  //virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any function to make it an abstract_class or Interface.
+};
+//void BAnimal::speak() { cout << "BGeneric Animal Call!" << endl; };
+
+class BDog : public BAnimal { public: void speak(); }; void  BDog::speak() { cout << "BWoof!" << endl; }
+class BCat : public BAnimal { public: void speak(); }; void  BCat::speak() { cout << "BMeow!" << endl; }
+
+BAnimal::~BAnimal() {}                  // TODO??: Do I need this for Boost factory?
+BAnimal * BAnimal::create(BAnimal_type a) {
+    switch (a) {
+    case BAnimal_type::dog :
+        return new BDog();
+        break;
+    case BAnimal_type::cat :
+        return new BCat();
+        break;
+    };
+    assert( false );
+}
 
 // ********** Example 1 **********************
 enum class Animal_type { cat, dog };
@@ -42,11 +73,9 @@ public:
   //virtual void    speak();
     virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any function to make it an abstract_class or Interface?
 };
-
   class Dog : public Animal { public: void speak(); }; void  Dog::speak() { cout << "Woof!" << endl; }
   class Cat : public Animal { public: void speak(); }; void  Cat::speak() { cout << "Meow!" << endl; }
 //class Cat : public Animal { };
-
 Animal::~Animal() {}
 Animal * Animal::create(Animal_type a) {
     switch (a) {
@@ -60,7 +89,9 @@ Animal * Animal::create(Animal_type a) {
     assert( false );
 }
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };
-// ********** Example 2 **********************
+
+
+// ********** Example 2 illustrating C.50 & C.82 **********************
 struct Wrong_base {
     string s_{"Definition inited"};
     Wrong_base()  {
@@ -167,15 +198,27 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
             std::string my_derived_1_string{"Definition inited"};
             int my_derived_fn() { return 150; }
 };
+// ********** END Example 2 illustrating C.82 **********************
 
 int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    // *** Example 1
+    /* *** Example 0
+    //  boost::factory<T*>()(arg1,arg2,arg3) // same as new T(arg1,arg2,arg3)
+    //  boost::value_factory<T>()(arg1,arg2,arg3) // same as T(arg1,arg2,arg3)
+    BAnimal * b_animal_ptr   {boost::factory<BAnimal *>()()};
+    BDog *    b_dog_ptr      {boost::factory<BDog *>()()};
+    BCat *    b_cat          {boost::factory<BCat *>()()};
+    b_animal_ptr->speak();
+    b_dog_ptr->speak();
+    b_cat->speak(); */
+
+
+    /* *** Example 1
     // Animal a;           // TODO??: fails because pure virtual or no constructor.
     Animal * dog_ptr = Animal::create(Animal_type::dog); // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
     dog_ptr->speak();
     delete dog_ptr;
     Animal::create(Animal_type::cat)->speak();  // TODO??: What happens to this memory?  When new called in a temporary?  I can't delete it.
-
+    */
 
     // *** Example 2
     LOGGER_( ./Wrong_derived wd1{}; );
