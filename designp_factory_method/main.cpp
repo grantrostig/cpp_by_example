@@ -6,8 +6,8 @@
     Uses:
     Related Patterns:
     Inspired by: (and possible copyright and LICENSE)
-    C.50: Use a factory function if you need “virtual behavior” during initialization https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
-    C.82: Don’t call virtual functions in constructors and destructors https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c82-dont-call-virtual-functions-in-constructors-and-destructors
+C.50: Use a factory function if you need “virtual behavior” during initialization. https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
+C.82: Don’t call virtual functions in constructors and destructors. https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c82-dont-call-virtual-functions-in-constructors-and-destructors
 
     Edited by: Grant Rostig 2023
         Any additional beyond those that inspired this code is:
@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <source_location>
 #include <boost/functional/factory.hpp>
+#include <boost/functional/value_factory.hpp>
 //#include "animals.hpp"
 // Some crude logging that prints source location, where X prints a variable, and R adds \n\r (which is usefull when tty in in RAW or CBREAK mode. Requires C++20.
 #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
@@ -33,40 +34,39 @@
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 
-// ********** Example 0 using types in Ex 1. **********************
-enum class BAnimal_type { cat, dog };
-class BAnimal {
-public:
-    static BAnimal * create(BAnimal_type a);
-    BAnimal()        =default;          // TODO??: Why not needed? What does it do/mean here?
-    virtual         ~BAnimal();
-    virtual void    speak() { cout << "BGeneric Animal Call!" << endl; };
-  //virtual         ~BAnimal()  =0;     //
-  //virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any function to make it an abstract_class or Interface.
-};
-//void BAnimal::speak() { cout << "BGeneric Animal Call!" << endl; };
+//#define PURE_VIRTUAL
+//#define BOILER_PLATE_BOOST_TEST
+//#define PURE_VIRTUAL_DEFINED_CASE
 
-class BDog : public BAnimal { public: void speak(); }; void  BDog::speak() { cout << "BWoof!" << endl; }
-class BCat : public BAnimal { public: void speak(); }; void  BCat::speak() { cout << "BMeow!" << endl; }
-
-BAnimal::~BAnimal() {}                  // TODO??: Do I need this for Boost factory?
-BAnimal * BAnimal::create(BAnimal_type a) {
-    switch (a) {
-    case BAnimal_type::dog :
-        return new BDog();
-        break;
-    case BAnimal_type::cat :
-        return new BCat();
-        break;
-    };
-    assert( false );
-}
-
-// ********** Example 1 **********************
+namespace Boost_example { // ********** Example 0 using Boost **********************
 enum class Animal_type { cat, dog };
 class Animal {
 public:
-    static Animal * create(Animal_type a);
+    Animal()        =default;
+#ifdef PURE_VIRTUAL
+#ifdef BOILER_PLATE_BOOST_TEST
+    virtual         ~Animal()   =0;
+#endif // BOILER_PLATE_BOOST_TEST
+    virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any one function to make it an abstract_class AKA Interface.
+#else // not PURE_VIRTUAL
+#ifdef BOILER_PLATE_BOOST_TEST
+    virtual         ~Animal();
+#endif // BOILER_PLATE_BOOST_TEST
+    virtual void    speak();
+#endif
+};
+void Animal::speak() { cout << "Generic Animal Call!" << endl; };  // Need not be defined if =0, but can be.
+class Dog : public Animal { public: void speak() override; }; void  Dog::speak() { cout << "Woof!" << endl; }
+class Cat : public Animal { public: void speak() override; }; void  Cat::speak() { cout << "Meow!" << endl; }
+#ifdef BOILER_PLATE_BOOST_TEST
+Animal::~Animal() {}                  // TODO??: Do I need this for Boost factory?
+#endif
+}
+namespace Simple_example { // ********** Example 1 **********************
+enum class Animal_type { cat, dog };
+class Animal {
+public:
+    static Animal * create(Animal_type a);  // Has to be static so we can call it, since class isn't construstruced in intended usage.
     Animal()        =default;           // TODO??: Why not needed? What does it do/mean here?
     virtual         ~Animal();
   //virtual         ~Animal()   =0;     //
@@ -77,21 +77,18 @@ public:
   class Cat : public Animal { public: void speak(); }; void  Cat::speak() { cout << "Meow!" << endl; }
 //class Cat : public Animal { };
 Animal::~Animal() {}
-Animal * Animal::create(Animal_type a) {
-    switch (a) {
+Animal * Animal::create(Animal_type t) {    // Not virtual because this is the version that is called in intended usage, even with object of dynamic derived type.
+    switch (t) {
     case Animal_type::dog :
-        return new Dog();
-        break;
+        return new Dog();                   // TODO??: Should this be unique_ptr and or make_unique?
     case Animal_type::cat :
         return new Cat();
-        break;
     };
     assert( false );
 }
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };
-
-
-// ********** Example 2 illustrating C.50 & C.82 **********************
+}
+namespace C50_C82_example { // ********** Example 2 illustrating C.50 & C.82 **********************
 struct Wrong_base {
     string s_{"Definition inited"};
     Wrong_base()  {
@@ -104,7 +101,7 @@ struct Wrong_base {
         ub_to_call_virtual_in_constructor();  // *** Undefined behaviour
     }
 //#define BAD_C_82
-#ifdef  BAD_C_82
+#ifdef    BAD_C_82
     virtual string ub_to_call_virtual_in_constructor() =0;        // BAD: C.82: Don't call virtual functions in constructors and destructors or you will get UB.
 #else
     virtual string ub_to_call_virtual_in_constructor();
@@ -198,90 +195,95 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
             std::string my_derived_1_string{"Definition inited"};
             int my_derived_fn() { return 150; }
 };
-// ********** END Example 2 illustrating C.82 **********************
+}
+void test_example_0() { using namespace Boost_example;  //  boost::factory<T*>()(arg1,arg2,arg3) // same as new T(arg1,arg2,arg3)
+                                                        //  boost::value_factory<T>()(arg1,arg2,arg3) // same as T(arg1,arg2,arg3)
+#ifndef PURE_VIRTUAL
+    Animal *animal_ptr{boost::factory<Animal *>()()};
+    animal_ptr->speak();
+#endif
+    Dog *dog_ptr{boost::factory<Dog *>()()};
+    dog_ptr->speak();
 
-int main (int argc, char* argv[]) { string my_argv {*argv};cerr<< "~~~ argc,argv:"<<argc<<","<<my_argv<<"."<<endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    /* *** Example 0
-    //  boost::factory<T*>()(arg1,arg2,arg3) // same as new T(arg1,arg2,arg3)
-    //  boost::value_factory<T>()(arg1,arg2,arg3) // same as T(arg1,arg2,arg3)
-    BAnimal * b_animal_ptr   {boost::factory<BAnimal *>()()};
-    BDog *    b_dog_ptr      {boost::factory<BDog *>()()};
-    BCat *    b_cat          {boost::factory<BCat *>()()};
-    b_animal_ptr->speak();
-    b_dog_ptr->speak();
-    b_cat->speak(); */
-
-
-    /* *** Example 1
-    // Animal a;           // TODO??: fails because pure virtual or no constructor.
-    Animal * dog_ptr = Animal::create(Animal_type::dog); // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
+    Cat cat{boost::value_factory<Cat>()()};
+    cat.speak();
+    delete dog_ptr;
+}
+void test_example_1() { using namespace Simple_example;
+    // Animal a;           // Fails because pure virtual or no constructor.
+    Animal *dog_ptr = Animal::create( Animal_type::dog );                           // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
     dog_ptr->speak();
     delete dog_ptr;
-    Animal::create(Animal_type::cat)->speak();  // TODO??: What happens to this memory?  When new called in a temporary?  I can't delete it.
-    */
-
-    // *** Example 2
-    LOGGER_( ./Wrong_derived wd1{}; );
+    Animal::create(Animal_type::cat)->speak();      // TODO??: What happens to this memory?  When new called in a temporary?  I can't delete it.
+}
+void test_example_2() { using namespace C50_C82_example;
+    LOGGER_(./ Wrong_derived wd1{};);
     Wrong_derived wd1{};
-    LOGGERX( wd1.s_;,        wd1.s_ );
-    LOGGERX( wd1.derived_s_, wd1.derived_s_ );
-    LOGGERX(./wd1.ub_to_call_virtual_in_constructor()
-            , wd1.ub_to_call_virtual_in_constructor());
-    LOGGERX(./wd1.f()
-            , wd1.f() );
+    LOGGERX(wd1.s_;, wd1.s_);
+    LOGGERX(wd1.derived_s_, wd1.derived_s_);
+    LOGGERX(./ wd1.ub_to_call_virtual_in_constructor(), wd1.ub_to_call_virtual_in_constructor());
+    LOGGERX(./ wd1.f(), wd1.f());
 
     Wrong_derived wd2{"argument1"};
-    //std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument2"}};         // TODO??: Note warning.
+    /*std::unique_ptr<Wrong_derived> wd_unique_ptr_d{new Wrong_derived{"argument2"}};         // TODO??: Note warning.
     //std::unique_ptr<Wrong_derived> wb_unique_ptr_e{std::unique_ptr<Wrong_derived>()};
     //auto                           wb_unique_ptr_f{std::unique_ptr<Wrong_derived>()};
 
-//  std::unique_ptr<Wrong_derived> wd_unique_ptr_a{std::unique_ptr<Wrong_derived>("hello")};
-//  std::unique_ptr<Wrong_derived> wd_unique_ptr_h{std::unique_ptr<Wrong_derived>(){"hello"};
-//  std::unique_ptr<Wrong_derived> wd_unique_ptr_g{std::unique_ptr<Wrong_derived>()("hello")};
-
-/*  std::unique_ptr<Derived_1> uniq_ptr_1  { Derived_1::create_u<Derived_1>() };  // creating a Derived object
-    auto uniq_ptr_1a { Derived_1::create_u<Derived_1>() };  // creating a Derived object
-    cout << ":*** Unique ptr_1 ***" << endl;;
-    cout << uniq_ptr_1.get()->my_base_string     << endl;
-    cout << uniq_ptr_1.get()->my_base_fn()       << endl;
-    cout << uniq_ptr_1.get()->my_derived_1_string<< endl;
-    cout << uniq_ptr_1.get()->my_derived_fn()    << endl;
+    //  std::unique_ptr<Wrong_derived> wd_unique_ptr_a{std::unique_ptr<Wrong_derived>("hello")};
+    //  std::unique_ptr<Wrong_derived> wd_unique_ptr_h{std::unique_ptr<Wrong_derived>(){"hello"};
+    //  std::unique_ptr<Wrong_derived> wd_unique_ptr_g{std::unique_ptr<Wrong_derived>()("hello")};
+    */
+    /* std::unique_ptr<Derived_1> uniq_ptr_1{ Derived_1::create_u<Derived_1>() };              // creating a Derived object
+    auto uniq_ptr_1a{Derived_1::create_u<Derived_1>()}; // creating a Derived object
+    cout << ":*** Unique ptr_1 ***" << endl;
+    ;
+    cout << uniq_ptr_1.get()->my_base_string << endl;
+    cout << uniq_ptr_1.get()->my_base_fn() << endl;
+    cout << uniq_ptr_1.get()->my_derived_1_string << endl;
+    cout << uniq_ptr_1.get()->my_derived_fn() << endl;
 
     Derived_1 derived_1d{std::make_unique<Derived_1>()};
-    Derived_1 derived_1a{Derived_1::Protected_dummy_token {}};
+    Derived_1 derived_1a{Derived_1::Protected_dummy_token{}};
     int fake{};
-    Derived_1 derived_1b{ (Derived_1::Protected_dummy_token) fake {}};
+    Derived_1 derived_1b{(Derived_1::Protected_dummy_token) fake{}};
 
-    std::unique_ptr<Derived_1> temp_uniq_ptr_1 { Derived_1::create_u<Derived_1>() };  // creating a Derived object
-    auto temp{ *temp_uniq_ptr_1 };
-    Derived_1 derived_1c{ temp };
+    std::unique_ptr<Derived_1> temp_uniq_ptr_1{
+        Derived_1::create_u<Derived_1>()}; // creating a Derived object
+    auto temp{*temp_uniq_ptr_1};
+    Derived_1 derived_1c{temp};
     cout << derived_1c.my_derived_1_int << endl;
     cout << derived_1c.my_base_int << endl;
 
-    std::unique_ptr<Derived_2> uniq_ptr_2 { Derived_2::create_u<Derived_2>() };
-    cout << ":*** Unique ptr Derived_2 ***" << endl;;
-    cout << uniq_ptr_2.get()->my_base_int       << endl;;
-    cout << uniq_ptr_2.get()->my_derived_2_int  << endl;;
-    cout << uniq_ptr_2.get()->my_derived_fn()   << endl;;
+    std::unique_ptr<Derived_2> uniq_ptr_2{Derived_2::create_u<Derived_2>()};
+    cout << ":*** Unique ptr Derived_2 ***" << endl;
+    cout << uniq_ptr_2.get()->my_base_int << endl;
+    cout << uniq_ptr_2.get()->my_derived_2_int << endl;
+    cout << uniq_ptr_2.get()->my_derived_fn() << endl;
 
-    std::shared_ptr<Derived_1> shared_ptr_1 = Derived_1::create_s<Derived_1>();  // creating a Derived object
-    cout << ":*** Shared ptr Derived_1 ***"    << endl;;
-    cout << shared_ptr_1.get()->my_base_int     << endl;;
-    cout << shared_ptr_1.get()->my_derived_1_int<< endl;;
-    cout << shared_ptr_1.get()->my_derived_fn() << endl;;
+    std::shared_ptr<Derived_1> shared_ptr_1
+        = Derived_1::create_s<Derived_1>(); // creating a Derived object
+    cout << ":*** Shared ptr Derived_1 ***" << endl;
+    cout << shared_ptr_1.get()->my_base_int << endl;
+    cout << shared_ptr_1.get()->my_derived_1_int << endl;
+    cout << shared_ptr_1.get()->my_derived_fn() << endl;
 
-    std::shared_ptr<Derived_1> moved_shared_ptr_1 { std::move(uniq_ptr_1) };
-    cout << ":*** Unique ptr moved to Shared ptr ***"    << endl;;
-    cout << moved_shared_ptr_1.get()->my_base_int     << endl;;
-    cout << moved_shared_ptr_1.get()->my_derived_1_int<< endl;;
-    cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;;
- */
+    std::shared_ptr<Derived_1> moved_shared_ptr_1{std::move(uniq_ptr_1)};
+    cout << ":*** Unique ptr moved to Shared ptr ***" << endl;
+    cout << moved_shared_ptr_1.get()->my_base_int << endl;
+    cout << moved_shared_ptr_1.get()->my_derived_1_int << endl;
+    cout << moved_shared_ptr_1.get()->my_derived_fn() << endl;
+    */
+}
 
- /* Uncomment in main_shortened.cpp if running of that code is also wanted. And, or, rename the main() you want
+int main(int argc, char *argv[]) { string my_argv{*argv}; cerr << "~~~ argc,argv:" << argc << "," << my_argv << "." << endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
+    test_example_0();
+  //test_example_1();
+  //test_example_2();
+
+    /* Uncomment in main_shortened.cpp if running of that code is also wanted. And, or, rename the main() you want
     extern int main_not_shortened(int, char*[]);
     main_not_shortened(argc,argv);
     */
-
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
