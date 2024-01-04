@@ -1,7 +1,7 @@
 .gitignore.swp
 .vscode
 .gdb*
-.tar
+*.tar
 */build/
 */src/
 */inc/
