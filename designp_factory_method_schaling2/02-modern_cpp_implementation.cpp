@@ -1,35 +1,36 @@
 #include <cassert>
 #include <iostream>
 #include <memory>
-using namespace std::literals;
+#include <utility>
+using namespace std;
 namespace test_02_ns {
-struct I_Connection {                         // Abstract class or Interface
-    virtual ~I_Connection() = default;
-    virtual void send(const char *) = 0;
+struct I_Connection {                               // Abstract class or Interface
+    virtual ~I_Connection()                         =default;
+    virtual void send(const char *)                 =0;
 };
 
-struct TCPConnection : public I_Connection {
-    void send(const char *s) override { std::cout << "TCP2: " << s << std::endl; }
+struct TCPConnection final : public I_Connection {
+    void send(const char *s) override final { cout << "TCP2: " << s << endl; }
 };
 
-struct UDPConnection : public I_Connection {
-    void send(const char *s) override { std::cout << "UDP2: " << s << std::endl; }
+struct UDPConnection final : public I_Connection {
+    void send(const char *s) override final { cout << "UDP2: " << s << endl; }
 };
 
-struct I_ConnectionFactory {                  // Abstract class of Interface
-    virtual ~I_ConnectionFactory() = default;
-    virtual std::unique_ptr<I_Connection> make() = 0;
+struct I_ConnectionFactory {                        // Abstract class of Interface
+    virtual ~I_ConnectionFactory()                  =default;
+    virtual unique_ptr<I_Connection> make()    =0;
 };
 
-struct TCPConnectionFactory : public I_ConnectionFactory {
-    //I_Connection *make() override { return std::make_unique<TCPConnection>(); }
-    std::unique_ptr<I_Connection> make() override { return std::make_unique<TCPConnection>(); }
+struct TCPConnectionFactory final : public I_ConnectionFactory {
+    unique_ptr<I_Connection> make() override final { return make_unique<TCPConnection>(); }   // TODO??: RVO? Moved?
 };
 
-struct UDPConnectionFactory : public I_ConnectionFactory {
-    std::unique_ptr<I_Connection> make() override { return std::unique_ptr<UDPConnection>(); }
+struct UDPConnectionFactory final : public I_ConnectionFactory {
+    unique_ptr<I_Connection> make() override final { return unique_ptr<UDPConnection>(); }    // TODO??: Does this non-make elide one new()?
 };
 
+<<<<<<< Updated upstream
 //#define PASS_BY_REF
 #ifdef PASS_BY_REF
 void use_factory(I_ConnectionFactory &i_conFactory) {
@@ -88,4 +89,24 @@ void test_02() {  using namespace test_02_ns;
     //use_factory(std::move(i_conFactory_uptr));
  // use_factory(i_conFactory_uptr);
  // i_conFactory_uptr.reset(nullptr);
+=======
+//void use_factory(unique_ptr<I_ConnectionFactory> &i_conFactory) {
+void use_factory(unique_ptr<I_ConnectionFactory> i_conFactory) {
+    unique_ptr<I_Connection> i_con{ i_conFactory->make() };    // static type
+    i_con->send("Hello");                                           // dynamic type is run
+    i_con.reset(nullptr);
+}}
+
+void test_02() {  using namespace test_02_ns;
+    unique_ptr<I_ConnectionFactory> i_conFactory_uptr{};       // static type
+    i_conFactory_uptr = make_unique<TCPConnectionFactory>();   // static type  TODO??: Is this copy assignment or initialization or construction?  What happens to ownership?
+                        // OR JUST: unique_ptr<I_ConnectionFactory> i_conFactory_uptr{make_unique<TCPConnectionFactory>()};
+
+    use_factory( std::move( i_conFactory_uptr ) );
+    i_conFactory_uptr.reset(nullptr);
+
+    i_conFactory_uptr.reset( new UDPConnectionFactory );
+    use_factory(std::move(i_conFactory_uptr));
+    i_conFactory_uptr.reset(nullptr);
+>>>>>>> Stashed changes
 }
