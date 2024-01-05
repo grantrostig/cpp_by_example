@@ -30,7 +30,6 @@ struct UDPConnectionFactory final : public I_ConnectionFactory {
     unique_ptr<I_Connection> make() override final { return unique_ptr<UDPConnection>(); }    // TODO??: Does this non-make elide one new()?
 };
 
-<<<<<<< Updated upstream
 //#define PASS_BY_REF
 #ifdef PASS_BY_REF
 void use_factory(I_ConnectionFactory &i_conFactory) {
@@ -51,7 +50,7 @@ void use_factory(std::unique_ptr<I_ConnectionFactory> i_conFactory) {
     std::unique_ptr<I_Connection> i_con{i_conFactory->make()};  // static type
 #endif
     i_con->send("Bye");                       					// dynamic type is run
-    //i_con.reset(nullptr);
+    i_con.reset(nullptr);
 }
 
 auto use_factory_rtn(std::unique_ptr<I_ConnectionFactory> i_conFactory) {
@@ -63,6 +62,7 @@ auto use_factory_rtn(std::unique_ptr<I_ConnectionFactory> i_conFactory) {
 void test_02() {  using namespace test_02_ns;
     std::unique_ptr<I_ConnectionFactory> i_conFactory_uptr{};   		// static type, but NULL
     i_conFactory_uptr = std::make_unique<TCPConnectionFactory>();   	// static type, loaded.
+                        // OR JUST: unique_ptr<I_ConnectionFactory> i_conFactory_uptr{make_unique<TCPConnectionFactory>()};
     //i_conFactory_uptr.reset( std::make_unique<TCPConnectionFactory>() );// TODO??: Why? FAIL static type, loaded.
     i_conFactory_uptr.reset(new TCPConnectionFactory);                  // static type, loaded
 
@@ -89,24 +89,7 @@ void test_02() {  using namespace test_02_ns;
     //use_factory(std::move(i_conFactory_uptr));
  // use_factory(i_conFactory_uptr);
  // i_conFactory_uptr.reset(nullptr);
-=======
 //void use_factory(unique_ptr<I_ConnectionFactory> &i_conFactory) {
-void use_factory(unique_ptr<I_ConnectionFactory> i_conFactory) {
-    unique_ptr<I_Connection> i_con{ i_conFactory->make() };    // static type
-    i_con->send("Hello");                                           // dynamic type is run
-    i_con.reset(nullptr);
-}}
-
-void test_02() {  using namespace test_02_ns;
-    unique_ptr<I_ConnectionFactory> i_conFactory_uptr{};       // static type
-    i_conFactory_uptr = make_unique<TCPConnectionFactory>();   // static type  TODO??: Is this copy assignment or initialization or construction?  What happens to ownership?
-                        // OR JUST: unique_ptr<I_ConnectionFactory> i_conFactory_uptr{make_unique<TCPConnectionFactory>()};
-
-    use_factory( std::move( i_conFactory_uptr ) );
-    i_conFactory_uptr.reset(nullptr);
-
-    i_conFactory_uptr.reset( new UDPConnectionFactory );
-    use_factory(std::move(i_conFactory_uptr));
-    i_conFactory_uptr.reset(nullptr);
->>>>>>> Stashed changes
 }
+
+
