@@ -95,19 +95,20 @@ void test_09();
 void test_12();
 //void test_13();
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl; //crash_signals_register(); cin.exceptions( std::istream::failbit);  // throw on fail of cin.
-    test_01();
+ // test_01();
     test_02();
-    test_03();
-    test_04();
-    test_05();
-    test_06();
-    test_07();
-    test_08();
-    test_09();
+ // test_03();
+ // test_04();
+ // test_05();
+ // test_06();
+ // test_07();
+ // test_08();
+ // test_09();
     //test_10();
     //test_11();
-    test_12();
+ // test_12();
     //test_13();
+
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
