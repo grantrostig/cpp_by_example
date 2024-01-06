@@ -18,7 +18,7 @@ using TCPConnectionFactory = boost::value_factory<TCPConnection>;
 using UDPConnectionFactory = boost::value_factory<UDPConnection>;
 
 template<class ConnectionFactory>
-void send(ConnectionFactory &conFactory) {
+void send(ConnectionFactory const &conFactory) {
     auto con = conFactory();
     con.send("Hello");
 }

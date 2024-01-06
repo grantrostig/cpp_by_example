@@ -22,15 +22,15 @@ struct I_ConnectionFactory {                        // Abstract class of Interfa
 };
 
 struct TCPConnectionFactory final : public I_ConnectionFactory {
-    unique_ptr<I_Connection> make() override final { return make_unique<TCPConnection>(); }   // TODO??: RVO? Moved?
+    unique_ptr<I_Connection> make() override final { return make_unique<TCPConnection>(); }     // TODO??: RVO? Moved?
 };
 
 struct UDPConnectionFactory final : public I_ConnectionFactory {
-    //unique_ptr<I_Connection> make() override final { return unique_ptr<UDPConnection>(); }  // TODO??: Why does this compile but crash later?
+    //unique_ptr<I_Connection> make() override final { return unique_ptr<UDPConnection>(); }    // TODO??: Why does this compile but crash later?
     unique_ptr<I_Connection> make() override final {   return make_unique<TCPConnection>(); }   // TODO??: RVO? Moved?
 };
 
-//#define PASS_BY_REF
+#define PASS_BY_REF
 #ifdef PASS_BY_REF
   void use_factory_hello(           I_ConnectionFactory &i_conFactory) {
     unique_ptr<I_Connection> i_con = i_conFactory.make();  // static type
@@ -42,33 +42,36 @@ struct UDPConnectionFactory final : public I_ConnectionFactory {
   }
 #else
   void use_factory_hello(unique_ptr<I_ConnectionFactory> i_conFactory) {
-    unique_ptr<I_Connection> i_con{  i_conFactory->make() };  // static type
-    i_con->send("Hello");                       // dynamic type is run
+    unique_ptr<I_Connection> i_con{  i_conFactory->make() };            // static type
+    i_con->send("Hello");                                               // dynamic type is run
   }
   void use_factory_bye(unique_ptr<I_ConnectionFactory>  i_conFactory) {
-    unique_ptr<I_Connection> i_con { i_conFactory->make() };  // static type
-    i_con->send("Bye");                       					// dynamic type is run
+    unique_ptr<I_Connection> i_con { i_conFactory->make() };            // static type
+    i_con->send("Bye");                       					        // dynamic type is run
   }
 #endif
 
 auto use_factory_return_it(unique_ptr<I_ConnectionFactory> i_conFactory) {
-    unique_ptr<I_Connection> i_con{i_conFactory->make()};  // static type
-    i_con->send("RETURN_HELLO");                       			// dynamic type is run
+    unique_ptr<I_Connection> i_con{i_conFactory->make()};               // static type
+    i_con->send("RETURN_HELLO");                       			        // dynamic type is run
     return i_conFactory;
 }}
 
 void test_02() {  using namespace test_02_ns; cout << "Start test 02" << endl;
     unique_ptr<I_ConnectionFactory> i_conFactory_uptr{};   		        // static type, but NULL
-    i_conFactory_uptr = make_unique<TCPConnectionFactory>();   	// static type, loaded.
+    unique_ptr<I_ConnectionFactory> i_conFactory_uptr2{ new TCPConnectionFactory };
+    i_conFactory_uptr = make_unique<TCPConnectionFactory>();   	        // static type, loaded.
+    i_conFactory_uptr = make_unique<TCPConnectionFactory>();   	        // static type, loaded.
                         // OR JUST: unique_ptr<I_ConnectionFactory> i_conFactory_uptr{make_unique<TCPConnectionFactory>()}; // grostig verified.
-    //i_conFactory_uptr.reset( make_unique<TCPConnectionFactory>() );   // TODO??: Why? FAIL static type, loaded.
-    i_conFactory_uptr.reset( new TCPConnectionFactory );                // static type, loaded
+    //i_conFactory_uptr.reset( make_unique<TCPConnectionFactory>().get() );   // TODO??: Why? FAIL static type, loaded.  Doesn't decay to raw_pointer?
+    //i_conFactory_uptr.reset( make_unique<TCPConnectionFactory>().release() );   // TODO??: Why? FAIL static type, loaded.  Doesn't decay to raw_pointer?
+    //i_conFactory_uptr.reset( new TCPConnectionFactory );                // static type, loaded
 
-#ifdef PASS_BY_REF
-    use_factory_hello(*i_conFactory_uptr);	// We didn't pass the pointer, or ownership, just the value, which is a covariant factory class
-    use_factory_bye(  *i_conFactory_uptr);
+#ifdef PASS_BY_REF  // CCG R.33 says so.
+    use_factory_hello(*i_conFactory_uptr);	// TODO??: We didn't pass the pointer, just the value, which is a covariant factory class, BUT WHO OWNS IT?
+    use_factory_bye(  *i_conFactory_uptr);  // TODO??: WHO OWNS IT and how can we use it again?
 #else
-                                            //use_factory_hello(std::move(i_conFactory_uptr));       // BAD: We loose posession TODO??: permanently?
+                                            //use_factory_hello(std::move(i_conFactory_uptr));  // BAD: We loose posession TODO??: permanently?
     i_conFactory_uptr = use_factory_return_it(std::move(i_conFactory_uptr));
                                 // i_conFactory_uptr = use_factory_return_it(i_conFactory_uptr);// FAILS because we can't copy it.
     assert(i_conFactory_uptr.get());
@@ -76,17 +79,19 @@ void test_02() {  using namespace test_02_ns; cout << "Start test 02" << endl;
 #endif
 
     // *** UDP is second type ***
- // i_conFactory_uptr.reset(new UDPConnectionFactory);                   // BAD, causes error of staying TCP, TODO??: not sure why?
+    i_conFactory_uptr.reset(new UDPConnectionFactory);                   // No problem.
+    cout << "type:" << typeid( i_conFactory_uptr.get() ).name() << endl;
+
     unique_ptr<I_ConnectionFactory> i_conFactory_uptr_udp{make_unique<UDPConnectionFactory>()};
 #ifdef PASS_BY_REF
     use_factory_hello( *i_conFactory_uptr_udp);
  // use_factory_hello( *i_conFactory_uptr);
+    i_conFactory_uptr.reset(nullptr);       // Release the resource RIGHT NOW.  Not necessary
+    i_conFactory_uptr_udp.reset(nullptr);   // Release the resource RIGHT NOW.  Not necessary
 #else
     use_factory_hello(std::move(i_conFactory_uptr_udp));
  // use_factory_hello(std::move(i_conFactory_uptr));
 #endif
-    i_conFactory_uptr.reset(nullptr);
-    i_conFactory_uptr_udp.reset(nullptr);
     cout << "End test 02"<< endl;
 }
 

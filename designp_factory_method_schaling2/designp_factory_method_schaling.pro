@@ -16,10 +16,10 @@ SOURCES += \
     07-type_erasure_std-function.cpp \
     08-type_erasure_boost_typeerasure_1.cpp \
     09-type_erasure_boost_typeerasure_2.cpp \
-    #10-heap_factory_boost_factory.cpp \
-    #11-value_factory_boost_factory.cpp \
+    10-heap_factory_boost_factory.cpp \
+    11-value_factory_boost_factory.cpp \
     12-handmade_function_class.cpp \
-    #13-handmade_any_class.cpp \
+    13-handmade_any_class.cpp \
     main.cpp \
 
 HEADERS += \
