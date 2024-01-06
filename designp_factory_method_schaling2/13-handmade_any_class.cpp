@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 using namespace std;
-
+namespace test_13_ns {
 template<typename Concept>
 struct Any_Concept : Concept {
     template<typename T>
@@ -38,7 +38,7 @@ struct Any_Concept : Concept {
         private:                                            \
             T t;                                            \
         };                                                  \
-        std::unique_ptr<Object_base> object_base_uptr;                     \
+        std::unique_ptr<Object_base> object_base_uptr;      \
     };
 
 MEMBER_FUNCTION( C_must_have_send, send )
@@ -51,9 +51,9 @@ struct TCPConnection {
 
 struct UDPConnection {
     void send(const char *s) { std::cout << "UDP: " << s << '\n'; }
-};
+};}
 
-void test_13() { cout << "START test 13" << endl;
+void test_13() { using namespace test_13_ns; cout << "START test 13" << endl;
     Connection c;
     c = TCPConnection{};
     // Connection c2 = {TCPConnection{}};  // TODO??: Why fail when above works?
