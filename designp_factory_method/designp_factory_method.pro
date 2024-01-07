@@ -6,7 +6,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-    #animals.cpp \
     main.cpp \
     main_shortened.cpp
 

@@ -34,18 +34,26 @@ C.82: Don’t call virtual functions in constructors and destructors. https://is
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 
-//#define PURE_VIRTUAL
+#define PURE_VIRTUAL
 //#define BOILER_PLATE_BOOST_TEST
 //#define PURE_VIRTUAL_DEFINED_CASE
 
 namespace Boost_example { // ********** Example 0 using Boost **********************
+
+//#define PURE_VIRTUAL
+#define BOILER_PLATE_BOOST_TEST
 enum class Animal_type { cat, dog };
+
 class Animal {
 public:
+    string species{};
+    int * int_ptr{};
     Animal()        =default;
+ // Animal() { int_ptr = new int[10];}; }
 #ifdef PURE_VIRTUAL
 #ifdef BOILER_PLATE_BOOST_TEST
     virtual         ~Animal()   =0;
+  //virtual         ~Animal();
 #endif // BOILER_PLATE_BOOST_TEST
     virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any one function to make it an abstract_class AKA Interface.
 #else // not PURE_VIRTUAL
@@ -55,28 +63,44 @@ public:
     virtual void    speak();
 #endif
 };
-void Animal::speak() { cout << "Generic Animal Call!" << endl; };  // Need not be defined if =0, but can be.
-class Dog : public Animal { public: void speak() override; }; void  Dog::speak() { cout << "Woof!" << endl; }
+void Animal::speak() { cout << "Generic Animal Call!" << endl; };  // grostig: Need not be defined if =0, but can be.
+
+class Dog : public Animal {
+public: void speak() override; }; void  Dog::speak() { cout << "Woof!" << endl;
+}
 class Cat : public Animal { public: void speak() override; }; void  Cat::speak() { cout << "Meow!" << endl; }
 #ifdef BOILER_PLATE_BOOST_TEST
 Animal::~Animal() {}                  // TODO??: Do I need this for Boost factory?
 #endif
 }
+
 namespace Simple_example { // ********** Example 1 **********************
 enum class Animal_type { cat, dog };
 class Animal {
 public:
+    string species{};
     static Animal * create(Animal_type a);  // Has to be static so we can call it, since class isn't construstruced in intended usage.
     Animal()        =default;           // TODO??: Why not needed? What does it do/mean here?
-    virtual         ~Animal();
-  //virtual         ~Animal()   =0;     //
+  //virtual         ~Animal();
+    virtual         ~Animal()   =0;     //
   //virtual void    speak();
     virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any function to make it an abstract_class or Interface?
 };
-  class Dog : public Animal { public: void speak(); }; void  Dog::speak() { cout << "Woof!" << endl; }
-  class Cat : public Animal { public: void speak(); }; void  Cat::speak() { cout << "Meow!" << endl; }
+Animal::~Animal() { cout << "ex 1 animal destructor"<< endl;}
+  class Dog : public Animal {
+  public:
+      void speak();
+      ~Dog() { cout << "ex1 Dog destructo"<<endl;};
+  };
+  void  Dog::speak() { cout << "Woof!" << endl; }
+
+  class Cat : public Animal {
+  public:
+      void speak();
+      ~Cat() { cout << "ex1 Cat destructo"<<endl;};
+  };
+  void  Cat::speak() { cout << "Meow!" << endl; }
 //class Cat : public Animal { };
-Animal::~Animal() {}
 Animal * Animal::create(Animal_type t) {    // Not virtual because this is the version that is called in intended usage, even with object of dynamic derived type.
     switch (t) {
     case Animal_type::dog :
@@ -88,6 +112,10 @@ Animal * Animal::create(Animal_type t) {    // Not virtual because this is the v
 }
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };
 }
+
+
+
+
 namespace C50_C82_example { // ********** Example 2 illustrating C.50 & C.82 **********************
 struct Wrong_base {
     string s_{"Definition inited"};
@@ -196,21 +224,35 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
             int my_derived_fn() { return 150; }
 };
 }
+
 void test_example_0() { using namespace Boost_example;  //  boost::factory<T*>()(arg1,arg2,arg3) // same as new T(arg1,arg2,arg3)
                                                         //  boost::value_factory<T>()(arg1,arg2,arg3) // same as T(arg1,arg2,arg3)
 #ifndef PURE_VIRTUAL
     Animal *animal_ptr{boost::factory<Animal *>()()};
     animal_ptr->speak();
 #endif
-    Dog *dog_ptr{boost::factory<Dog *>()()};
-    dog_ptr->speak();
+
+    Dog *dog_ptr2{(boost::factory<Dog *>())()};  // ptr to dog on heap
+
+    //auto x {boost::factory<Dog *>()};
+    boost::factory<Dog *> dog_factory3;
+    Dog * dog_ptr3{ dog_factory3() };  // callable?
+    Dog * dog_ptr4{ new Dog{} };
+
+    // Dog *dog_ptr{dog_factory()};
+
+    //dog_ptr->speak();
+    dog_ptr3->speak();
+    dog_ptr4->speak();
 
     Cat cat{boost::value_factory<Cat>()()};
     cat.speak();
-    delete dog_ptr;
+
+    delete dog_ptr3;
 }
+
 void test_example_1() { using namespace Simple_example;
-    // Animal a;           // Fails because pure virtual or no constructor.
+    //Animal a;           // Fails because pure virtual or no constructor.
     Animal *dog_ptr = Animal::create( Animal_type::dog );                           // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
     dog_ptr->speak();
     delete dog_ptr;
@@ -276,8 +318,8 @@ void test_example_2() { using namespace C50_C82_example;
 }
 
 int main(int argc, char *argv[]) { string my_argv{*argv}; cerr << "~~~ argc,argv:" << argc << "," << my_argv << "." << endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    test_example_0();
-  //test_example_1();
+  //test_example_0();
+    test_example_1();
   //test_example_2();
 
     /* Uncomment in main_shortened.cpp if running of that code is also wanted. And, or, rename the main() you want
