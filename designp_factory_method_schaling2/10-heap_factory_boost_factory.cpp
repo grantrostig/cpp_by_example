@@ -1,32 +1,29 @@
 #include <boost/functional/factory.hpp>
 #include <iostream>
-#include <string>
+using namespace std;
 
-using namespace std::literals;
+namespace test_10_ns {
+struct TCPConnection { void send(const char *s) { std::cout << "TCP: " << s << '\n'; } };
+struct UDPConnection { void send(const char *s) { std::cout << "UDP: " << s << '\n'; } };
 
-struct TCPConnection {
-    void send(const char *s) { std::cout << "TCP: " << s << '\n'; }
-};
-
-struct UDPConnection {
-    void send(const char *s) { std::cout << "UDP: " << s << '\n'; }
-};
-
+// NOT value, but ptr // TODO??: What sort of pointer and where is it?
 using TCPConnectionFactory = boost::factory<TCPConnection *>;
 using UDPConnectionFactory = boost::factory<UDPConnection *>;
 
 template<class ConnectionFactory>
-void send(ConnectionFactory const & conFactory) {  // Will bind to a temporary?
-//void send(ConnectionFactory && conFactory) {
-    auto *con = conFactory();
-    con->send("Hello");
-    delete con;
-}
+void send(ConnectionFactory const & conFactory) {   // Will bind to a temporary if it is const.
+// OR THIS: $ void send(ConnectionFactory && conFactory) {
+    auto *con_factory_ptr = conFactory();
+    con_factory_ptr->send("Hello");
 
-void test_10() {
-    auto x =TCPConnectionFactory();
-    send(x);
+    delete con_factory_ptr;                                     // TODO??: What is deleted and what not?
+}}
 
-    send(TCPConnectionFactory());  // temporary is good enough and ends at ";"
-    send(UDPConnectionFactory());
+void test_10() { using namespace test_10_ns; cout << "START test 10" << endl;
+    // OR THIS: $ send(TCPConnectionFactory());  // temporary is good enough and ends at ";"
+    boost::factory<TCPConnection *> boost_factory{TCPConnectionFactory()};
+    send(boost_factory);
+
+    send( UDPConnectionFactory() );
+    cout << "END   test 10" << endl;
 }

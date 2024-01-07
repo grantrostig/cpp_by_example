@@ -1,4 +1,5 @@
 #include <iostream>
+using namespace std;
 namespace test_01_ns {
 struct I_Connection {                         // Abstract class or Interface
     virtual ~I_Connection()         =default;

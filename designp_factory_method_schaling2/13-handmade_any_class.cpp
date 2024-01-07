@@ -1,65 +1,63 @@
+/* IPV means: Interface via Pure Virtual technique. */
 #include <iostream>
 #include <memory>
 using namespace std;
 namespace test_13_ns {
-template<typename Concept>
-struct Any_Concept : Concept {
-    template<typename T>
-    void operator=(T t) {
-        Concept::object_base_uptr = std::make_unique< typename Concept::template object<T> >(t);
-    }
-};
 
-#define MEMBER_FUNCTION(x, y)                               \
-    template<typename T>                                    \
-    struct x; /* forward decl and ends template d/t ";" */  \
+#define MEMBER_FN_GENERATOR( UDT_with_one_fn, member_fn_name ) \
+    template<typename T> class UDT_with_one_fn; /* Forward Decl and ENDs template with ";" */ \
                                                             \
-    template<typename ReturnType, typename... Args>         \
-    struct x<ReturnType(Args...)>  {                        \
-        ReturnType y(Args... args)                          \
-        {                                                   \
-            return object_base_uptr->invoke(args...);       \
+    template<typename Return_type, typename... Args>        \
+    class UDT_with_one_fn< Return_type( Args... ) > {       \
+    public:                                                 \
+        Return_type member_fn_name( Args... args ) {        \
+            return object_base_uptr_->invoke( args... );    \
         }                                                   \
                                                             \
     protected:                                              \
-        struct Object_base  {                               \
-            virtual ~Object_base()              =default;   \
-            virtual ReturnType invoke(Args...)  =0;         \
+        class IPV_Object_base  {                            \
+        public:                                             \
+            virtual ~IPV_Object_base()            =default; \
+            virtual Return_type invoke( Args... )  =0;      \
         };                                                  \
                                                             \
-        template<class T>                                   \
-        struct object : Object_base  {                      \
-            object(T t) : t{t} {}                           \
-            ReturnType invoke(Args... args) override        \
-            {                                               \
-                return t.y(args...);                        \
+        template<typename UDT_with_one_fn> /* TODO??: Should this typename have a different name? Is it seperable? */                 \
+        class Object_derived : public IPV_Object_base  {    \
+            UDT_with_one_fn t_;                             \
+        public:                                             \
+            Object_derived(UDT_with_one_fn t) : t_{t} {}    \
+            Return_type invoke( Args... args ) override {   \
+                return t_.member_fn_name( args... );        \
             }                                               \
-                                                            \
-        private:                                            \
-            T t;                                            \
         };                                                  \
-        std::unique_ptr<Object_base> object_base_uptr;      \
-    };
+                                                            \
+        std::unique_ptr<IPV_Object_base> object_base_uptr_; /* can we make this private with using friend? Would that better? */ \
+    }; // END template. // END Macro.
 
-MEMBER_FUNCTION( C_must_have_send, send )
+MEMBER_FN_GENERATOR( UDT_with_named_fn, send )
+using UDT_with_named_fn_parameterized = UDT_with_named_fn< void(const char *) >;
 
-using Connection = Any_Concept< C_must_have_send< void(const char *) > >;
+template<typename UDT_base>
+class Target_Concrete_Derived_UDT : public UDT_base {                     // TODO??: Where is assignment used?
+public: template<typename T>
+    void operator=(T t) {
+        UDT_base::object_base_uptr_ = std::make_unique<
+            typename UDT_base::template Object_derived<T>    // Dynamic uptr. // TODO??: what are "template" & "::template" here?
+        >( t );
+    }
+}; // END template.
+using Connection = Target_Concrete_Derived_UDT< UDT_with_named_fn_parameterized >;
 
-struct TCPConnection {
-    void send(const char *s) { std::cout << "TCP: " << s << '\n'; }
-};
-
-struct UDPConnection {
-    void send(const char *s) { std::cout << "UDP: " << s << '\n'; }
-};}
+class TCPConnection { public: void send(const char *s) { std::cout << "TCP: " << s << '\n'; } };
+class UDPConnection { public: void send(const char *s) { std::cout << "UDP: " << s << '\n'; } };}
 
 void test_13() { using namespace test_13_ns; cout << "START test 13" << endl;
     Connection c;
-    c = TCPConnection{};
-    // Connection c2 = {TCPConnection{}};  // TODO??: Why fail when above works?
-    c.send("Hello");
+    c = TCPConnection{}; // TODO??: Why fail when other works, a constructor missing? $ Connection c2 = {TCPConnection{}};
+    c.send("Hello form TCP");
 
     c = UDPConnection{};
-    c.send("Hello");
+    c.send("Hello from UPD");
+
     cout << "END   test 13" << endl;
 }

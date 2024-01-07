@@ -1,59 +1,45 @@
 #include <iostream>
 #include <memory>
-
-template<typename T>
-class function;
-
-template<typename ReturnType, typename... Args>
-class function<ReturnType(Args...)>
-{
-public:
-    template<typename T>
-    void operator=(T t)
-    {
-        c = std::make_unique<callable<T>>(t);
-    }
-    ReturnType operator()(Args... args) { return c->invoke(args...); }
-
-private:
-    struct callable_base
-    {
-        virtual ~callable_base() = default;
-        virtual ReturnType invoke(Args...) = 0;
-    };
-
-    template<class T>
-    struct callable : callable_base
-    {
-        callable(T t)
-            : t(t)
-        {}
-        ReturnType invoke(Args... args) override { return t(args...); }
-
-    private:
-        T t;
-    };
-
-    std::unique_ptr<callable_base> c;
-};
+using namespace std;
 
 namespace test_12_ns {
-void hello()
-{
-    std::cout << "Hello function\n";
-}
+template<typename T> class templated_parameterized_fn;                    // Forward decl.
 
-struct Hello
-{
-    void operator()() const { std::cout << "Hello class\n"; }
+template<typename Return_type, typename... Args>
+class templated_parameterized_fn< Return_type( Args... ) > {
+public:
+    template<typename T>
+    void operator=(T t) {
+        c = std::make_unique<Callable_derived<T>>(t);
+    }
+    Return_type operator()( Args... args ) { return c->invoke( args... ); }
+private:
+    struct Callable_base {
+        virtual ~Callable_base() = default;
+        virtual Return_type invoke( Args... ) = 0;
+    };
+    template<class T>  // nested templated class
+    struct Callable_derived : Callable_base {
+        Callable_derived(T t) : t_(t) {}
+        Return_type invoke( Args... args ) override { return t_( args... ); }
+
+    private:
+        T t_;
+    };
+
+    std::unique_ptr<Callable_base> c;
 };
-}
 
-void test_12() {
-    using namespace test_12_ns;
-    function<void()> f;
+void hello() { std::cout << "Hello templated_parameterized_fn\n"; }
+class Hello_fo { public: void operator()() const { std::cout << "Hello class_fo\n"; } };
+} // END namespace
+
+void test_12() { using namespace test_12_ns; cout << "START test 12" << endl;
+    templated_parameterized_fn< void() > f;
     f = hello;
     f();
-    f = Hello();
+
+    f = Hello_fo();
     f();
+    cout << "END   test 12" << endl;
 }

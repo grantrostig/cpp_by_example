@@ -24,7 +24,7 @@ void send(ConnectionFactory &conFactory) {
     con.send("Hello");
 }}
 
-void test_05() { using namespace test_05_ns; cout << "END  test 05" << endl;
+void test_05() { using namespace test_05_ns; cout << "STARTtest 05" << endl;
     TCPConnectionFactory tcp_factory;
     send(tcp_factory);
     tcp_factory.~TCPConnectionFactory();

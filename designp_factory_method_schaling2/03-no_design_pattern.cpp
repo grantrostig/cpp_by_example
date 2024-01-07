@@ -8,9 +8,9 @@ struct TCPConnection {
 
 struct UDPConnection {
     void send(const char *s) { std::cout << "UDP: " << s << '\n'; }
-};
-}
+}; }
 
+// No design pattern
 void test_03() { using namespace test_03_ns; cout << "Start test 03" << endl;
     TCPConnection con;
     con.send("TCP Hello");

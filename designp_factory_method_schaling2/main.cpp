@@ -81,34 +81,34 @@ operator<<( std::ostream & out, Container const & c) {
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 // ++++++++++++++++ EXAMPLE begins ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//void test_01();
-//void test_02();
-//void test_03();
-//void test_04();
-//void test_05();
-//void test_06();
-//void test_07();
-//void test_08();
-//void test_09();
-//void test_10();
-//void test_11();
-//void test_12();
-//void test_13();
+void test_01();
+void test_02();
+void test_03();
+void test_04();
+void test_05();
+void test_06();
+void test_07();
+void test_08();
+void test_09();
+void test_10();
+void test_11();
+void test_12();
+void test_13();
 void test_13b();
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl; //crash_signals_register(); cin.exceptions( std::istream::failbit);  // throw on fail of cin.
-    //test_01();
-    //test_02();
-    //test_03();
-    //test_04();
-    //test_05();
-    //test_06();
-    //test_07();
-    //test_08();
-    //test_09();
-    //test_10();
-    //test_11();
-    //test_12();
-    //test_13();
+    test_01();
+    test_02();
+    test_03();
+    test_04();
+    test_05();
+    test_06();
+    test_07();
+    test_08();
+    test_09();
+    test_10();
+    test_11();
+    test_12();
+    test_13();
     test_13b();
 
     cout << "###" << endl;

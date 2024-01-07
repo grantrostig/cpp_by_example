@@ -1,58 +1,57 @@
 #include <functional>
 #include <iostream>
 #include <memory>
-#include <string>
-
-using namespace std::literals;
+using namespace std;
 
 namespace test_07_ns {
-struct Connection
-{
-    virtual ~Connection() = default;
-    virtual void send(const char *) = 0;
+class Connection {
+public:
+    virtual ~Connection()           =default;
+    virtual void send(const char *) =0;
 };
 
-struct TCPConnection : public Connection
-{
+class TCPConnection : public Connection {
+public:
     void send(const char *s) { std::cout << "TCP: " << s << '\n'; }
 };
 
-struct UDPConnection : public Connection
-{
+class UDPConnection : public Connection {
+public:
     void send(const char *s) { std::cout << "UDP: " << s << '\n'; }
 };
 
-struct TCPConnectionFactory
-{
-    std::unique_ptr<Connection> operator()()
-    {
+class TCPConnectionFactory {
+public:
+    std::unique_ptr<Connection> operator()() {
         return std::unique_ptr<Connection>(new TCPConnection);
     }
 };
 
-struct UDPConnectionFactory
-{
-    std::unique_ptr<Connection> operator()()
-    {
+class UDPConnectionFactory {
+public:
+    std::unique_ptr<Connection> operator()() {
         return std::unique_ptr<Connection>(new UDPConnection);
     }
 };
 
+// Type erasure?
 template<class ConnectionFactory>
-void send(ConnectionFactory &conFactory)
-{
+void send(ConnectionFactory &conFactory) {
     auto con = conFactory();
     con->send("Hello");
-}
-}
+}}
 
-void test_07()
-{
-    using namespace test_07_ns;
-    std::function<std::unique_ptr<Connection>()> factory;
-    factory = TCPConnectionFactory();
-    send(factory);
-    factory = nullptr;
-    factory = UDPConnectionFactory();
-    send(factory);
+void test_07() { using namespace test_07_ns; cout << "START test 07" << endl;
+    std::function<std::unique_ptr<Connection>()> con_factory;
+    con_factory = TCPConnectionFactory();
+    send(con_factory);
+
+    con_factory = nullptr;  // TODO??: Does this release most/all memory?
+    // con_factory.target( TCPConnectionFactory());  // TODO: review what target() does.
+
+    con_factory = UDPConnectionFactory();
+    send(con_factory);
+
+    // factory.~YYYY();  // TODO??: what is destructor?
+    cout << "END   test 07" << endl;
 }

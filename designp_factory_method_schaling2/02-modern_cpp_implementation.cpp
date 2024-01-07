@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 using namespace std;
+
 namespace test_02_ns {
 struct I_Connection {                               // Abstract class or Interface
     virtual ~I_Connection()                         =default;

@@ -1,6 +1,6 @@
 #include <iostream>
-#include <string>
 using namespace std;
+
 namespace test_04_ns {
 struct TCPConnection {
     void send(const char *s) { std::cout << "TCP: " << s << '\n'; }
@@ -18,6 +18,7 @@ UDPConnection make_udp_connection() {
     return UDPConnection();
 }
 
+// Global
 template<class ConnectionFactory>
 void send(ConnectionFactory &conFactory) {
     auto con = conFactory();
