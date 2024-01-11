@@ -19,8 +19,8 @@ struct RequiredField {
     operator       T&()       { return value_; }        // https://stackoverflow.com/questions/38180908/weird-operator-overloading-operator-t-const-noexcept-return-ptr
                                                         // https://stackoverflow.com/questions/25060413/what-is-operator-t-where-t-is-a-template-parameter-in-c
     operator const T&() const { return value_; }        // https://en.cppreference.com/w/cpp/language/cast_operator
-    operator       T*()       { return value_; }        // TODO??: What is this?
-    operator const T*() const { return value_; }        //
+explicit operator       T*()       { return value_; }        // TODO??: What is this?
+explicit operator const T*() const { return value_; }        //
     T value_;
 };
 
