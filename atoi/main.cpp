@@ -1,10 +1,14 @@
 #include <cstdlib>
-#include <cassert>
 #include <iostream>
 #include <string>
 using namespace std;
 
 //int my_naive_atoi( char * number_ascii ) {
+
+struct S {
+    int a = 22;
+    string str = "hello";
+};
 
 int my_naive_atoi( string number_ascii ) {
     // Invariants
@@ -17,12 +21,12 @@ int my_naive_atoi( string number_ascii ) {
     // Assume we can have one leading '-' minus for negative numbers.
     // Assuming we have no commas (USA), or periods (Europe).
 
-    constexpr int RADIX {10}; // assuming base 10
-    int result {};
+    int RADIX =10; // assuming base 10
+    int result =0;
 
     if (number_ascii.size() == 0) return 0; // or throw?
 
-    int offset_for_negative {0};
+    int offset_for_negative =0;
     if (number_ascii[0] == '-') offset_for_negative = 1;
 
     // for (auto ch : number_ascii+(number_ascii[0] == '-' ? 1:0)) { // ERROR todo: I don't suppose we can start the range for

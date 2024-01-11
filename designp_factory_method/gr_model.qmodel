@@ -48,8 +48,13 @@
                           </DElement>
                          </base-DElement>
                          <object>{3fa6c304-ee0c-4c1c-8492-0a7e2370c819}</object>
+                         <stereotypes>
+                          <qlist>
+                           <item>entity</item>
+                          </qlist>
+                         </stereotypes>
                          <name>tty</name>
-                         <pos>x:390;y:290</pos>
+                         <pos>x:365;y:450</pos>
                          <rect>x:-295;y:-240;w:590;h:480</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -61,12 +66,42 @@
                          <item>gr_template</item>
                         </qlist>
                        </template>
+                       <show-all-members>true</show-all-members>
+                      </DClass>
+                     </instance>
+                    </item>
+                    <item>
+                     <instance type="DClass">
+                      <DClass>
+                       <base-DObject>
+                        <DObject>
+                         <base-DElement>
+                          <DElement>
+                           <uid>{388fbba6-ccfe-49a2-963f-2f8ccfc468c3}</uid>
+                          </DElement>
+                         </base-DElement>
+                         <object>{21b65c02-6ba4-4409-aa13-94eb08ba44e5}</object>
+                         <name>New Class</name>
+                         <pos>x:235;y:120</pos>
+                         <rect>x:-40;y:-75;w:80;h:150</rect>
+                         <auto-sized>false</auto-sized>
+                         <visual-role>0</visual-role>
+                         <visual-role2>2</visual-role2>
+                        </DObject>
+                       </base-DObject>
+                       <namespace>gr_ns</namespace>
+                       <template>
+                        <qlist>
+                         <item>template</item>
+                        </qlist>
+                       </template>
+                       <show-all-members>true</show-all-members>
                       </DClass>
                      </instance>
                     </item>
                    </qlist>
                   </elements>
-                  <last-modified>1697515025715</last-modified>
+                  <last-modified>1704855439925</last-modified>
                   <toolbarid>General</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -86,6 +121,11 @@
                   <base-MElement>
                    <MElement>
                     <uid>{3fa6c304-ee0c-4c1c-8492-0a7e2370c819}</uid>
+                    <stereotypes>
+                     <qlist>
+                      <item>entity</item>
+                     </qlist>
+                    </stereotypes>
                    </MElement>
                   </base-MElement>
                   <name>tty</name>
@@ -97,6 +137,62 @@
                   <item>gr_template</item>
                  </qlist>
                 </template>
+                <members>
+                 <qlist>
+                  <item>
+                   <MClassMember>
+                    <uid>{6583f448-dcff-46cb-9533-efda0e2bc963}</uid>
+                    <type>1</type>
+                    <declaration>sdg</declaration>
+                   </MClassMember>
+                  </item>
+                 </qlist>
+                </members>
+               </MClass>
+              </instance>
+             </target>
+            </handle>
+           </item>
+           <item>
+            <handle>
+             <uid>{21b65c02-6ba4-4409-aa13-94eb08ba44e5}</uid>
+             <target>
+              <instance type="MClass">
+               <MClass>
+                <base-MObject>
+                 <MObject>
+                  <base-MElement>
+                   <MElement>
+                    <uid>{21b65c02-6ba4-4409-aa13-94eb08ba44e5}</uid>
+                   </MElement>
+                  </base-MElement>
+                  <name>New Class</name>
+                 </MObject>
+                </base-MObject>
+                <namespace>gr_ns</namespace>
+                <template>
+                 <qlist>
+                  <item>template</item>
+                 </qlist>
+                </template>
+                <members>
+                 <qlist>
+                  <item>
+                   <MClassMember>
+                    <uid>{2f33f5c4-20a8-41cb-90d8-3cd9588e1a3a}</uid>
+                    <type>1</type>
+                    <declaration>aaaaa</declaration>
+                   </MClassMember>
+                  </item>
+                  <item>
+                   <MClassMember>
+                    <uid>{8cebc8bc-8478-44ed-9a17-f11e6f5f2bb6}</uid>
+                    <type>1</type>
+                    <declaration>bbbb</declaration>
+                   </MClassMember>
+                  </item>
+                 </qlist>
+                </members>
                </MClass>
               </instance>
              </target>
