@@ -3,11 +3,16 @@
     Intent: Define an interface for creating objects, but let subclasses decide which class to instanciate
             Factory_Method lets a class defer instanciation to subclasses.
     Not:    Abstract_Factory, Builder, Prototype, Singleton, and the generic term: factory.
-    Uses:
-    Related Patterns:
+    Uses:   ??
+    Related Patterns: ??
     Inspired by: (and possible copyright and LICENSE)
-C.50: Use a factory function if you need “virtual behavior” during initialization. https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
-C.82: Don’t call virtual functions in constructors and destructors. https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c82-dont-call-virtual-functions-in-constructors-and-destructors
+    Boost_example is: --------------------------
+    Copyright 2007 Tobias Schwinger
+    Copyright 2019 Glen Joseph Fernandes (glenjofe@gmail.com)
+    Distributed under the Boost Software License, Version 1.0. (http://www.boost.org/LICENSE_1_0.txt)
+    ---------------------------------------------
+    C.50: Use a factory function if you need “virtual behavior” during initialization. https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-factory
+    C.82: Don’t call virtual functions in constructors and destructors. https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c82-dont-call-virtual-functions-in-constructors-and-destructors
 
     Edited by: Grant Rostig 2023
         Any additional beyond those that inspired this code is:
@@ -34,6 +39,8 @@ C.82: Don’t call virtual functions in constructors and destructors. https://is
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 
+#define BOOST_PURE_VIRTUAL        // Make the base class =0
+namespace Boost_example { // ********** Boost Example **********************
 // #define BOOST_BOILER_PLATE_TEST   // Ignore for now, we don't recall the rationale.
 // #ifdef BOOST_BOILER_PLATE_TEST
 //     virtual         ~Animal()   =0;
@@ -42,10 +49,6 @@ using namespace std::string_literals;
 // #ifdef BOOST_BOILER_PLATE_TEST
 // Animal::~Animal() {}                  // Showing a pure virtual fn can may be defined.
 // #endif
-
-//#define BOOST_PURE_VIRTUAL        // Make the base class =0
-
-namespace Boost_example { // ********** Boost Example **********************
 enum class Animal_type { cat, dog };
 class Animal {
 public:
@@ -62,6 +65,7 @@ public:
 
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };  // grostig: Need not be defined if =0, but can be.
 
+//class Dog final : public Animal { public: void speak() override; };
 class Dog : public Animal { public: void speak() override; };
 void  Dog::speak() { cout << "Woof!" << endl; }
 class Cat : public Animal { public: void speak() override; };
@@ -226,26 +230,37 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
 void test_boost_example() { using namespace Boost_example; cout << "START test_boost_example." << endl; //  boost::factory<T*>()(arg1,arg2,arg3) // same as new T(arg1,arg2,arg3)
                                                         //  boost::value_factory<T>()(arg1,arg2,arg3) // same as T(arg1,arg2,arg3)
 #ifndef BOOST_PURE_VIRTUAL
-    Animal *animal_ptr{boost::factory<Animal *>()()};
+    Animal *              animal_ptr{ boost::factory<Animal *>() () };
     animal_ptr->speak();
 #endif
 
-    Dog *dog_ptr2{(boost::factory<Dog *>())()};  // ptr to dog on heap
+    Dog *                 dog_ptr1{ new Dog{} };                    // What the boost::factory<*> does.
+    boost::factory<Dog *> dog_factory_function_object;              // Getting a factory that can be used multiple times is probably good.
+    Dog *                 dog_ptr2{ dog_factory_function_object() };
+    Dog *                 dog_ptr3{ boost::factory<Dog *>()  () };  // 2 things on one line. NOT factory_value, but _B _function_object _fo; then ptr to dog on heap
 
-    //auto x {boost::factory<Dog *>()};
-    boost::factory<Dog *> dog_factory3;
-    Dog * dog_ptr3{ dog_factory3() };  // callable?
-    Dog * dog_ptr4{ new Dog{} };
+    std::unique_ptr< Dog * >                  dog_ptr4{ std::make_unique< Dog * >() };
 
-    // Dog *dog_ptr{dog_factory()};
+    std::unique_ptr< Boost_example::Dog * >                  dog_ptr5{ std::make_unique< Dog * >() };
 
-    //dog_ptr->speak();
+    dog_ptr1->speak();
+    dog_ptr2->speak();
     dog_ptr3->speak();
     dog_ptr4->speak();
+    dog_ptr4.get().speak();
 
-    Cat cat{boost::value_factory<Cat>()()};
-    cat.speak();
+    Cat                       cat_0{ *(new Cat) };
+    Cat                       cat_1{};
+    boost::value_factory<Cat> cat_factory_constructing;     // Getting a factory that can be used multiple times is probably good.
+    Cat                       cat_2{ cat_factory_constructing() };
+    Cat                       cat_3{ boost::value_factory<Cat>() ()};  // 2 things on one line. NOT factory_value, but _ptr; ptr to dog on heap
 
+    cat_1.speak();
+    cat_2.speak();
+    cat_3.speak();
+
+    delete dog_ptr1;    // Fixed by definition: $ class Dog final : ...
+    delete dog_ptr2;
     delete dog_ptr3;
     cout << "END   test_boost_example." << endl;
 }
@@ -320,8 +335,8 @@ void test_C50_C82_example() { using namespace C50_C82_example; cout <<"START tes
 
 int main(int argc, char *argv[]) { string my_argv{*argv}; cerr << "~~~ argc,argv:" << argc << "," << my_argv << "." << endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
     test_boost_example();
-    test_simple_example();
-    test_C50_C82_example();
+  //test_simple_example();
+  //test_C50_C82_example();
 
     /* Uncomment in main_shortened.cpp if running of that code is also wanted. And, or, rename the main() you want
     extern int main_not_shortened(int, char*[]);
