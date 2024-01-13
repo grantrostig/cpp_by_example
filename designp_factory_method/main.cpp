@@ -54,7 +54,8 @@ class Animal {
 public:
     string          species{};
     int *           int_ptr{}; // Animal() { int_ptr = new int[10];}; }  // Playing around with Abstract_Types that allocate memory and the effect on the compiler errors/warnings.
-    Animal()        =default;
+    Animal()         =default;
+    virtual ~Animal()=default;
 
 #ifdef      BOOST_PURE_VIRTUAL
     virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any one function to make it an abstract_class AKA Interface.
@@ -65,8 +66,17 @@ public:
 
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };  // grostig: Need not be defined if =0, but can be.
 
-//class Dog final : public Animal { public: void speak() override; };
-class Dog : public Animal { public: void speak() override; };
+           //  class Dog final : public Animal { public: void speak() override; };
+class Dog final : public Animal {
+    public: void speak() override;
+    virtual ~Dog();
+  };
+Dog::~Dog() {};
+//class Dog : public Animal {
+    //public: void speak() override;
+    //virtual ~Dog();
+  //};
+//Dog::~Dog() {};
 void  Dog::speak() { cout << "Woof!" << endl; }
 class Cat : public Animal { public: void speak() override; };
 void  Cat::speak() { cout << "Meow!" << endl; }
@@ -78,7 +88,8 @@ class Animal {
 public:
     string species{};
     int *  int_ptr{}; // Animal() { int_ptr = new int[10];}; }  // Playing around with Abstract_Types that allocate memory and the effect on the compiler errors/warnings.
-    static Animal * create(Animal_type a);  // Has to be STATIC so we can call it, since the base class isn't construstruced at time of intended usage.
+    static Animal *         createAnimal_ptr_FactoryMethod_MemberFunction(Animal_type a);  // Has to be STATIC so we can call it, since the base class isn't construstruced at time of intended usage.
+    static std::unique_ptr<Animal> createAnimal_uptr_FactoryMethod_MemberFunction(Animal_type a);  // Has to be STATIC so we can call it, since the base class isn't construstruced at time of intended usage.
     Animal();                           // TODO??: Why not needed? What does it do/mean here?
   //Animal()        =default;           // TODO??: Why not needed? What does it do/mean here?
   //virtual         ~Animal();
@@ -106,7 +117,7 @@ public:
 };
 void Cat::speak() { cout << "Meow!" << endl; }
 
-Animal * Animal::create(Animal_type t) {    // STATIC, not virtual because this is the version that is called in intended usage, even with object of dynamic derived type.
+Animal *                Animal::createAnimal_ptr_FactoryMethod_MemberFunction(Animal_type t) {    // STATIC, not virtual because this is the version that is called in intended usage, even with object of dynamic derived type.
     switch (t) {
     case Animal_type::dog :
         return new Dog();                   // TODO??: Should this be unique_ptr and or make_unique?
@@ -115,6 +126,19 @@ Animal * Animal::create(Animal_type t) {    // STATIC, not virtual because this 
     };
     assert( false );
 }
+
+std::unique_ptr<Animal> Animal::createAnimal_uptr_FactoryMethod_MemberFunction(Animal_type t) {    // STATIC, not virtual because this is the version that is called in intended usage, even with object of dynamic derived type.
+    switch (t) {
+    case Animal_type::dog :
+        return std::make_unique<Dog>();
+    case Animal_type::cat :
+        return std::make_unique<Cat>();
+
+    };
+    assert( false );
+}
+
+
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };
 }
 
@@ -234,26 +258,26 @@ void test_boost_example() { using namespace Boost_example; cout << "START test_b
     animal_ptr->speak();
 #endif
 
-    Dog *                 dog_ptr1{ new Dog{} };                    // What the boost::factory<*> does.
-    boost::factory<Dog *> dog_factory_function_object;              // Getting a factory that can be used multiple times is probably good.
-    Dog *                 dog_ptr2{ dog_factory_function_object() };
-    Dog *                 dog_ptr3{ boost::factory<Dog *>()  () };  // 2 things on one line. NOT factory_value, but _B _function_object _fo; then ptr to dog on heap
+    Dog *                    dog_ptr1{ new Dog{} };                    // What the boost::factory<*> does.
+    boost::factory<Dog *>    dog_factory_ptr_function_object;              // Getting a factory that can be used multiple times is probably good.
+    Dog *                    dog_ptr2{ dog_factory_ptr_function_object() };
+    Dog *                    dog_ptr3{ boost::factory<Dog *>()  () };  // 2 things on one line. NOT factory_value, but _B _function_object _fo; then ptr to dog on heap
 
-    std::unique_ptr< Dog * >                  dog_ptr4{ std::make_unique< Dog * >() };
-
-    std::unique_ptr< Boost_example::Dog * >                  dog_ptr5{ std::make_unique< Dog * >() };
+  //std::unique_ptr< Dog * > dog_ptr4{ std::make_unique< Dog * >() };   // Wrong
+    std::unique_ptr< Dog >   dog_uptr4{ std::make_unique< Dog >() };
 
     dog_ptr1->speak();
     dog_ptr2->speak();
     dog_ptr3->speak();
-    dog_ptr4->speak();
-    dog_ptr4.get().speak();
+    dog_uptr4->speak();
+    std::unique_ptr< Animal >   animal_uptr4{ std::make_unique< Dog >() };
+    animal_uptr4->speak();  // covariant dynamic and static?/defined? type
 
     Cat                       cat_0{ *(new Cat) };
-    Cat                       cat_1{};
-    boost::value_factory<Cat> cat_factory_constructing;     // Getting a factory that can be used multiple times is probably good.
-    Cat                       cat_2{ cat_factory_constructing() };
-    Cat                       cat_3{ boost::value_factory<Cat>() ()};  // 2 things on one line. NOT factory_value, but _ptr; ptr to dog on heap
+    Cat                       cat_1{ std::move(*(new Cat)) };
+    Cat                       cat_2{};
+    boost::value_factory<Cat> cat_factory_constructing_fo;     // Getting a factory that can be used multiple times is probably good.
+    Cat                       cat_3{ cat_factory_constructing_fo() };
 
     cat_1.speak();
     cat_2.speak();
@@ -262,14 +286,26 @@ void test_boost_example() { using namespace Boost_example; cout << "START test_b
     delete dog_ptr1;    // Fixed by definition: $ class Dog final : ...
     delete dog_ptr2;
     delete dog_ptr3;
+    //delete dog_uptr4;
     cout << "END   test_boost_example." << endl;
 }
 void test_simple_example() { using namespace Simple_example; cout << "START test_simple_example." << endl;
     //Animal a;           // Fails because pure virtual or no constructor.
-    Animal *dog_ptr = Animal::create( Animal_type::dog );                           // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
+
+    Animal *                dog_ptr{  Animal::createAnimal_ptr_FactoryMethod_MemberFunction( Animal_type::dog ) };                           // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
+    auto                    dog_Xptr1{Animal::createAnimal_ptr_FactoryMethod_MemberFunction( Animal_type::dog ) };
+    std::unique_ptr<Animal> dog_uptr{ Animal::createAnimal_ptr_FactoryMethod_MemberFunction( Animal_type::dog ) };  // Forces uptr even when given a raw ptr. TODO??: Forces a copy? or a type_cast?
+    std::unique_ptr<Animal> dog_uptr2{Animal::createAnimal_uptr_FactoryMethod_MemberFunction( Animal_type::dog ) }; // Uptr initializing a uptr. TODO?? RVO? and move?
+    auto                    dog_Xptr2{Animal::createAnimal_uptr_FactoryMethod_MemberFunction( Animal_type::dog ) };
     dog_ptr->speak();
-    delete dog_ptr;
-    Animal::create(Animal_type::cat)->speak();      // TODO??: What happens to this memory?  When new called in a temporary?  I can't delete it.
+    dog_uptr->speak();
+    dog_uptr2->speak();
+    dog_Xptr1->speak();
+    dog_Xptr2->speak();
+    delete dog_ptr;     // Not needed for unique_ptrs.
+
+    Animal::createAnimal_ptr_FactoryMethod_MemberFunction(Animal_type::cat)->speak();      // TODO??: What happens to this memory?  When new called in a temporary?  I can't delete it.
+    Animal::createAnimal_uptr_FactoryMethod_MemberFunction(Animal_type::cat)->speak();
     cout << "END   test_simple_example." << endl;
 }
 void test_C50_C82_example() { using namespace C50_C82_example; cout <<"START test_C50_C82_example."<< endl;
@@ -334,8 +370,8 @@ void test_C50_C82_example() { using namespace C50_C82_example; cout <<"START tes
 }
 
 int main(int argc, char *argv[]) { string my_argv{*argv}; cerr << "~~~ argc,argv:" << argc << "," << my_argv << "." << endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    test_boost_example();
-  //test_simple_example();
+  //test_boost_example();
+    test_simple_example();
   //test_C50_C82_example();
 
     /* Uncomment in main_shortened.cpp if running of that code is also wanted. And, or, rename the main() you want
