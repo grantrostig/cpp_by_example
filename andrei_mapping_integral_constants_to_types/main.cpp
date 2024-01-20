@@ -3,6 +3,7 @@
 
     Intent: Template specialization criteria??
             Strong parameter types??
+            Conversion operators??
     Uses:   ??
     Related Patterns: ??
     Inspired by: (and possible copyright and LICENSE)
