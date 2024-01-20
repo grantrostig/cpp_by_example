@@ -12,25 +12,35 @@ Enables implicit conversion or explicit conversion from a class type to another 
 //#include <iomanip>
 #include <iostream>
 #include <string>
-#include <type_traits>
+#include <vector>
+//#include <type_traits>
 using namespace std;
 
 class Required_field_int {                                      // Similar to strong types??
     //int value2;
-    int value_;
+public: static   int value_;
 public:
-         Required_field_int() = default;
-explicit Required_field_int(const int& value) : value_(value) {}       // Implicit copy construct // TODO??: Suppresses default constructors?
+//         Required_field_int() = default;
+//explicit Required_field_int(const int& value) : value_(value) {}       // Implicit copy construct // TODO??: Suppresses default constructors?
+    Required_field_int(const int& value) {value_ = value;}       // Implicit copy construct // TODO??: Suppresses default constructors?
       // Required_field_int(const int& value) : value_(value) {}       // Implicit copy construct // TODO??: Suppresses default constructors?
 
     //operator       int( /*this*/ ) { cout<< "converstion operator int()."<< endl;return value_; }   // TODO??: What could this be?
-explicit operator       int&( /*this*/ ) { cout<< "converstion operator int()."<< endl;return value_; }   // TODO??: What could this be?
+//operator       int&( /*this*/ ) { cout<< "converstion operator int()."<< endl;return value_; }   // TODO??: What could this be?
+
+
+//explicit operator       int&( /*this*/ ) { cout<< "converstion operator int()."<< endl;return value_; }   // TODO??: What could this be?
     //operator       int&()       { return value_; }   // TODO: Cliff says: see conversion operator.
     //operator const int&() const { return value_; }
     //operator       int*()       { return &value_; }  // TODO??: What could this be?
-    operator       string() { cout<< "conversion operator string()."<< endl; return to_string(value_); }  // TODO??: What could this be?
+    //operator std::string()    { cout<< "conversion operator string()."<< endl; return to_string( value_ ).c_str(); }  // TODO??: What could this be?
+    //operator std::basic_string<char>()    { cout<< "conversion operator string()."<< endl; return to_string( value_ ); }  // TODO??: What could this be?
+    operator std::vector<int>()    { cout<< "conversion operator string()."<< endl; return {12} ; }  // TODO??: What could this be?
+    //operator const char**()    { cout<< "conversion operator string()."<< endl; return new to_string( value_ ).c_str(); }  // TODO??: What could this be?
     //operator       <<()       { return &value_; }  // TODO??: What could this be?
 };
+
+int Required_field_int::value_ = 99;
 
 template <typename T>
 class Required_field {                                      // Similar to strong types??
@@ -51,7 +61,6 @@ public:
 };
 static_assert( not std::is_default_constructible_v< Required_field< std::string > > );  // no default construction.
 static_assert(     std::is_constructible_v< Required_field< std::string >, std::string > );
-
 struct Options1 {
     //Required_field<int> id1{};         // Won't compile
     //Required_field<int> id5 = {};      // Won't compile
@@ -69,19 +78,23 @@ struct Options2 {
 
 void takes_rfi( Required_field_int i ) {
 }
+
 int main() {                    // Required_field is not constructible from empty initializer list.
  //   takes_rfi( 23 );            // calls constructor and conversion operators.
     //takes_rfi( (int)23 );
-    takes_rfi( static_cast<Required_field_int>(23) );
-    takes_rfi( Required_field_int{23} );
+    //takes_rfi( static_cast<Required_field_int>(23) );
+    //takes_rfi( Required_field_int{23} );
+
     Required_field_int i{ 41 };
     //Required_field_int i_f( 41.0 );
 
-    cout << static_cast<string>(i) << endl;        // cout << (int)(i) << endl;
-    cout << static_cast<int>(i) << endl;        // cout << (int)(i) << endl;
+    cout << static_cast< vector<int> > (i).at(0) << endl;        // cout << (int)(i) << endl;
+    cout << (i).at(0) << endl;        // cout << (int)(i) << endl;
+   // cout << static_cast<string>(i) << endl;        // cout << (int)(i) << endl;
+    //cout << static_cast<int>(i) << endl;        // cout << (int)(i) << endl;
 //    cout << static_cast<int *>(i) << endl;
-    cout << &i << endl;        //
-    int j{i};                                   // Implicit conversion, but dangerous
+    //cout << &i << endl;        //
+    //int j{i};                                   // Implicit conversion, but dangerous
     // int j2=i;
     // int j3={i};
    // int j4(i);
@@ -89,7 +102,7 @@ int main() {                    // Required_field is not constructible from empt
     //int j2{1.0};
     //int j3{};
 
-    cout << ++j << endl;
+    //cout << ++j << endl;
 
     /* Required_field<int> junk{99};
     junk = 5;   // uses line 15
