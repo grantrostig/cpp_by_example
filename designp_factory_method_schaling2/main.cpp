@@ -15,26 +15,24 @@
     #ifdef GR_DEBUG
     #endif GR_DEBUG
  */
-
 //#include <bits/stdc++.h>
+//#include <chrono>
+//#include <csignal>
 //#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
-#include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
-#include <vector>
+//#include <source_location>
+//#include <stacktrace>
 #include <string>
-#include <csignal>
-#include <source_location>
-#include <stacktrace>
-
+//#include <vector>
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
-using namespace std::chrono_literals;
+//using namespace std::chrono_literals;
 #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
 #define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
 #define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
 #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
-
 // Gives a source location for printing.  Used for debugging.
 std::string source_loc();           // forward declaration
 extern void stacktrace_register();
@@ -56,7 +54,6 @@ concept Insertable = requires( std::ostream & out ) {
     requires not std::same_as<std::string, Container>;                                    // OR $ std::is_same <std::string, Container>::value OR std::is_same_v<std::string, Container>;
     { out << typename Container::value_type {} } -> std::convertible_to<std::ostream & >; // OR just $ { out << typename Container::value_type {} };
 };
-
 /** Prints contents of a container such as a vector of int's.
     Insertable Concept used by Templated Function definition
     Older version is here for the record:
@@ -78,9 +75,10 @@ operator<<( std::ostream & out, Container const & c) {
     } else out << "[CONTAINTER IS EMPTY]";
     return out;
 }
+
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-// ++++++++++++++++ EXAMPLE begins ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void test_01();
 void test_02();
 void test_03();

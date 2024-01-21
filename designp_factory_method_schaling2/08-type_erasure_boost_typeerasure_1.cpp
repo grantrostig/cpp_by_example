@@ -29,7 +29,7 @@ using Connection = boost::type_erasure::any<
     boost::mpl::vector<has_send<void(const char *)>, boost::type_erasure::copy_constructible<>>>;
 }
 
-void test_08() { using namespace test_08_ns; cout << "START test 09" << endl;
+void test_08() { using namespace test_08_ns; cout << "START test 08" << endl;
     std::function<Connection()> con_factory;
     con_factory = TCPConnectionFactory();
     send(con_factory);
@@ -37,5 +37,5 @@ void test_08() { using namespace test_08_ns; cout << "START test 09" << endl;
 
     con_factory = UDPConnectionFactory();
     send(con_factory);
-    cout << "END   test 09" << endl;
+    cout << "END   test 08" << endl;
 }

@@ -89,7 +89,7 @@ SomeType2Type<string,3>     sometype2typeString{};
 SomeType2Type<string,"hello">  sometype2typeStringHello{};
 
 int main(int argc, char *argv[]) { string my_argv{*argv}; cerr << "~~~ argc,argv:" << argc << "," << my_argv << "." << endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
-    //test_simple_example();
+    //test();
 
     int some_int{32};
     switch (some_int) {
