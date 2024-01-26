@@ -1,8 +1,34 @@
 // from cppreference.com
 #include <bitset>
 #include <cassert>
+#include <climits>
 #include <cstddef>
 #include <iostream>
+#include <optional>
+static_assert(CHAR_MIN < 0, "char is signed");
+//static_assert(CHAR_MIN == 0, "char is unsigned");
+#if CHAR_MIN < 0
+#pragma message("char is signed")
+#else
+#pragma message("char is unsigned")
+#endif
+using Ostring       = std::optional<std::string>;
+using Ochar         = std::optional<char>;
+using Ointegral     = std::optional<long>;
+//inline constexpr char           CHAR_NULL{'\177'};        // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+//inline constexpr char           CHAR_NULL{'\o{177}'};        // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+inline constexpr char           CHAR_NULL{CHAR_MIN};        // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+inline constexpr char           CHAR_NULL2{0b01111111};        // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+inline constexpr char           CHAR_NULL3{0x7F};        // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+inline constexpr char           CHAR_NULL4{'\x{7F}'};        // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+inline constexpr char           CHAR_NULL4{'\x7F'};        // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+static_assert(CHAR_NULL  == CHAR_NULL2, "error");
+static_assert(CHAR_NULL2 == CHAR_NULL3, "error");
+static_assert(CHAR_NULL3 == CHAR_NULL4, "error");
+
+inline constexpr signed char    SCHAR_NULL{SCHAR_MIN};       // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+inline constexpr unsigned char  UCHAR_NULL{UCHAR_MAX};       // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
+inline constexpr std::string    STRING_NULL{"NULL"};    // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
 
 int main() {
     typedef std::size_t length_t, position_t; // the hints
