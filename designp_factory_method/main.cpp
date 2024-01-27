@@ -41,14 +41,14 @@ using namespace std::string_literals;
 
 namespace Boost_example {  // ********** Boost Example **********************
 #define BOOST_PURE_VIRTUAL        // Make the base class =0
-// #define BOOST_BOILER_PLATE_TEST   // Ignore for now, we don't recall the rationale.
+/* #define BOOST_BOILER_PLATE_TEST   // Ignore for now, we don't recall the rationale.
 // #ifdef BOOST_BOILER_PLATE_TEST
 //     virtual         ~Animal()   =0;
 //   //virtual         ~Animal();
 // #endif // BOOST_BOILER_PLATE_TEST
 // #ifdef BOOST_BOILER_PLATE_TEST
 // Animal::~Animal() {}                  // Showing a pure virtual fn can may be defined.
-// #endif
+// #endif */
 enum class Animal_type { cat, dog };
 class Animal {
 public:
@@ -63,25 +63,19 @@ public:
     virtual void    speak();
 #endif //   BOOST_PURE_VIRTUAL
 };
-
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };  // grostig: Need not be defined if =0, but can be.
-
-           //  class Dog final : public Animal { public: void speak() override; };
 class Dog final : public Animal {
     public: void speak() override;
     virtual ~Dog();
   };
 Dog::~Dog() {};
-//class Dog : public Animal {
-    //public: void speak() override;
-    //virtual ~Dog();
-  //};
-//Dog::~Dog() {};
 void  Dog::speak() { cout << "Woof!" << endl; }
 class Cat : public Animal { public: void speak() override; };
 void  Cat::speak() { cout << "Meow!" << endl; }
 
-void test() { using namespace Boost_example; cout << "START test_boost_example." << endl; //  boost::factory<T*>()(arg1,arg2,arg3) // same as new T(arg1,arg2,arg3)
+void test() {
+    cout << "START test_boost_example." << endl;
+                                                        //  boost::factory<T*>()(arg1,arg2,arg3) // same as new T(arg1,arg2,arg3)
                                                         //  boost::value_factory<T>()(arg1,arg2,arg3) // same as T(arg1,arg2,arg3)
 #ifndef BOOST_PURE_VIRTUAL
     Animal *              animal_ptr{ boost::factory<Animal *>() () };
@@ -119,7 +113,7 @@ void test() { using namespace Boost_example; cout << "START test_boost_example."
     //delete dog_uptr4;
     cout << "END   test_boost_example." << endl;
 }
-}  // ********** END   Boost Example **********************
+}  // ********** END namespace  Boost Example **********************
 
 namespace Simple_example {  // ********** START Simple Example **********************
 enum class Animal_type { cat, dog };
@@ -136,7 +130,6 @@ public:
   //virtual void    speak();
     virtual void    speak()     =0;     // =0 forces definition in derived classes, also need it on any function to make it an abstract_class or Interface?
 };
-
 Animal::Animal() { cout << "Simple Example: Animal constructor"<< endl;}
 Animal::~Animal() { cout << "Simple Example: Animal destructor"<< endl;}
 
@@ -176,11 +169,9 @@ std::unique_ptr<Animal> Animal::createAnimal_uptr_FactoryMethod_MemberFunction(A
     };
     assert( false );
 }
-
-
 void Animal::speak() { cout << "Generic Animal Call!" << endl; };
 
-void test() { using namespace Simple_example; cout << "START test_simple_example." << endl;
+void test() { cout << "START test_simple_example." << endl;
     //Animal a;           // Fails because pure virtual or no constructor.
 
     Animal *                dog_ptr{  Animal::createAnimal_ptr_FactoryMethod_MemberFunction( Animal_type::dog ) };                           // https://stackoverflow.com/questions/307352/g-undefined-reference-to-typeinfo
@@ -200,7 +191,7 @@ void test() { using namespace Simple_example; cout << "START test_simple_example
     cout << "END   test_simple_example." << endl;
 }
 
-}  // ********** END   Simple Example **********************
+}  // ********** END namespace  Simple Example **********************
 
 namespace C50_C82_example {  // ********** START C.50 & C.82 Illustrating Example **********************
 struct Wrong_base {
@@ -310,7 +301,7 @@ public:     explicit Derived_1( Protected_dummy_token ) : Base { Base::Protected
             int my_derived_fn() { return 150; }
 };
 
-void test() { using namespace C50_C82_example; cout <<"START test_C50_C82_example."<< endl;
+void test() { cout <<"START test_C50_C82_example."<< endl;
     LOGGER_(./ Wrong_derived wd1{};);
     Wrong_derived wd1{};
 
@@ -370,7 +361,7 @@ void test() { using namespace C50_C82_example; cout <<"START test_C50_C82_exampl
     */
     cout <<"END   test_C50_C82_example."<< endl;
 }
-}  // ********** END   C.50 & C.82 Illustrating Example **********************
+}  // ********** END namespace  C.50 & C.82 Illustrating Example **********************
 
 int main(int argc, char *argv[]) { string my_argv{*argv}; cerr << "~~~ argc,argv:" << argc << "," << my_argv << "." << endl; //crash_signals_register(); //cin.exceptions( std::istream::failbit);//throw on fail of cin.
     Boost_example::test();
