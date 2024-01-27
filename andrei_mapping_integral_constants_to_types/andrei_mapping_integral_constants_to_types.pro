@@ -21,7 +21,7 @@ QMAKE_CXXFLAGS += \
         # -Wno-reorder 		\
         # -Wno-unused-parameter 	\
         -O0 		            \
-        -g3 		            \
+        #-g3 		            \
         #-ggdb 		            \
         #-ggdb3 	            \
         #-pedantic              \

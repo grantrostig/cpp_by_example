@@ -2,15 +2,11 @@
 #include <cstdlib>
 #include <vector>
 
-namespace fteng
-{
-	namespace details
-	{
+namespace fteng {
+    namespace details {
 		struct conn_base;
-		struct sig_base
-		{
-			struct call
-			{
+        struct sig_base {
+            struct call {
 				void* object;
 				void* func;
 			};
@@ -31,16 +27,13 @@ namespace fteng
 			sig_base& operator= (sig_base&& other) noexcept;
 		};
 
-		struct blocked_connection
-		{
+        struct blocked_connection {
 			const sig_base* sig = nullptr;
 			sig_base::call call = {nullptr, nullptr};
 		};
 
-		struct conn_base
-		{
-			union
-			{
+        struct conn_base {
+            union {
 				const sig_base* sig;
 				blocked_connection* blocked_conn;
 			};
@@ -53,10 +46,8 @@ namespace fteng
 
 			conn_base(const sig_base* sig, size_t idx) : sig(sig), idx(idx) {}
 
-			virtual ~conn_base()
-			{
-				if (!blocked)
-				{
+            virtual ~conn_base() {
+                if (!blocked) {
 					if (sig)
 					{
 						sig->calls[idx].object = nullptr;
@@ -65,22 +56,18 @@ namespace fteng
 						sig->dirty = 1;
 					}
 				}
-				else
-				{
+                else {
 					delete blocked_conn;
 				}
 			}
 
-			void set_sig(const sig_base* sig) 
-			{
+            void set_sig(const sig_base* sig)  {
 				if (blocked) this->blocked_conn->sig = sig;
 				else this->sig = sig;
 			}
 
-			void block()
-			{
-				if (!blocked)
-				{
+            void block() {
+                if (!blocked) {
 					blocked = 1;
 					const sig_base* orig_sig = sig;
 					sig = nullptr;
@@ -90,10 +77,8 @@ namespace fteng
 				}
 			}
 
-			void unblock()
-			{
-				if (blocked)
-				{
+            void unblock() {
+                if (blocked) {
 					const sig_base* orig_sig = blocked_conn->sig;
 					std::swap(blocked_conn->call, orig_sig->calls[idx]);
 					delete blocked_conn;
@@ -105,23 +90,17 @@ namespace fteng
 		};
 
 		template<typename T>
-		struct conn_nontrivial : conn_base
-		{
+        struct conn_nontrivial : conn_base {
 			using conn_base::conn_base;
-
-			virtual ~conn_nontrivial()
-			{
+            virtual ~conn_nontrivial() {
 				if (sig)
 					reinterpret_cast<T*>(&sig->calls[idx].object)->~T();
 			}
 		};
 
-		inline sig_base::~sig_base()
-		{
-			for (conn_base* c : conns)
-			{
-				if (c) 
-				{
+        inline sig_base::~sig_base() {
+            for (conn_base* c : conns) {
+                if (c)  {
 					if (c->owned)
 						c->set_sig(nullptr);
 					else
@@ -140,8 +119,7 @@ namespace fteng
 				if (c) c->set_sig(this);
 		}
 
-		inline sig_base& sig_base::operator= (sig_base&& other) noexcept
-		{
+        inline sig_base& sig_base::operator= (sig_base&& other) noexcept {
 			calls = std::move(other.calls);
 			conns = std::move(other.conns);
 			calling = other.calling;
@@ -155,35 +133,29 @@ namespace fteng
 	template<typename F> struct signal;
 
 	// A connection without auto disconnection
-	struct connection_raw
-	{
+    struct connection_raw {
 		details::conn_base* ptr = nullptr;
 	};
 
-	struct connection
-	{
+    struct connection {
 		details::conn_base* ptr = nullptr;
 
-		void disconnect()
-		{
+        void disconnect() {
 			delete ptr;
 			ptr = nullptr;
 		}
 
-		void block()
-		{
+        void block() {
 			ptr->block();
 		}
 
-		void unblock()
-		{
+        void unblock() {
 			ptr->unblock();
 		}
 
 		connection() = default;
 
-		~connection()
-		{
+        ~connection() {
 			disconnect();
 		}
 		connection(const connection&) = delete;
@@ -191,35 +163,29 @@ namespace fteng
 		connection& operator=(const connection&) = delete;
 
 		connection(connection&& other) noexcept
-			: ptr (other.ptr)
-		{
+            : ptr (other.ptr) {
 			other.ptr = nullptr;
 		}
 
-		connection& operator=(connection&& other) noexcept
-		{
+        connection& operator=(connection&& other) noexcept {
 			disconnect();
 			ptr = other.ptr;
 			other.ptr = nullptr;
 			return *this;
 		}
 
-		connection(connection_raw conn) : ptr(conn.ptr)
-		{
+        connection(connection_raw conn) : ptr(conn.ptr) {
 			ptr->owned = true;
 		}
 	};
 
 	template<typename ... A>
-	struct signal<void(A...)> : details::sig_base
-	{
+    struct signal<void(A...)> : details::sig_base {
 		template<typename ... ActualArgsT>
-		void operator()(ActualArgsT&& ... args) const
-		{
+        void operator()(ActualArgsT&& ... args) const {
 			bool recursion = calling;
 			if (!calling) calling = 1;
-			for (size_t i = 0, n = calls.size(); i < n; ++i)
-			{
+            for (size_t i = 0, n = calls.size(); i < n; ++i) {
 				auto& cb = calls[i];
 				if (cb.func)
                 {
@@ -230,17 +196,14 @@ namespace fteng
                 }
 			}
 
-			if (!recursion)
-			{
+            if (!recursion) {
 				calling = 0;
 
-				if (dirty)
-				{
+                if (dirty) {
 					dirty = 0;
 					//remove all empty slots while patching the stored index in the connection
 					size_t sz = 0;
-					for (size_t i = 0, n = conns.size(); i < n; ++i)
-					{
+                    for (size_t i = 0, n = conns.size(); i < n; ++i) {
 						if (conns[i]) {
 							conns[sz] = conns[i];
 							calls[sz] = calls[i];
@@ -255,8 +218,7 @@ namespace fteng
 		}
 
 		template<auto PMF, class C>
-		connection_raw connect(C* object) const
-		{
+        connection_raw connect(C* object) const {
 			size_t idx = conns.size();
 			auto& call = calls.emplace_back();
 			call.object = object;
@@ -267,13 +229,11 @@ namespace fteng
 		}
 
 		template<auto func>
-		connection_raw connect() const
-		{
+        connection_raw connect() const {
 			return connect(func);
 		}
 
-		connection_raw connect(void(*func)(A...)) const
-		{
+        connection_raw connect(void(*func)(A...)) const {
 			size_t idx = conns.size();
 			auto& call = calls.emplace_back();
 			call.func = call.object = reinterpret_cast<void*>(func);
@@ -283,15 +243,12 @@ namespace fteng
 		}
 
 		template<typename F>
-		connection_raw connect(F&& functor) const
-		{
+        connection_raw connect(F&& functor) const {
 			using f_type = std::remove_pointer_t<std::remove_reference_t<F>>;
-			if constexpr (std::is_convertible_v<f_type, void(*)(A...)>)
-			{
+            if constexpr (std::is_convertible_v<f_type, void(*)(A...)>) {
 				return connect(+functor);
 			}
-			else if constexpr (std::is_lvalue_reference_v<F>)
-			{
+            else if constexpr (std::is_lvalue_reference_v<F>) {
 				size_t idx = conns.size();
 				auto& call = calls.emplace_back();
 				call.func = reinterpret_cast<void*>(+[](void* obj, A ... args) { (*reinterpret_cast<f_type**>(obj))->operator()(args...); });
@@ -300,8 +257,7 @@ namespace fteng
 				conns.emplace_back(conn);
 				return { conn };
 			}
-			else if constexpr (sizeof(std::remove_pointer_t<f_type>) <= sizeof(void*))
-			{
+            else if constexpr (sizeof(std::remove_pointer_t<f_type>) <= sizeof(void*)) {
 				//copy the functor.
 				size_t idx = conns.size();
 				auto& call = calls.emplace_back();
@@ -312,18 +268,15 @@ namespace fteng
 				conns.emplace_back(conn);
 				return { conn };
 			}
-			else
-			{
-				struct unique
-				{
+            else {
+                struct unique {
 					f_type* ptr;
 
 					unique(f_type* ptr) : ptr(ptr) {}
 					unique(const unique&) = delete;
 					unique(unique&&) = delete;
 
-					~unique()
-					{
+                    ~unique() {
 						delete ptr;
 					}
 				};
