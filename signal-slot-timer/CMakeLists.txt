@@ -3,7 +3,8 @@ project(signal_slot_timer)
 
 set(CMAKE_CXX_STANDARD 20)
 include_directories(src, lib)
-find_package(Boost 1.78 COMPONENTS program_options REQUIRED)
+find_package( Boost 1.78 )
+#find_package(Boost 1.78 COMPONENTS program_options REQUIRED)
 
 add_executable(signal_slot_timer
         src/Feeding_chime.h
@@ -11,4 +12,4 @@ add_executable(signal_slot_timer
         src/main.cpp
         src/TimerUesr.h
         lib/fteng/signals.hpp)
-target_link_libraries(signal_slot_timer Boost::program_options)  # macOS
+#target_link_libraries(signal_slot_timer Boost::program_options)  # macOS

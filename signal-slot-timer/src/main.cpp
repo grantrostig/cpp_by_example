@@ -1,10 +1,13 @@
 /**     Signals                             & Slots (or, more properly, objects that occur as part of the slots ??)
-AKA:    Publishers                          & Subscribers (Pub-Sub?)
-AKA:    Subject/Broadcaster                 & Observer
+GOF:    Subject                             & Observer
+GOF:                                        & Dependents
+GOF:    Publishers                          & Subscribers (Pub-Sub)
+AKA:    Broadcaster??                       & Listener??
         Events                              & Targets
         Callbacks with multiple targets     & Target Callback Receivers                          TODO??: Do these synonyms make sense?
         Emitters                            & Target having a Callback (multiple on one target?) TODO??: Do these synonyms make sense?
 Boost Doc states poins with '+', Grant '-'.                              www.boost.org/doc/libs/1_84_0/doc/html/signals2.html#id-1.3.35.3
+
 +   Signals represent callbacks with multiple targets, and are also called publishers or events in similar systems.
 +   Signals are connected to some set of slots, which are callback receivers (also called event targets or subscribers),
     which are called when the signal is "emitted."
@@ -15,7 +18,11 @@ Boost Doc states poins with '+', Grant '-'.                              www.boo
 -   Once received by WHOM1,
     the emission is processed by WHOM2 in what way?     Eg. the recipient has "update" run on him which is like "waking up"???
                                                             s/he runs a function/callback,
-                                                            for example, the dog or cat eats the food.                      */
+                                                            for example, the dog or cat eats the food.
+Data Structures:
+
+
+*/
 /* +Signals and slots are managed,
     in that signals and slots (or, more properly, objects that occur as part of the slots)
     can track connections and are capable of automatically disconnecting
@@ -58,17 +65,24 @@ float sum       (float x, float y) { return x + y; }
 float difference(float x, float y) { return x - y; }
 int main() {
     /** **** TheWhisp/signals example *** */
+    constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
 
-    constexpr std::chrono::milliseconds sleepDuration = 500ms;
-    Signal_user Pet_owner{1000ms}; //Timer user will print a message out ever second +- sleepDuration
-    while (true) {           // Take up time/use CPU.  Or GUI loop??
+    Signal_user pet_owner_signal_user{1000ms}; //Timer user will print a message out ever second +- sleepDuration
+
+    Feeding_chime chime_for_dog{};
+    chime_for_dog.start();
+    int i{};
+    while (true) {           // Run/use CPU. Or a GUI loop
         Feeding_chime::updateAll();
-        std::this_thread::sleep_for(sleepDuration);
+
+        std::this_thread::sleep_for(SLEEP_DURATION);
+        if ( ++i > 4 ) chime_for_dog.stop();
     }
+    chime_for_dog.stop();
 
     /** **** Boost Signals example ***
 
-    boost::signals2::signal<float (float, float)                      > signal_default_last;
+    boost::signals2::signal<float (float, float)                   > signal_default_last;
 
     signal_default_last.connect(&product);  // Product is one SLOT of several subscribing to an event/signal
     signal_default_last.connect(&quotient);

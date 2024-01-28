@@ -4,28 +4,24 @@
 */
 #pragma once
 #include "Feeding_chime.h"
-#include "../lib/fteng/signals.hpp"
-#include <iostream>  //fteng/signals.hpp from https://github.com/TheWisp/signals under the MIT License
+#include "../lib/fteng/signals.hpp"  // github.com/TheWisp/signals under the MIT License
+#include <iostream>
 
 class Signal_user{
-    fteng::connection           m_connectTimerSlot; //User to auto disconnect on destruction of Signal_user
-    Feeding_chime                      m_timer;
-    std::chrono::milliseconds   m_lastUpdate;
-    void updateTimeStamp() {
-        m_lastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    }
+    std::chrono::milliseconds   last_update_{};
+    Feeding_chime               timer_{};
+    fteng::connection           connection_chime_timer_slot_{};  //User to auto disconnect on destruction of Signal_user
 public:
-    explicit Signal_user(std::chrono::milliseconds  interval){
-        m_connectTimerSlot = m_timer.timeout.connect< &Signal_user::update >( this );  // note: THIS
-        updateTimeStamp();
-        m_timer.start(interval);
+    explicit Signal_user(std::chrono::milliseconds interval) {
+        last_update_                  = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+        connection_chime_timer_slot_  = timer_.chime_timeout_signal.connect< &Signal_user::touch_last_update >( this );  // note: THIS  >>>>>>> see definition.
+        timer_.start(interval);
     }
-    ~Signal_user() {
-        m_timer.stop();
-    }
-    void update(){
-        const auto currentTimeMil = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-        std::cout << "Update time interval:" << currentTimeMil.count() - m_lastUpdate.count() <<"ms\n";
-        updateTimeStamp();
+    ~Signal_user() { timer_.stop(); }
+
+    void touch_last_update(){
+        const auto temp_now{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())};
+        std::cout << "Update time interval:" << temp_now.count() - last_update_.count() <<"ms\n";
+        last_update_= temp_now;
     }
 };
