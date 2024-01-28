@@ -5,8 +5,10 @@
 #pragma once
 #include "../lib/fteng/signals.hpp" //fteng/signals.hpp from https://github.com/TheWisp/signals under the MIT License
 #include <chrono>
+#include <set>
 
-class STimer {
+class Feeding_chime {
+static std::set<Feeding_chime *> m_timerToUpdate;  // m_ is like _
 protected:
     bool m_active = false;
     std::chrono::milliseconds m_startTime;
@@ -14,12 +16,12 @@ protected:
     void update();
 public:
     fteng::signal<void()> timeout;
-    STimer();
-    ~STimer();
+    Feeding_chime();
+    ~Feeding_chime();
     void start();
     void start(std::chrono::milliseconds interval);
     void stop();
     void setInterval(std::chrono::milliseconds interval);
     bool isActive();
-    static void updateAll();
+    static void updateAll();   // probably not notify ???
 };

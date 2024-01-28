@@ -1,5 +1,6 @@
 /**     Signals                             & Slots (or, more properly, objects that occur as part of the slots ??)
 AKA:    Publishers                          & Subscribers (Pub-Sub?)
+AKA:    Subject/Broadcaster                 & Observer
         Events                              & Targets
         Callbacks with multiple targets     & Target Callback Receivers                          TODO??: Do these synonyms make sense?
         Emitters                            & Target having a Callback (multiple on one target?) TODO??: Do these synonyms make sense?
@@ -14,7 +15,7 @@ Boost Doc states poins with '+', Grant '-'.                              www.boo
 -   Once received by WHOM1,
     the emission is processed by WHOM2 in what way?     Eg. the recipient has "update" run on him which is like "waking up"???
                                                             s/he runs a function/callback,
-                                                            for example, feeds the dog or cat.                      */
+                                                            for example, the dog or cat eats the food.                      */
 /* +Signals and slots are managed,
     in that signals and slots (or, more properly, objects that occur as part of the slots)
     can track connections and are capable of automatically disconnecting
@@ -29,7 +30,7 @@ Boost Doc states poins with '+', Grant '-'.                              www.boo
     Edited by: Grant Rostig
     Boost Software License - Version 1.0 - August 17th, 2003
     Copyright (c) 2024 Alan Uthoff                                  */
-#include "STimer.h"
+#include "Feeding_chime.h"
 #include "TimerUesr.h"
 #include <boost/signals2.hpp>
 #include <chrono>
@@ -45,7 +46,7 @@ struct maximum {
         if(first == last ) return T();
         T max_value = *first++;
         while (first != last) {
-            if (max_value < *first) max_value = *first;
+            if ( max_value < *first ) max_value = *first;
             ++first;
         }
         return max_value;
@@ -56,28 +57,32 @@ float quotient  (float x, float y) { return x / y; }
 float sum       (float x, float y) { return x + y; }
 float difference(float x, float y) { return x - y; }
 int main() {
-    /** **** TheWhisp/signals example ***
+    /** **** TheWhisp/signals example *** */
 
     constexpr std::chrono::milliseconds sleepDuration = 500ms;
-    TimerUser tUser{1000ms}; //Timer user will print a message out ever second +- sleepDuration
+    Signal_user Pet_owner{1000ms}; //Timer user will print a message out ever second +- sleepDuration
     while (true) {           // Take up time/use CPU.  Or GUI loop??
-        STimer::updateAll();
+        Feeding_chime::updateAll();
         std::this_thread::sleep_for(sleepDuration);
-    } */
-    /** **** Boost Signals example *** */
-    boost::signals2::signal<float (float, float)> sig_default_last;
-    sig_default_last.connect(&product);
-    sig_default_last.connect(&quotient);
-    sig_default_last.connect(&sum);
-    sig_default_last.connect(&difference);
-    std::cout << "*sig_default_last(5, 3): " << *sig_default_last(5, 3) << std::endl; // The default combiner returns a boost::optional containing the return value of the last slot in the slot list, in this case the difference function.
+    }
 
-    boost::signals2::signal< float (float x, float y), maximum<float> > sig_max;
+    /** **** Boost Signals example ***
+
+    boost::signals2::signal<float (float, float)                      > signal_default_last;
+
+    signal_default_last.connect(&product);  // Product is one SLOT of several subscribing to an event/signal
+    signal_default_last.connect(&quotient);
+    signal_default_last.connect(&sum);
+    signal_default_last.connect(&difference);
+    std::cout << "*sig_default_last(5, 3): " << *signal_default_last(5, 3) << std::endl; // SIGNAL FIRES HERE The default combiner returns a boost::optional containing the return value of the last slot in the slot list, in this case the difference function.
+    //std::cout << "*sig_default_last(5, 3): " << signal_default_last(5, 3) << std::endl; // SIGNAL FIRES HERE The default combiner returns a boost::optional containing the return value of the last slot in the slot list, in this case the difference function.
+
+    boost::signals2::signal< float (float, float), maximum<float> > sig_max;
     sig_max.connect(&product);
     sig_max.connect(&quotient);
     sig_max.connect(&sum);
     sig_max.connect(&difference);
-    std::cout << "maximum: " << sig_max(5, 3) << std::endl; // Outputs the maximum value returned by the connected slots, in this case 15 from the product function.
+    std::cout << "maximum: " << sig_max(5, 3) << std::endl; // Outputs the maximum value returned by the connected slots, in this case 15 from the product function.  */
 
     std::cout << "###" << std::endl;
     return 0;
