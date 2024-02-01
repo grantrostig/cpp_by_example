@@ -23,6 +23,7 @@ Data Structures:
 
 
 */
+
 /* +Signals and slots are managed,
     in that signals and slots (or, more properly, objects that occur as part of the slots)
     can track connections and are capable of automatically disconnecting
@@ -39,11 +40,15 @@ Data Structures:
     Copyright (c) 2024 Alan Uthoff                                  */
 #include "Feeding_chime.h"
 #include "TimerUesr.h"
+#include "fteng/signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
 #include <boost/signals2.hpp>
 #include <chrono>
 #include <thread>
+using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
+using namespace std::string_literals;
 using namespace std::chrono_literals;
 
+namespace boost_signals2_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 template<typename T> // Combiner which returns the maximum value returned by all slots
 struct maximum {
     typedef T result_type;
@@ -63,25 +68,9 @@ float product   (float x, float y) { return x * y; }
 float quotient  (float x, float y) { return x / y; }
 float sum       (float x, float y) { return x + y; }
 float difference(float x, float y) { return x - y; }
-int main() {
-    /** **** TheWhisp/signals example *** */
-    constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
 
-    Signal_user pet_owner_signal_user{1000ms}; //Timer user will print a message out ever second +- sleepDuration
-
-    Feeding_chime chime_for_dog{};
-    chime_for_dog.start();
-    int i{};
-    while (true) {           // Run/use CPU. Or a GUI loop
-        Feeding_chime::updateAll();
-
-        std::this_thread::sleep_for(SLEEP_DURATION);
-        if ( ++i > 4 ) chime_for_dog.stop();
-    }
-    chime_for_dog.stop();
-
-    /** **** Boost Signals example ***
-
+/** **** Boost Signals example *** */
+void test() {
     boost::signals2::signal<float (float, float)                   > signal_default_last;
 
     signal_default_last.connect(&product);  // Product is one SLOT of several subscribing to an event/signal
@@ -97,7 +86,93 @@ int main() {
     sig_max.connect(&sum);
     sig_max.connect(&difference);
     std::cout << "maximum: " << sig_max(5, 3) << std::endl; // Outputs the maximum value returned by the connected slots, in this case 15 from the product function.  */
+}} // END namespace boost_signals2_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
+namespace alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+void test() {
+constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
+Signal_user pet_owner_signal_user{1000ms}; //Timer user will print a message out ever second +- sleepDuration
+//Feeding_chime chime_for_dog{};  Not needed??
+//chime_for_dog.start();  // Does nothing??
+//int i{};
+while (true) {           // Run/use CPU. Or a GUI loop
+    Feeding_chime::updateAll();
+    std::this_thread::sleep_for(SLEEP_DURATION);
+    // if ( ++i / 4 ) chime_for_dog.stop(); // Does nothing??
+}
+//chime_for_dog.stop();  // Does nothing?
+}} // END namespace alans_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace grants_theWisp_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // theWisp is NOT THREADSAFE.
+void observer_slot_callback_free_fn(float delta) { std::cout << "update_fn() delta:"<<delta<<std::endl; } // A function callback
+class My_slot_waiting_on_update_class { // A member function callback
+public: void GOFs_update(float delta) { std::cout << "my_class::update_fn() delta:"<<delta<<std::endl; }
+};
+void test1() {                                           std::cout<< "START grants_theWisp_example test1. ++++++++++++++++++++++++"<<std::endl;
+    // Here the Signal class does not allow us to modify it, so is NOT really a user defineable Subject to an Observer??
+    fteng::signal< void(float delta) > signal_which_emmits_a_calls_update_on_know_observers{};        // A signal specifying its signature in the template parameter. which wants to connect to observers/slots??
+    // Signal.connect() GOF names Subject.attach/detach().
+    // TODO??: how to rename member function via "using" or Template magic?
+    signal_which_emmits_a_calls_update_on_know_observers.connect( observer_slot_callback_free_fn );                          // Connects to the observer's function callback
+
+    My_slot_waiting_on_update_class * my_slot{ new My_slot_waiting_on_update_class };
+    signal_which_emmits_a_calls_update_on_know_observers.connect< &My_slot_waiting_on_update_class::GOFs_update > ( my_slot );   // Connects to the observer/slot object's callback member function
+
+    signal_which_emmits_a_calls_update_on_know_observers.connect( [](float delta) {std::cout <<  "lambda callback 1() delta:"<<delta<<std::endl; });  // Connects to a lambda callback observer/slot
+    signal_which_emmits_a_calls_update_on_know_observers.connect( [](auto &&...as) {std::cout << "lambda callback 2() ...as is NOT printed." <<std::endl; });    // Connects to a generic lambda callback observer/slot
+
+    // Emmits the signal 42 using its function_object, but is GOF name is: notify(), ie. ~ signal_which_emmits_a_calls_update_on_know_observers.GOF_notify( 42 );
+    // All attached/subscribed/connect()ed Slots get the signal 42 via their own GOF_update().
+    signal_which_emmits_a_calls_update_on_know_observers( 42 );
+    delete my_slot;                                      std::cout<< "END   grants_theWisp_example test1. ++++++++++++++++++++"<<std::endl;
+}
+
+class Button_with_slots{
+public:
+    string name_{"NULL"};
+    fteng::signal< void( Button_with_slots& btn, bool down ) > pressed_signal_{};
+    Button_with_slots() { cout<<"Button_with_slots constructor.\n";};
+    // ~Button_with_slots() { cout<<"Button_with_slots destructor.\n";};  // TODO??: why prohibited by compiler?
+};
+class My_special_frame {
+public:
+    std::vector<Button_with_slots> button_with_slots{};
+    My_special_frame() {
+        button_with_slots.emplace_back();   // TODO??: Is this exaclty the same? $ buttons.emplace_back(new Button{});
+        button_with_slots.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );  // attaching button callback to frame and not?? Signal
+        button_with_slots.back().name_ = "1st in constructor";  // attaching button callback to frame and not?? Signal
+        button_with_slots.emplace_back();   // TODO??: Is this exaclty the same? $ buttons.emplace_back(new Button{});
+        button_with_slots.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );  // attaching button callback to frame and not?? Signal
+        button_with_slots.back().name_ = "2st in constructor";  // attaching button callback to frame and not?? Signal
+        cout<<"My_special_frame constructor.\n";
+    }
+    ~My_special_frame() { cout<<"My_special_frame destructor.\n";};
+    void on_button_pressed_callback( Button_with_slots & btn, bool down) {
+        std::cout <<"on_button_pressed_callback():"<<btn.name_ <<","<< &btn <<","<< down<<"\n";
+    }
+};
+void test2() {                                           std::cout<< "START grants_theWisp_example test2. ++++++++++++++++++++++++"<<std::endl;
+    // is NOT really a user defineable Subject to an Observer??
+    //fteng::signal< void(float delta) > signal_which_emmits_a_calls_update_on_know_observers{};        // A signal specifying its signature in the template parameter. which wants to connect to observers/slots??
+
+    My_special_frame button_frame{};
+    Button_with_slots button{};
+
+    // Signal needs to be fired, usually done by the class that has/is a Signal. Here we just call the funtion it would call.
+    //auto junk = button_frame.button_with_slots.back().pressed_signal;  // TODO??: what is this strange return type? We guessed it would be void because callback returns void.
+    button_frame.button_with_slots.back().pressed_signal_( button, 1 );  // TODO??: meaning of warning, since we can init a variable with this value?
+
+    // Signal.connect() GOF names Subject.attach/detach().
+    // TODO??: how to rename member function via "using" or Template magic?
+    //signal_which_emmits_a_calls_update_on_know_observers.connect( observer_slot_callback_free_fn );                          // Connects to the observer's function callback
+    std::cout<< "END   grants_theWisp_example test2. ++++++++++++++++++++++++"<<std::endl;
+}} // namespace grants_theWisp_example
+
+int main() {
+    //boost_signals2_example::test();
+    //alans_example::test();
+    //grants_theWisp_example::test1();
+    grants_theWisp_example::test2();
     std::cout << "###" << std::endl;
     return 0;
 }

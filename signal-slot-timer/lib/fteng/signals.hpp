@@ -1,3 +1,6 @@
+/** https://github.com/TheWisp/signals
+    theWisp is NOT THREADSAFE.
+*/
 #pragma once
 #include <cstdlib>
 #include <vector>
