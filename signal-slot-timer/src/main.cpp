@@ -19,11 +19,7 @@ Boost Doc states poins with '+', Grant '-'.                              www.boo
     the emission is processed by WHOM2 in what way?     Eg. the recipient has "update" run on him which is like "waking up"???
                                                             s/he runs a function/callback,
                                                             for example, the dog or cat eats the food.
-Data Structures:
-
-
-*/
-
+Data Structures: */
 /* +Signals and slots are managed,
     in that signals and slots (or, more properly, objects that occur as part of the slots)
     can track connections and are capable of automatically disconnecting
@@ -41,12 +37,101 @@ Data Structures:
 #include "Feeding_chime.h"
 #include "TimerUesr.h"
 #include "fteng/signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
+#include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 #include <chrono>
+#include <iostream>
 #include <thread>
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
+
+namespace boost_signals2_timer_asio { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN           // source: Bing
+
+class Timer {
+    boost::asio::deadline_timer timer_;
+public:
+    Timer(boost::asio::io_service& io_service) : timer_(io_service) {}
+
+    boost::signals2::signal<void()> on_timer_expired;       // Signal to be emitted on timer expiry
+
+    void start(int seconds) {
+        timer_.expires_from_now(boost::posix_time::seconds(seconds));
+        //timer_.async_wait(this {
+            //on_timer_expired(); // Emit the signal
+        //});
+    }
+};
+
+void test1() {
+    boost::asio::io_service io_service;
+    Timer timer(io_service);
+
+    // Connect a slot to the signal
+    //timer.on_timer_expired.connect( {
+        //std::cout << "Timer expired!" << std::endl;
+    //});
+
+    timer.start(5);     // Start the timer for 5 seconds
+    io_service.run();   // Start the event loop
+}
+
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace boost_signals2_timer_thread { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN                  // source: Bing
+auto my_sleeper_l{ [ /* this */ ] (std::chrono::seconds seconds_in) {
+    std::this_thread::sleep_for(std::chrono::seconds(seconds_in));
+    //on_timer_expired_();                                             // Emit the signal
+}};
+
+class Timer;
+void my_sleeper_fn();
+class Timer {
+public:
+    boost::signals2::signal<void()> on_timer_expired_; // Signal to be emitted on timer expiry
+
+    void start(int seconds_in) {
+        //WAS std::thread(this, seconds {
+        //std::thread([this] (std::chrono::seconds seconds_in) {
+                //std::this_thread::sleep_for(std::chrono::seconds(seconds_in));
+                //on_timer_expired_();                                             // Emit the signal
+            //}).detach();
+
+        auto my_sleeper_fm_l{ [ /* this */ ] (std::chrono::seconds seconds_in) {
+                //std::this_thread::sleep_for(std::chrono::seconds(seconds_in));
+                //on_timer_expired_();                                             // Emit the signal
+        }};
+
+        //std::thread my_thread1{ my_sleeper_fn, this, seconds_in };
+        //std::thread my_thread2{ my_sleeper_l, seconds_in };         // TODO??: Compile error: std::thread arguments must be invocable after conversion to rvalues
+        //std::thread my_thread4{ my_sleeper_fm_l, seconds_in };      // TODO??: Compile error: std::thread arguments must be invocable after conversion to rvalues
+        //my_thread1.detach();
+    }
+};
+
+void my_sleeper_fn( Timer & timer_in, int seconds_in) {
+    std::this_thread::sleep_for(std::chrono::seconds(seconds_in));
+    //on_timer_expired_();                                                      // Emit the signal
+    timer_in.on_timer_expired_();                                               // Emit the signal
+}
+
+int test1() {
+    Timer timer;
+
+    // Connect a slot to the signal
+    timer.on_timer_expired_.connect( []() {
+        std::cout << "Timer expired!" << std::endl;
+    });
+
+    timer.start(5);  // Start the timer for 5 seconds
+
+    // Wait for the timer to expire
+    std::this_thread::sleep_for(std::chrono::seconds(6));
+
+    return 0;
+}
+
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace boost_signals2_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 template<typename T> // Combiner which returns the maximum value returned by all slots
@@ -70,7 +155,7 @@ float sum       (float x, float y) { return x + y; }
 float difference(float x, float y) { return x - y; }
 
 /** **** Boost Signals example *** */
-void test() {
+void test1() {
     boost::signals2::signal<float (float, float)                   > signal_default_last;
 
     signal_default_last.connect(&product);  // Product is one SLOT of several subscribing to an event/signal
@@ -89,7 +174,7 @@ void test() {
 }} // END namespace boost_signals2_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-void test() {
+void test1() {
 constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
 Signal_user pet_owner_signal_user{1000ms}; //Timer user will print a message out ever second +- sleepDuration
 //Feeding_chime chime_for_dog{};  Not needed??
@@ -103,7 +188,7 @@ while (true) {           // Run/use CPU. Or a GUI loop
 //chime_for_dog.stop();  // Does nothing?
 }} // END namespace alans_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace grants_theWisp_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // theWisp is NOT THREADSAFE.
+namespace grants_theWisp_examples { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // theWisp is NOT THREADSAFE.
 void observer_slot_callback_free_fn(float delta) { std::cout << "update_fn() delta:"<<delta<<std::endl; } // A function callback
 class My_slot_waiting_on_update_class { // A member function callback
 public: void GOFs_update(float delta) { std::cout << "my_class::update_fn() delta:"<<delta<<std::endl; }
@@ -130,49 +215,70 @@ void test1() {                                           std::cout<< "START gran
 class Button_with_slots{
 public:
     string name_{"NULL"};
-    fteng::signal< void( Button_with_slots& btn, bool down ) > pressed_signal_{};
+    fteng::signal< void( Button_with_slots& btn, bool down ) > pressed_signal_{};  // Signals automatically disconnect from their slots (receivers) upon destruction.
     Button_with_slots() { cout<<"Button_with_slots constructor.\n";};
     // ~Button_with_slots() { cout<<"Button_with_slots destructor.\n";};  // TODO??: why prohibited by compiler?
 };
 class My_special_frame {
 public:
-    std::vector<Button_with_slots> button_with_slots{};
+    std::vector<Button_with_slots> buttons_{};
     My_special_frame() {
-        button_with_slots.emplace_back();   // TODO??: Is this exaclty the same? $ buttons.emplace_back(new Button{});
-        button_with_slots.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );  // attaching button callback to frame and not?? Signal
-        button_with_slots.back().name_ = "1st in constructor";  // attaching button callback to frame and not?? Signal
-        button_with_slots.emplace_back();   // TODO??: Is this exaclty the same? $ buttons.emplace_back(new Button{});
-        button_with_slots.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );  // attaching button callback to frame and not?? Signal
-        button_with_slots.back().name_ = "2st in constructor";  // attaching button callback to frame and not?? Signal
+        buttons_.emplace_back();                                                                            // TODO??: Is this exaclty the same? $ buttons.emplace_back(new Button{});
+        buttons_.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );  // TODO??: Attaching button callback to frame and not?? Signal
+        buttons_.back().name_ = "1st in constructor";
+        Button_with_slots button2{};
+        button2.pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );
+        button2.name_ = "2st in constructor";
+        //buttons_.push_back( button2 );
+        buttons_.emplace_back();
+        buttons_.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );
+        buttons_.back().name_ = "3rd in constructor";
         cout<<"My_special_frame constructor.\n";
     }
     ~My_special_frame() { cout<<"My_special_frame destructor.\n";};
     void on_button_pressed_callback( Button_with_slots & btn, bool down) {
-        std::cout <<"on_button_pressed_callback():"<<btn.name_ <<","<< &btn <<","<< down<<"\n";
+        std::cout <<"on_button_pressed_callback() name_, &button, parameter:"<<btn.name_ <<","<< &btn <<","<< down<<"\n";
     }
 };
 void test2() {                                           std::cout<< "START grants_theWisp_example test2. ++++++++++++++++++++++++"<<std::endl;
-    // is NOT really a user defineable Subject to an Observer??
-    //fteng::signal< void(float delta) > signal_which_emmits_a_calls_update_on_know_observers{};        // A signal specifying its signature in the template parameter. which wants to connect to observers/slots??
-
-    My_special_frame button_frame{};
-    Button_with_slots button{};
-
-    // Signal needs to be fired, usually done by the class that has/is a Signal. Here we just call the funtion it would call.
-    //auto junk = button_frame.button_with_slots.back().pressed_signal;  // TODO??: what is this strange return type? We guessed it would be void because callback returns void.
-    button_frame.button_with_slots.back().pressed_signal_( button, 1 );  // TODO??: meaning of warning, since we can init a variable with this value?
-
-    // Signal.connect() GOF names Subject.attach/detach().
-    // TODO??: how to rename member function via "using" or Template magic?
-    //signal_which_emmits_a_calls_update_on_know_observers.connect( observer_slot_callback_free_fn );                          // Connects to the observer's function callback
+    My_special_frame button_frame{};                                // Constructor creates several buttons
+    Button_with_slots & button0{button_frame.buttons_.at(0)};       // Get handle to button to fire a signal on it below
+    Button_with_slots & button1{button_frame.buttons_.at(1)};
+    //Button_with_slots & button2 {button_frame.buttons_.at(2)};    // uncomment once above code is fixed.
+    cout << "Firing signals, usually done by the class that has/is a Signal. Here we just call the funtion it would call."<<endl;
+    button_frame.buttons_.front().pressed_signal_( button0, 1 );    //auto junk = button_frame.button_with_slots.back().pressed_signal;  // TODO??: what is this strange return type? We guessed it would be void because callback returns void.
+    button_frame.buttons_.at(1).pressed_signal_(   button1, 0 );
     std::cout<< "END   grants_theWisp_example test2. ++++++++++++++++++++++++"<<std::endl;
-}} // namespace grants_theWisp_example
+}
+// *** NOTE: below code is under construction
+class Interval_signal {
+    string              name_{"NULL"};
+    int                 interval_{};
+    fteng::signal< void() > strike_the_signal_{};
+};
+class Chime {   // A special type of clock that only chimes on an specified interval, for example every 1,0000 ms
+
+    void chime_clock_tick() {};
+
+    void interval_signal_callback() {
+        cout << "interval_signal_callback()" << endl;
+    };
+};
+
+void test3() {
+    Chime chime{};
+
+};
+} // namespace grants_theWisp_examples
 
 int main() {
-    //boost_signals2_example::test();
-    //alans_example::test();
-    //grants_theWisp_example::test1();
-    grants_theWisp_example::test2();
+    //boost_signals2_timer_thread::test1();
+    //boost_signals2_timer_asio::test1();
+    boost_signals2_example::test1();
+    alans_example::test1();
+    //grants_theWisp_examples::test1();
+    //grants_theWisp_examples::test2();
+    //grants_theWisp_examples::test3();
     std::cout << "###" << std::endl;
     return 0;
 }

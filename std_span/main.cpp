@@ -2,7 +2,6 @@
 #include <span>
 #include <cassert>
 using namespace std;
-// option 1
 
 template<typename Container>
 int sum3(const Container& c) {
@@ -20,7 +19,7 @@ int main() {
     int rs {sum3span(ar)};
 
     int a=2, b=3;
-    int& aref=a;
+    int& aref=a;  // Let's see if refs generate the same assembly code
     int& bref=b;
     int answer1 = a+b;
     int answer2 = aref + bref;
