@@ -1,10 +1,42 @@
-cmake_minimum_required(VERSION 3.5)
+#https://cmake.org/cmake/help/latest/command/add_link_options.html#command:add_link_options
+#https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html
+#https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html
+
+cmake_minimum_required(VERSION 3.27)
 project(signal_slot_timer)
 
-set(CMAKE_CXX_STANDARD 20)
-include_directories(src, lib)
+#cd project
+#cmake -B build/
+#cmake --build build --verbose
+#cmake --build . --verbose
+#make VERBOSE=1
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CXX_EXTENSIONS OFF)
+
+
+#https://cmake.org/cmake/help/latest/prop_sf/COMPILE_OPTIONS.html#prop_sf:COMPILE_OPTIONS
+add_compile_options( -Wall -Wextra -pedantic -pedantic-errors -Wno-unused-variable ) # -fsanitize=undefined)
+
+#https://cmake.org/cmake/help/latest/command/add_link_options.html#command:add_link_options
+#add_link_options(<option> ...)
+#???string(APPEND CMAKE_EXE_LINKER_FLAGS " -fexceptions")
+
+
+# new in 3.11 https://cmake.org/cmake/help/latest/prop_sf/COMPILE_OPTIONS.html#prop_sf:COMPILE_OPTIONS
+set_source_files_properties(foo.cpp PROPERTIES COMPILE_OPTIONS "-Wno-unused-parameter;-Wno-missing-field-initializer")
+
+add_compile_definitions("NO_DEBUG")
+
 find_package( Boost 1.78 )
 #find_package(Boost 1.78 COMPONENTS program_options REQUIRED)
+
+include_directories(src, lib)
 
 add_executable(signal_slot_timer
         src/Feeding_chime.h

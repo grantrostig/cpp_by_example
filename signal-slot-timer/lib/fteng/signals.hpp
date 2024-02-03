@@ -220,13 +220,13 @@ namespace fteng {
 			}
 		}
 
-		template<auto PMF, class C>
+        template<auto PMF, class C>  // Pointer to member functions
         connection_raw connect(C* object) const {
 			size_t idx = conns.size();
 			auto& call = calls.emplace_back();
 			call.object = object;
 			call.func = reinterpret_cast<void*>(+[](void* obj, A ... args) {((*reinterpret_cast<C**>(obj))->*PMF)(args...); });
-			details::conn_base* conn = new details::conn_base(this, idx);
+            details::conn_base * conn = new details::conn_base(this, idx);
 			conns.emplace_back(conn);
 			return { conn };
 		}

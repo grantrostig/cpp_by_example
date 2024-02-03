@@ -215,7 +215,7 @@ void test1() {                                           std::cout<< "START gran
 class Button_with_slots{
 public:
     string name_{"NULL"};
-    fteng::signal< void( Button_with_slots& btn, bool down ) > pressed_signal_{};  // Signals automatically disconnect from their slots (receivers) upon destruction.
+    fteng::signal< void( Button_with_slots & btn, bool down ) > pressed_signal_{};  // Signals automatically disconnect from their slots (receivers) upon destruction.
     Button_with_slots() { cout<<"Button_with_slots constructor.\n";};
     // ~Button_with_slots() { cout<<"Button_with_slots destructor.\n";};  // TODO??: why prohibited by compiler?
 };
@@ -223,21 +223,28 @@ class My_special_frame {
 public:
     std::vector<Button_with_slots> buttons_{};
     My_special_frame() {
-        buttons_.emplace_back();                                                                            // TODO??: Is this exaclty the same? $ buttons.emplace_back(new Button{});
+        buttons_.emplace_back();                                                                            // TODO??: Is this similar? $ buttons_.emplace_back(Button_with_slots{});
         buttons_.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );  // TODO??: Attaching button callback to frame and not?? Signal
         buttons_.back().name_ = "1st in constructor";
         Button_with_slots button2{};
         button2.pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );
         button2.name_ = "2st in constructor";
+        //buttons_.emplace_back( button2 );
         //buttons_.push_back( button2 );
+
         buttons_.emplace_back();
-        buttons_.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );
+        //buttons_.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );
         buttons_.back().name_ = "3rd in constructor";
         cout<<"My_special_frame constructor.\n";
     }
+    void add( Button_with_slots & b ) {
+        buttons_.emplace_back();                                                                            // TODO??: Is this similar? $ buttons_.emplace_back(Button_with_slots{});
+        buttons_.back().pressed_signal_.connect< & My_special_frame::on_button_pressed_callback >( this );  // TODO??: Attaching button callback to frame and not?? Signal
+        buttons_.back().name_ = b.name_;
+    }
     ~My_special_frame() { cout<<"My_special_frame destructor.\n";};
     void on_button_pressed_callback( Button_with_slots & btn, bool down) {
-        std::cout <<"on_button_pressed_callback() name_, &button, parameter:"<<btn.name_ <<","<< &btn <<","<< down<<"\n";
+        //std::cout <<"on_button_pressed_callback() name_, &button, parameter:"<<btn.name_ <<","<< &btn <<","<< down<<"\n";
     }
 };
 void test2() {                                           std::cout<< "START grants_theWisp_example test2. ++++++++++++++++++++++++"<<std::endl;
@@ -245,9 +252,13 @@ void test2() {                                           std::cout<< "START gran
     Button_with_slots & button0{button_frame.buttons_.at(0)};       // Get handle to button to fire a signal on it below
     Button_with_slots & button1{button_frame.buttons_.at(1)};
     //Button_with_slots & button2 {button_frame.buttons_.at(2)};    // uncomment once above code is fixed.
+    Button_with_slots button4{};
+    button4.name_ = "button4";
+    button_frame.add(button4);
     cout << "Firing signals, usually done by the class that has/is a Signal. Here we just call the funtion it would call."<<endl;
     button_frame.buttons_.front().pressed_signal_( button0, 1 );    //auto junk = button_frame.button_with_slots.back().pressed_signal;  // TODO??: what is this strange return type? We guessed it would be void because callback returns void.
     button_frame.buttons_.at(1).pressed_signal_(   button1, 0 );
+    button_frame.buttons_.at(2).pressed_signal_(   button4, 0 );
     std::cout<< "END   grants_theWisp_example test2. ++++++++++++++++++++++++"<<std::endl;
 }
 // *** NOTE: below code is under construction
@@ -274,10 +285,10 @@ void test3() {
 int main() {
     //boost_signals2_timer_thread::test1();
     //boost_signals2_timer_asio::test1();
-    boost_signals2_example::test1();
-    alans_example::test1();
+    //boost_signals2_example::test1();
+    //alans_example::test1();
     //grants_theWisp_examples::test1();
-    //grants_theWisp_examples::test2();
+    grants_theWisp_examples::test2();
     //grants_theWisp_examples::test3();
     std::cout << "###" << std::endl;
     return 0;
