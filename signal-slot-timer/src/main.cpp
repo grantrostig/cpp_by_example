@@ -52,7 +52,7 @@ using std::cin; using std::cout; using std::cerr; using std::clog; using std::en
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
-namespace Boost_asio_timer5 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_asio_timer5 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 class Printer {
     boost::asio::strand<boost::asio::io_context::executor_type> strand_;
     boost::asio::steady_timer                                   timer1_;
@@ -64,8 +64,8 @@ public:
         , timer1_(io, boost::asio::chrono::seconds(1))
         , timer2_(io, boost::asio::chrono::seconds(1))
         , count_(0) {
-        timer1_.async_wait(boost::asio::bind_executor( strand_, boost::bind(&Printer::print1, this)));
-        timer2_.async_wait(boost::asio::bind_executor( strand_, boost::bind(&Printer::print2, this)));
+        timer1_.async_wait( boost::asio::bind_executor( strand_, boost::bind(&Printer::print1, this)));
+        timer2_.async_wait( boost::asio::bind_executor( strand_, boost::bind(&Printer::print2, this)));
     }
     ~Printer() { std::cout << "Final count is " << count_ << std::endl; }
     void print1() {
@@ -73,8 +73,7 @@ public:
             std::cout << "Timer 1: " << count_ << std::endl;
             ++count_;
             timer1_.expires_at(timer1_.expiry() + boost::asio::chrono::seconds(1));
-            timer1_.async_wait(
-                boost::asio::bind_executor( strand_, boost::bind(&Printer::print1, this)));
+            timer1_.async_wait( boost::asio::bind_executor( strand_, boost::bind(&Printer::print1, this)));
         }
     }
     void print2() {
@@ -82,19 +81,20 @@ public:
             std::cout << "Timer 2: " << count_ << std::endl;
             ++count_;
             timer2_.expires_at(timer2_.expiry() + boost::asio::chrono::seconds(1));
-            timer2_.async_wait(
-                boost::asio::bind_executor(strand_, boost::bind(&Printer::print2, this)));
+            timer2_.async_wait( boost::asio::bind_executor(strand_, boost::bind(&Printer::print2, this)));
         }
     }
 };
 int test1() {
     boost::asio::io_context io;
-    Printer p(io);
-    boost::thread t(boost::bind(&boost::asio::io_context::run, &io));
+    Printer                 p(io);
+
+    boost::thread           t1( boost::bind( &boost::asio::io_context::run, &io));
     io.run();
-    t.join();
-    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_asio_timer4 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    t1.join();
+    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace Boost_asio_timer4 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 class Printer {
     boost::asio::steady_timer timer_;
     int                       count_;
@@ -116,8 +116,8 @@ int test1() {
     boost::asio::io_context io;
     Printer p(io);
     io.run();
-    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_asio_timer3 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_asio_timer3 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 void print(const boost::system::error_code& /*e*/, boost::asio::steady_timer* t, int* count) {
     if (*count < 5) {
         std::cout << *count << std::endl;
@@ -133,8 +133,8 @@ int test1() {
     t.async_wait( boost::bind( print, boost::asio::placeholders::error, &t, &count));
     io.run();
     std::cout << "Final count is " << count << std::endl;
-    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_signals2_timer_asio { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN           // source: Bing
+    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_signals2_timer_asio { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN           // source: Bing
 
 class Timer {
     boost::asio::deadline_timer timer_;
@@ -164,8 +164,8 @@ void test1() {
     io_service.run();   // Start the event loop
 }
 
-} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_signals2_timer_thread { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN                  // source: Bing
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_signals2_timer_thread { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN                  // source: Bing
 auto my_sleeper_l{ [ /* this */ ] (std::chrono::seconds seconds_in) {
     std::this_thread::sleep_for(std::chrono::seconds(seconds_in));
     //on_timer_expired_();                                             // Emit the signal
@@ -218,8 +218,8 @@ int test1() {
     return 0;
 }
 
-} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_signals2_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_signals2_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 template<typename T> // Combiner which returns the maximum value returned by all slots
 struct maximum {
     typedef T result_type;
@@ -257,8 +257,8 @@ void test1() {
     sig_max.connect(&sum);
     sig_max.connect(&difference);
     std::cout << "maximum: " << sig_max(5, 3) << std::endl; // Outputs the maximum value returned by the connected slots, in this case 15 from the product function.  */
-}} // END namespace boost_signals2_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+}} // END namespace boost_signals2_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 void test1() {
 constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
 Signal_user pet_owner_signal_user{1000ms}; //Timer user will print a message out ever second +- sleepDuration
@@ -271,8 +271,8 @@ while (true) {           // Run/use CPU. Or a GUI loop
     // if ( ++i / 4 ) chime_for_dog.stop(); // Does nothing??
 }
 //chime_for_dog.stop();  // Does nothing?
-}} // END namespace alans_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Grants_theWisp_examples { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // theWisp is NOT THREADSAFE.
+}} // END namespace alans_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Grants_theWisp_examples { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // theWisp is NOT THREADSAFE.
 void observer_slot_callback_free_fn(float delta) { std::cout << "update_fn() delta:"<<delta<<std::endl; } // A function callback
 class My_slot_waiting_on_update_class { // A member function callback
 public: void GOFs_update(float delta) { std::cout << "my_class::update_fn() delta:"<<delta<<std::endl; }
@@ -364,7 +364,7 @@ void test3() {
     Chime chime{};
 
 };
-} // namespace grants_theWisp_examples */
+} // namespace grants_theWisp_examples NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  */
 
 int main() {
     //Boost_asio_timer3::test1();
