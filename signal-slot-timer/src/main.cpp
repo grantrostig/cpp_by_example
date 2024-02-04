@@ -35,16 +35,18 @@ Data Structures: */
     Boost Software License - Version 1.0 - August 17th, 2003
     Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
     Copyright (c) 2024 Alan Uthoff                                  */
-#include "Feeding_chime.h"
-#include "TimerUesr.h"
-#include "fteng/signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
+//#include "Feeding_chime.h"
+//#include "TimerUesr.h"
+//#include "fteng/signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
+//#include "signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
+//#include "./lib/fteng/signals.hpp"  // theWisp/fteng/signals is NOT THREADSAFE.
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/signals2.hpp>
 #include <chrono>
 #include <iostream>
-#include <functional>
+//#include <functional>
 #include <thread>
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
@@ -259,7 +261,7 @@ void test1() {
     sig_max.connect(&difference);
     std::cout << "maximum: " << sig_max(5, 3) << std::endl; // Outputs the maximum value returned by the connected slots, in this case 15 from the product function.  */
 }} // END namespace boost_signals2_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+/* namespace Alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 void test1() {
 constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
 Signal_user pet_owner_signal_user{1000ms}; //Timer user will print a message out ever second +- sleepDuration
@@ -365,12 +367,12 @@ void test3() {
     Chime chime{};
 
 };
-} // namespace grants_theWisp_examples
+} // namespace grants_theWisp_examples */
 
 int main() {
     //Boost_asio_timer3::test1();
     //Boost_asio_timer4::test1();
-    Boost_asio_timer5::test1();
+    //Boost_asio_timer5::test1();
     //Boost_signals2_timer_thread::test1();
     //Boost_signals2_timer_asio::test1();
     //Boost_signals2_example::test1();

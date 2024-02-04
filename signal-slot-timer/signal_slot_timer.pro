@@ -21,6 +21,7 @@ CONFIG += console
 #CONFIG += static wrong? why?
 #QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += \
+        #-std=c++20		    \
         -std=c++23		    \
         #-std=gnu++23		    \
         -O0 		            \
@@ -30,7 +31,7 @@ QMAKE_CXXFLAGS += \
         -fconcepts              \
         #-pedantic              \
         #-pedantic-errors       \
-        -fsanitize=undefined    \
+        #-fsanitize=undefined    \
         -Wall   		        \  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
         -Wextra   		        \
         -Wdeprecated-declarations\
@@ -52,7 +53,7 @@ QMAKE_CXXFLAGS += \
 LIBS += \
         -lpthread               \
         -lrt                    \
-        -lstdc++_libbacktrace   \
+        #-lstdc++_libbacktrace   \
         #-lboost_system         \
         #-lboost_coroutine      \
         #-lssl                  \  #  missing this still: undefined reference to symbol 'd2i_PrivateKey_bio@@OPENSSL_1_1_0  related to: OPENSSL_API_COMPAT
@@ -67,20 +68,14 @@ LIBS += \
 #}
 
 HEADERS += \
-    boost_headers.h         \
-    cpp_headers.h           \
-    global_entities.h       \
-    gnuplot-iostream.h      \
-    KitchenSink.h           \
-    math_grostig.h          \
-    random_toolkit.h        \
+#   lib/fteng/signals.hpp \
+    src/Feeding_chime.h \
+    src/TimerUesr.h
 #   $$PWD/..h               \ # probably wrong
 
 SOURCES += \
-    main.cpp \
-    #iostreams.cpp \
-    #global_entities.cpp \
-    #random_toolkit.cpp \
+    src/Feeding_chime.cpp \
+    src/main.cpp \
 ####################################################
 
 # // Boost specific defines.
@@ -99,46 +94,47 @@ SOURCES += \
 #QMAKE_RPATHDIR += $$BOOST_PATH/stage/lib
 
 # boost on fedora26 parial list only derived from Unbuntu list
-LIBS += \
-        -lboost_atomic \
-        -lboost_chrono \
-        -lboost_context \
-        -lboost_coroutine \
-        -lboost_date_time \
-        -lboost_fiber \
-        -lboost_filesystem \
+#LIBS += \
+#        -lboost_atomic \
+#        -lboost_chrono \
+#        -lboost_context \
+#        -lboost_coroutine \
+#        -lboost_date_time \
+#        -lboost_fiber \
+#        -lboost_filesystem \
 #        -lboost_graph_parallel \
-        -lboost_graph \
-        -lboost_iostreams \
-        -lboost_locale \
-        -lboost_log_setup \
-        -lboost_log \
-        -lboost_math_c99f \
-        -lboost_math_c99l \
-        -lboost_math_c99 \
-        -lboost_math_tr1f \
-        -lboost_math_tr1l \
-        -lboost_math_tr1 \
+#        -lboost_graph \
+#        -lboost_iostreams \
+#        -lboost_locale \
+#        -lboost_log_setup \
+#        -lboost_log \
+#        -lboost_math_c99f \
+#        -lboost_math_c99l \
+#        -lboost_math_c99 \
+#        -lboost_math_tr1f \
+#        -lboost_math_tr1l \
+#        -lboost_math_tr1 \
 #        -lboost_mpi_python-py27 \
 #        -lboost_mpi_python-py35 \
 #        -lboost_mpi_python \
 #        -lboost_mpi \
-        -lboost_prg_exec_monitor \
-        -lboost_program_options \
+#        -lboost_prg_exec_monitor \
+#        -lboost_program_options \
 #        -lboost_python-py27 \
 #        -lboost_python-py35 \
 #        -lboost_python \
-        -lboost_random \
-        -lboost_regex \
-        -lboost_serialization \
+#        -lboost_random \
+#        -lboost_regex \
+#        -lboost_serialization \
 #        -lboost_signals \
-        -lboost_system \
-        -lboost_thread \
-        -lboost_timer \
-        -lboost_type_erasure \
-        -lboost_unit_test_framework \
-        -lboost_wave \
-        -lboost_wserialization
+#        -lboost_signals2 \
+#        -lboost_system \
+#        -lboost_thread \
+#        -lboost_timer \
+#        -lboost_type_erasure \
+#        -lboost_unit_test_framework \
+#        -lboost_wave \
+#        -lboost_wserialization
 
 # boost on ubuntu 17.04
 #LIBS += \
@@ -193,7 +189,7 @@ LIBS += \
 #    LIBS += -L$$BOOST_PATH/stage/lib
 #}
 
-DISTFILES += \
+#DISTFILES += \
 #    ../../bin/mk_src.sh \
 #    CMakeLists.cmake \
 #    Makefile \
@@ -238,10 +234,10 @@ DISTFILES += \
 #    README.txt
 
 # Default rules for deployment.
-unix {
-    target.path = $$[QT_INSTALL_PLUGINS]/generic
-}
-!isEmpty(target.path): INSTALLS += target
+#unix {
+#    target.path = $$[QT_INSTALL_PLUGINS]/generic
+#}
+#!isEmpty(target.path): INSTALLS += target
 
 #unix: PRE_TARGETDEPS += $$PWD/../build-lib_tty-Desktop-Debug/liblib_tty.a
 
