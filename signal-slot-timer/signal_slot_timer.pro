@@ -51,8 +51,8 @@ QMAKE_CXXFLAGS += \
         #-DBOOST_SYSTEM_NO_DEPRECATED \  	# not sure what it does.
 
 LIBS += \
-        -lpthread               \
-        -lrt                    \
+        #-lpthread               \
+        #-lrt                    \
         #-lstdc++_libbacktrace   \
         #-lboost_system         \
         #-lboost_coroutine      \
@@ -68,7 +68,7 @@ LIBS += \
 #}
 
 HEADERS += \
-#   lib/fteng/signals.hpp \
+    lib/fteng/signals.hpp \
     src/Feeding_chime.h \
     src/TimerUesr.h
 #   $$PWD/..h               \ # probably wrong
@@ -94,7 +94,7 @@ SOURCES += \
 #QMAKE_RPATHDIR += $$BOOST_PATH/stage/lib
 
 # boost on fedora26 parial list only derived from Unbuntu list
-#LIBS += \
+LIBS += \
 #        -lboost_atomic \
 #        -lboost_chrono \
 #        -lboost_context \
@@ -129,7 +129,7 @@ SOURCES += \
 #        -lboost_signals \
 #        -lboost_signals2 \
 #        -lboost_system \
-#        -lboost_thread \
+         -lboost_thread \
 #        -lboost_timer \
 #        -lboost_type_erasure \
 #        -lboost_unit_test_framework \

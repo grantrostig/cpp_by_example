@@ -35,11 +35,11 @@ Data Structures: */
     Boost Software License - Version 1.0 - August 17th, 2003
     Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
     Copyright (c) 2024 Alan Uthoff                                  */
-//#include "Feeding_chime.h"
-//#include "TimerUesr.h"
-//#include "fteng/signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
+#include "Feeding_chime.h"
+#include "TimerUesr.h"
 //#include "signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
-//#include "./lib/fteng/signals.hpp"  // theWisp/fteng/signals is NOT THREADSAFE.
+//#include "fteng/signals.hpp" // theWisp/fteng/signals is NOT THREADSAFE.
+#include "./lib/fteng/signals.hpp"  // theWisp/fteng/signals is NOT THREADSAFE.
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/thread/thread.hpp>
@@ -94,7 +94,6 @@ int test1() {
     io.run();
     t.join();
     return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
 namespace Boost_asio_timer4 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 class Printer {
     boost::asio::steady_timer timer_;
@@ -118,7 +117,6 @@ int test1() {
     Printer p(io);
     io.run();
     return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
 namespace Boost_asio_timer3 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 void print(const boost::system::error_code& /*e*/, boost::asio::steady_timer* t, int* count) {
     if (*count < 5) {
@@ -136,7 +134,6 @@ int test1() {
     io.run();
     std::cout << "Final count is " << count << std::endl;
     return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
 namespace Boost_signals2_timer_asio { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN           // source: Bing
 
 class Timer {
@@ -261,7 +258,7 @@ void test1() {
     sig_max.connect(&difference);
     std::cout << "maximum: " << sig_max(5, 3) << std::endl; // Outputs the maximum value returned by the connected slots, in this case 15 from the product function.  */
 }} // END namespace boost_signals2_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-/* namespace Alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 void test1() {
 constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
 Signal_user pet_owner_signal_user{1000ms}; //Timer user will print a message out ever second +- sleepDuration
@@ -372,7 +369,7 @@ void test3() {
 int main() {
     //Boost_asio_timer3::test1();
     //Boost_asio_timer4::test1();
-    //Boost_asio_timer5::test1();
+    Boost_asio_timer5::test1();
     //Boost_signals2_timer_thread::test1();
     //Boost_signals2_timer_asio::test1();
     //Boost_signals2_example::test1();
@@ -380,6 +377,6 @@ int main() {
     //Grants_theWisp_examples::test1();
     //Grants_theWisp_examples::test2();
     //Grants_theWisp_examples::test3();
-    std::cout << "###" << std::endl;
+    cout << "###" << endl;
     return 0;
 }
