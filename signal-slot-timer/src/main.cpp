@@ -45,6 +45,7 @@ Data Structures: */
 #include <boost/thread/thread.hpp>
 #include <boost/signals2.hpp>
 #include <chrono>
+//#include <ctime>
 #include <iostream>
 //#include <functional>
 #include <thread>
@@ -52,7 +53,47 @@ using std::cin; using std::cout; using std::cerr; using std::clog; using std::en
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
-namespace Boost_asio_timer5 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_asio_timer3 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+void print(const boost::system::error_code& /*e*/, boost::asio::steady_timer* t, int* count) {
+    if (*count < 5) {
+        std::cout << *count << std::endl;
+        ++(*count);
+        t->expires_at( t->expiry() + boost::asio::chrono::seconds(1) );
+        t->async_wait( boost::bind( print, boost::asio::placeholders::error, t, count) );
+    }
+}
+int test1() {
+    boost::asio::io_context io;
+    int count = 0;
+    boost::asio::steady_timer t( io, boost::asio::chrono::seconds(1) );
+    t.async_wait( boost::bind( print, boost::asio::placeholders::error, &t, &count));
+    io.run();
+    std::cout << "Final count is " << count << std::endl;
+    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_asio_timer4 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+class Printer {
+    boost::asio::steady_timer timer_;
+    int                       count_;
+public:
+    Printer(boost::asio::io_context& io) : timer_( io, boost::asio::chrono::seconds(1) ), count_(0) {
+        timer_.async_wait(boost::bind(&Printer::print, this));
+    }
+    ~Printer() { std::cout << "Final count is " << count_ << std::endl; }
+    void print() {
+        if (count_ < 5) {
+            std::cout << count_ << std::endl;
+            ++count_;
+            timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
+            timer_.async_wait(boost::bind(&Printer::print, this));
+        }
+    }
+};
+int test1() {
+    boost::asio::io_context io;
+    Printer p(io);
+    io.run();
+    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Boost_asio_timer5 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 class Printer {
     boost::asio::strand<boost::asio::io_context::executor_type> strand_;
     boost::asio::steady_timer                                   timer1_;
@@ -93,48 +134,57 @@ int test1() {
     io.run();
     t1.join();
     return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
-namespace Boost_asio_timer4 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-class Printer {
-    boost::asio::steady_timer timer_;
-    int                       count_;
-public:
-    Printer(boost::asio::io_context& io) : timer_( io, boost::asio::chrono::seconds(1) ), count_(0) {
-        timer_.async_wait(boost::bind(&Printer::print, this));
+namespace Boost_asio_time_t_timer_11 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+struct Asio_time_t_clock {   // A custom implementation of the Clock concept from the standard C++ library. time_t_timer.cpp (c) 2003-2022 Christopher M. Kohlhoff https://en.cppreference.com/w/cpp/chrono/c/clock
+    typedef std::chrono::steady_clock::duration     duration;   // The duration type.
+    typedef duration::rep                           rep;        // The duration's underlying arithmetic representation. TODO??: NOT USED?
+    typedef duration::period                        period;     // The ratio representing the duration's tick period. TODO??: NOT USED?
+    typedef std::chrono::time_point<Asio_time_t_clock>   time_point; // An absolute time point represented using the clock.
+    static time_point now() noexcept { return time_point() + std::chrono::seconds(std::time(0)); } // Get the current time.
+    static constexpr bool                           is_steady = false; // The clock is not monotonically increasing. TODO??: NOT USED?
+};
+/** The boost::asio::basic_waitable_timer template accepts an optional WaitTraits template parameter.
+    The underlying time_t clock has one-second granularity,
+    so these traits may be customised to reduce the latency between the clock ticking over and a wait operation's completion.
+    When the timeout is near (less than one second away) we poll the clock more frequently to detect the time change closer to when it occurs.
+    The user can select the appropriate trade off between accuracy and the increased CPU cost of polling.
+    In extreme cases, a zero duration may be returned to make the timers as accurate as possible, albeit with 100% CPU usage. */
+struct Asio_time_t_wait_traits {
+    // *** Determine how long until the clock should be next polled to determine whether the DURATION has elapsed.
+    static Asio_time_t_clock::duration
+    to_wait_duration( const Asio_time_t_clock::duration& d) {
+        if (d > std::chrono::seconds(1))
+            return d - std::chrono::seconds(1);
+        else if (d > std::chrono::seconds(0))
+            return std::chrono::milliseconds(10);
+        else
+            return std::chrono::seconds(0);
     }
-    ~Printer() { std::cout << "Final count is " << count_ << std::endl; }
-    void print() {
-        if (count_ < 5) {
-            std::cout << count_ << std::endl;
-            ++count_;
-            timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
-            timer_.async_wait(boost::bind(&Printer::print, this));
-        }
+    // *** Determine how long until the clock should be next polled to determine whether the ABSOLUTE time has been reached.  // TODO??: is this overload NOT USED?
+    static Asio_time_t_clock::duration
+    to_wait_duration( const Asio_time_t_clock::time_point& t) {
+        return to_wait_duration(t - Asio_time_t_clock::now());
     }
 };
-int test1() {
-    boost::asio::io_context io;
-    Printer p(io);
-    io.run();
-    return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_asio_timer3 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-void print(const boost::system::error_code& /*e*/, boost::asio::steady_timer* t, int* count) {
-    if (*count < 5) {
-        std::cout << *count << std::endl;
-        ++(*count);
-        t->expires_at( t->expiry() + boost::asio::chrono::seconds(1) );
-        t->async_wait( boost::bind( print, boost::asio::placeholders::error, t, count) );
+typedef boost::asio::basic_waitable_timer< Asio_time_t_clock, Asio_time_t_wait_traits > Asio_time_t_timer;  // *** KEY asio type
+int test1() { try {
+        boost::asio::io_context io_context;
+        Asio_time_t_timer        timer(io_context);
+
+        timer.expires_after(std::chrono::seconds(5));
+        std::cout << "Starting synchronous wait.\n";
+        timer.wait();
+        std::cout << "Finished synchronous wait.\n";
+
+        timer.expires_after(std::chrono::seconds(5));
+        std::cout << "Starting asynchronous wait\n";
+        timer.async_wait( [](const boost::system::error_code& /*error*/) { std::cout << "timeout.\n"; });
+        io_context.run();
+        std::cout << "Finished asynchronous wait.\n";
     }
-}
-int test1() {
-    boost::asio::io_context io;
-    int count = 0;
-    boost::asio::steady_timer t( io, boost::asio::chrono::seconds(1) );
-    t.async_wait( boost::bind( print, boost::asio::placeholders::error, &t, &count));
-    io.run();
-    std::cout << "Final count is " << count << std::endl;
+    catch (std::exception& e) { std::cout << "Exception: " << e.what() << "\n"; }
     return 0; } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_signals2_timer_asio { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN           // source: Bing
+namespace Boost_signals2_timer_asio { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // source: Bing
 
 class Timer {
     boost::asio::deadline_timer timer_;
@@ -165,18 +215,16 @@ void test1() {
 }
 
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-namespace Boost_signals2_timer_thread { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN                  // source: Bing
+namespace Boost_signals2_timer_thread { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // source: Bing
 auto my_sleeper_l{ [ /* this */ ] (std::chrono::seconds seconds_in) {
     std::this_thread::sleep_for(std::chrono::seconds(seconds_in));
     //on_timer_expired_();                                             // Emit the signal
 }};
-
 class Timer;
 void my_sleeper_fn();
 class Timer {
 public:
     boost::signals2::signal<void()> on_timer_expired_; // Signal to be emitted on timer expiry
-
     void start(int seconds_in) {
         //WAS std::thread(this, seconds {
         //std::thread([this] (std::chrono::seconds seconds_in) {
@@ -215,10 +263,7 @@ int test1() {
     // Wait for the timer to expire
     std::this_thread::sleep_for(std::chrono::seconds(6));
 
-    return 0;
-}
-
-} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    return 0; }  } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 namespace Boost_signals2_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 template<typename T> // Combiner which returns the maximum value returned by all slots
 struct maximum {
@@ -239,7 +284,6 @@ float product   (float x, float y) { return x * y; }
 float quotient  (float x, float y) { return x / y; }
 float sum       (float x, float y) { return x + y; }
 float difference(float x, float y) { return x - y; }
-
 /** **** Boost Signals example *** */
 void test1() {
     boost::signals2::signal<float (float, float)                   > signal_default_last;
@@ -257,7 +301,7 @@ void test1() {
     sig_max.connect(&sum);
     sig_max.connect(&difference);
     std::cout << "maximum: " << sig_max(5, 3) << std::endl; // Outputs the maximum value returned by the connected slots, in this case 15 from the product function.  */
-}} // END namespace boost_signals2_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+}} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 namespace Alans_example { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 void test1() {
 constexpr std::chrono::milliseconds SLEEP_DURATION = 500ms;
@@ -271,7 +315,7 @@ while (true) {           // Run/use CPU. Or a GUI loop
     // if ( ++i / 4 ) chime_for_dog.stop(); // Does nothing??
 }
 //chime_for_dog.stop();  // Does nothing?
-}} // END namespace alans_example NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+}} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 namespace Grants_theWisp_examples { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  // theWisp is NOT THREADSAFE.
 void observer_slot_callback_free_fn(float delta) { std::cout << "update_fn() delta:"<<delta<<std::endl; } // A function callback
 class My_slot_waiting_on_update_class { // A member function callback
@@ -345,6 +389,7 @@ void test2() {                                           std::cout<< "START gran
     button_frame.buttons_.at(2).pressed_signal_(   button4, 0 );
     std::cout<< "END   grants_theWisp_example test2. ++++++++++++++++++++++++"<<std::endl;
 }
+
 // *** NOTE: below code is under construction
 class Interval_signal {
     string              name_{"NULL"};
@@ -359,17 +404,15 @@ class Chime {   // A special type of clock that only chimes on an specified inte
         cout << "interval_signal_callback()" << endl;
     };
 };
-
 void test3() {
     Chime chime{};
-
-};
-} // namespace grants_theWisp_examples NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  */
+}} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main() {
     //Boost_asio_timer3::test1();
     //Boost_asio_timer4::test1();
-    Boost_asio_timer5::test1();
+    //Boost_asio_timer5::test1();
+    Boost_asio_time_t_timer_11::test1();
     //Boost_signals2_timer_thread::test1();
     //Boost_signals2_timer_asio::test1();
     //Boost_signals2_example::test1();
