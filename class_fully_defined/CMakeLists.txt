@@ -23,24 +23,26 @@ set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CXX_EXTENSIONS OFF)
 
+include_directories( src, lib )
+project(                class_fully_defined LANGUAGES CXX )
+add_executable(         class_fully_defined src/main.cpp )
+target_link_libraries(  class_fully_defined -lstdc++_libbacktrace )
+#https://cmake.org/cmake/help/latest/command/add_link_options.html#command:add_link_options
+# add_link_options( -lstdc++_libbacktrace  )  TODO??: Does NOT work.
+#???string(APPEND CMAKE_EXE_LINKER_FLAGS " -fexceptions")
+
 # new in 3.11 https://cmake.org/cmake/help/latest/prop_sf/COMPILE_OPTIONS.html#prop_sf:COMPILE_OPTIONS
 set_source_files_properties(main.cpp PROPERTIES COMPILE_OPTIONS "-Wno-unused-parameter;-Wno-missing-field-initializer")
 
 #https://cmake.org/cmake/help/latest/prop_sf/COMPILE_OPTIONS.html#prop_sf:COMPILE_OPTIONS
-add_compile_options( -Wall -Wextra -pedantic -pedantic-errors -Wno-unused-variable ) # -fsanitize=undefined)
-
-#https://cmake.org/cmake/help/latest/command/add_link_options.html#command:add_link_options
-#add_link_options(<option> ...)
-#???string(APPEND CMAKE_EXE_LINKER_FLAGS " -fexceptions")
+add_compile_options( -Wall -Wextra -pedantic -pedantic-errors -Wno-unused-variable
+                      ) # -fsanitize=undefined)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)  # Doesn't seem to do anything ??
 #add_compile_definitions("NO_DEBUG")
 
-find_package( Boost 1.81 )
+#find_package( Boost 1.81 )
 #find_package(Boost 1.78 COMPONENTS program_options REQUIRED)
 
-include_directories( src, lib )
-project(        class_fully_defined LANGUAGES CXX )
-add_executable( class_fully_defined src/main.cpp )
 
 #target_link_libraries(<EXECUTABLE_NAME> Boost::program_options)  # macOS
