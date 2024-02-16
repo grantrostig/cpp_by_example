@@ -9,7 +9,7 @@
  * Inspired by: B. Stoustrup's books
  */
 
-#include "../../grostig_tools/cpp_headers.h"
+#include <bits/stdc++.h>
 
 /* Tips from C++ in a Nutshell:
  * P:135: POD hasn't got: user-defined constructor/destructor, copy(&move??) assignment operator
