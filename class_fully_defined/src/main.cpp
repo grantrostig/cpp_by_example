@@ -395,21 +395,24 @@ public: // *** Things that MUST be public in general
     }; // copy assignment - partial  // todo:?? return what, check all operators!
 
     // ***** Binary operators *****
-    Base_class & operator+ (Base_class const &rhs){ return *this;};  // TODO??
+    Base_class & operator+ (Base_class const &rhs){ i_ += rhs.i_;return *this;};  // TODO??
+    Base_class & operator- (Base_class const &rhs){ i_ += rhs.i_;return *this;};  // TODO??
+    Base_class & operator* (Base_class const &rhs){ i_ += rhs.i_;return *this;};  // TODO??
+    Base_class & operator/ (Base_class const &rhs){ i_ += rhs.i_;return *this;};  // TODO??
+    Base_class & operator% (Base_class const &rhs){ i_ += rhs.i_;return *this;};  // TODO??
 
-    Base_class operator+= (Base_class const &rhs) { i_ += rhs.i_; return *this; }; // copy assignment - partial  // todo:?? return what?
-    Base_class operator+= (int const &rhs) { i_ += rhs; return *this; }; // copy assignment - partial  // todo:?? return what?
+    Base_class operator+= (Base_class const &rhs) { i_ += rhs.i_; return *this; };
+    Base_class operator+= (int        const &rhs) { i_ += rhs;    return *this; };
 
-
-    Base_class operator*= (Base_class const &rhs) { i_ *= rhs.i_; return *this; }; // copy assignment - partial  // todo:?? return what?
+    Base_class operator*= (Base_class const &rhs) { i_ *= rhs.i_; return *this; };
+    Base_class operator*= (int        const &rhs) { i_ += rhs.i_; return *this; };
 
     // ***** Normal  Operators *****
 
     // ***** Special Operators *****
-    int val_{};
-    Base_class  &operator [] (int const & i) const  { return *this; };  // TCPL p550,4
+    Base_class  &operator [] (int const & i)        { return *this; };  // TCPL p550,4
     void         operator () (int const & i) const  {};                 // TODO??: Return type?  What should be const?
-    Base_class  *operator -> ()              const  { return  *this; }; // TCPL p554
+    Base_class  *operator -> ()                     { return  this; }; // TCPL p554
     Base_class  &operator *  () const { return *ptr_; };        // TCPL p554
 
     void *operator new (size_t){};  // TCPL p557
@@ -454,24 +457,27 @@ public: // *** Things that MUST be public in general
     // *** Ancillary Functions ***
     // *** Ordinary Member Functions ***
     // void   f () {};
-    auto f () & {};  // TODO??: what is this?
-    void f () && {}; // TODO??: what is this?
+    auto f () & {};  // TODO??: what is this? // https://en.cppreference.com/w/cpp/language/function  Reference/Ref qualified ref-qualification member functions/ .
+                     // Like non const mem fun can only be called ON objects that were instancied as non const objects (AKA not "const objects".  (no this)
+    void f () && {}; // TODO??: what is this? // Ref qualified member functions.  May not be static.
 
     // struct stat st; 			//todo:?? elaborated type specifier example  eg: struct My_type my_var, where struct is needed.
 };
 
+// *** Helper Functions ***
+//    void operator <=>( Base_class const &,  Base_class const &) {};
+// std::ostream &operator<< (std::ostream &os, Base_class &rhs){ return os; }; // todo:?? make this work for more that <char>, the ostream typedef.
+std::basic_ostream<char, std::char_traits<char>> & operator<<( std::basic_ostream<char, std::char_traits<char>> & os,       Base_class &rhs) {};  	// todo:?? more template parameters? std::basic_ostream<char, std::char_traits<char>> & operator<<(
+std::ostream& operator<< (std::ostream const & os, Base_class const &rhs){};    // TCPL p568
+std::istream& operator>> (std::istream const & is, Base_class const &rhs){};
+
+bool operator== (Base_class const &lhs, Base_class const &rhs){ return true; };
+bool operator!= (Base_class const &lhs, Base_class const &rhs){ return not (lhs == rhs); };
+
 int operator""_UDL(unsigned long long i) { return 42; };        // TCPL p558
 int Base_class::i_static_ = 77;
 
-//    void operator <=>( Base_class const &,  Base_class const &) {};
-
-std::ostream &operator<< (std::ostream &os, Base_class &rhs){ return os; }; // todo:?? make this work for more that <char>, the ostream typedef.
-// std::basic_ostream<char, std::char_traits<char>> & operator<<( std::basic_ostream<char, std::char_traits<char>> & os,       C &
-// rhs) {};  	// todo:?? more template parameters? std::basic_ostream<char, std::char_traits<char>> & operator<<(
-// std::basic_ostream<char, std::char_traits<char>> & os, const C & rhs) {};  	// todo:?? more template parameters?
-
-int
-main (int argc, char *arv[]) {
+int main (int argc, char *arv[]) {
     string my_arv{ *arv };
     cout << "~~~ argc, argv:" << argc << "," << my_arv << "." << endl;
     cin.exceptions (std::istream::failbit);
