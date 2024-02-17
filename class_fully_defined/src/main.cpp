@@ -326,6 +326,7 @@ extern "C" int stat( char * filename, struct stat * st);  // elaborated type spe
 
 class Base_class {
                                                             // TODO??: Place using statements in public? Currently private. Opinions on better way??
+    using Ptr   = std::unique_ptr<Base_class>;
     using Uptr   = std::unique_ptr<Base_class>;
     using Vi     = std::vector<int>;                        // TODO??: is one ever required to do a typedef instead of using??
     using Vvi    = std::vector<std::vector<int> >;
@@ -341,26 +342,24 @@ class Base_class {
     int mutable         i_mutable_{};    // Even in a const Class definition. For example as a data cache, or memoization.
     int static          i_static_;       // compiler::non-const must be init out of line. todo: what if I don't??
     int const static    i_cstatic_{};
-    /*T 			    t_{};		// todo: for template doesn't compile??
-    std::string 			s 			{};
-    std::string static 		s_static;  		   	// non-const must be init out of line. todo: what if I don't??
-    std::vector<int> 		vi 			{};
-    std::vector<int> static vi_static;  		// non-const must be init out of line.
-    Vvs 					vvs 		{};
-    Vvs static 				vvs_static;  		// non-const must be init out of line.
-    // Now for some sophisticated UML relationships - note a Base_class++ aggregate is not the same as UML aggregation, but
-    confusingly similar. https://en.cppreference.com/w/cpp/language/aggregate_initialization
-    https://stackoverflow.com/questions/4178175/what-are-aggregates-and-pods-and-how-why-are-they-special
-    https://softwareengineering.stackexchange.com/questions/255973/c-association-aggregation-and-composition
-    https://stackoverflow.com/questions/885937/what-is-the-difference-between-association-aggregation-and-composition
-    https://www.youtube.com/watch?v=B46RqPYhEys
-    https://www.learncpp.com/cpp-tutorial/aggregation/
-    //Base_class * 				composed_member_this 	{nullptr};  	// todo:?? or is this an aggregate?
-    //Uptr 				composed_member_this_u 	{nullptr};
-    //std::vector<Base_class *>	composed_members_this_v 	{nullptr};  // todo:?? put nulls in all members?
-    //Uptr_v				composed_members_this_vu 	{nullptr};  // todo:?? put nulls in all members?
-    */
+    Ptr 				ptr_{nullptr};
+    Uptr 				uptr_{nullptr};
+    Uptr_v				uptr_v_{nullptr};  // todo:?? put nulls in all members?
+    string static 		s_static_;  		   	// non-const must be init out of line. todo: what if I don't??
+    Vvs static 			vvs_static_;  		// non-const must be init out of line.
+    Vi static           vi_static_;  		// non-const must be init out of line.
+    /*  Now for some sophisticated UML relationships - note a Base_class++ aggregate is not the same as UML aggregation, but
+         confusingly similar. https://en.cppreference.com/w/cpp/language/aggregate_initialization
+        https://stackoverflow.com/questions/4178175/what-are-aggregates-and-pods-and-how-why-are-they-special
+        https://softwareengineering.stackexchange.com/questions/255973/c-association-aggregation-and-composition
+        https://stackoverflow.com/questions/885937/what-is-the-difference-between-association-aggregation-and-composition
+        https://www.youtube.com/watch?v=B46RqPYhEys
+        https://www.learncpp.com/cpp-tutorial/aggregation/ */
+    Base_class * 	    composed_member_this_ptr_{nullptr};  	// todo:?? or is this an aggregate?
+    std::vector<Base_class *> composed_members_this_ptr_v_{nullptr};  // todo:?? put nulls in all members?
+                                            //T 			    t_{};		// todo: for template doesn't compile??
 public: // *** Things that MUST be public in general
+    // *** Essential Operations Functions?? ***
     // Base_class() {};     			                            // Default contructor  TODO??: Do constructors have an implicit/hidden this? todo:
     Base_class () = default;                                        // TODO??: Does this and similar lines defeat other default member functions?
     // Base_class() = delete;
@@ -371,85 +370,97 @@ public: // *** Things that MUST be public in general
 
     ~Base_class () {};                                                 // Destructor default TODO:?? Are more specific destructors generally used?
 
-    Base_class (int & i)            : i_{i} {};                   // Copy constuctor
-    Base_class (int & i, int & i2)  : i_{i}, i_const_{42} {}  // ??Specialized constuctor for int using initializer list. i_const may be inited here. todo: when can we set it?? what order is respected??
-    Base_class (int && i)           : i_{i} {};                   // Move constuctor
+    Base_class (int const & i)                  : i_{i} {};                   // Copy constuctor
+    Base_class (int const & i, int const & i2)  : i_{i}, i_const_{42} {}      // ??Specialized Copy constuctor for int using initializer list. i_const may be inited here. todo: when can we set it?? what order is respected??
+    Base_class (int const && i)                 : i_{i} {};                   // Move constuctor
 
 
     // Conversion operators & and * // TODO??: YES they exist.  But how they work again?
     // https://github.com/cppmsg/cpp_by_example/blob/master/andrei_mapping_integral_constants_to_types/main.cpp
 
-    // Assignment?? operator
+    // *** Assignment operators ***
     Base_class &
-    operator= (Base_class const &rhs)  {  // Copy assignment
-        i_                    = rhs.i_;
-        s_                    = rhs.s_;
-        vvi_                   = rhs.vvi_;
-        vvs_                  = rhs.vvs_;
-        //composed_member_this = composed_member_this;
+    operator= (Base_class const &rhs) {
+        i_   = rhs.i_;
+        s_   = rhs.s_;
+        vvi_ = rhs.vvi_;
+        vvs_ = rhs.vvs_;
+        composed_member_this_ptr_ = rhs.composed_member_this_ptr_;
         return *this;
-    };
-    Base_class
-    operator= (Base_class rhs) {  // BAD Copy assignment
-        return *this;
-    };
-    Base_class
+    }; // Copy assignment
+    Base_class &
     operator= (int const & rhs) {
         i_ = rhs;
-        return false;
+        return *this;
     }; // copy assignment - partial  // todo:?? return what, check all operators!
 
-    Base_class
-    operator+= (Base_class &rhs) {
-        i_ + rhs.i_;
-        return *this;
-    }; // copy assignment - partial  // todo:?? return what?
-    Base_class
-    operator+= (int &rhs) {
-        i_ + rhs;
-        return *this;
-    }; // copy assignment - partial  // todo:?? return what?
-    Base_class operator+ (Base_class &rhs){ return rhs;};  // TODO??
-    Base_class
-    operator*= (Base_class &rhs) {
-        i_ + rhs.i_;
-        return *this;
-    }; // copy assignment - partial  // todo:?? return what?
+    // ***** Binary operators *****
+    Base_class & operator+ (Base_class const &rhs){ return *this;};  // TODO??
 
-    // *** Unary operators *** TODO??: are there more??
-    void  operator!(){};                        // todo:?? pre-fix unary
-    //auto  operator!(Base_class &rhs){};                        // todo:?? pre-fix unary
-    //Base_class  operator!(Base_class &rhs){};                        // todo:?? pre-fix unary
-    Base_class  operator++ (int rhs){};               // pre-fix unary??
-    //Base_class &operator++ (int rhs){};               // TODO??: post-fix unary??
+    Base_class operator+= (Base_class const &rhs) { i_ += rhs.i_; return *this; }; // copy assignment - partial  // todo:?? return what?
+    Base_class operator+= (int const &rhs) { i_ += rhs; return *this; }; // copy assignment - partial  // todo:?? return what?
 
-    Base_class operator&= (Base_class rhs){};
-    Base_class operator& (Base_class rhs){};
-    Base_class operator&& (Base_class rhs){}; // todo: What is this even?
 
-    bool operator<= (Base_class const &){};         // TODO??: What about spaceship operator?
-    bool operator>= (Base_class const &){};         // TODO??: What about spaceship operator?
-    bool operator!= (Base_class const &){};         // TODO??: What about spaceship operator?
+    Base_class operator*= (Base_class const &rhs) { i_ *= rhs.i_; return *this; }; // copy assignment - partial  // todo:?? return what?
+
+    // ***** Normal  Operators *****
+
+    // ***** Special Operators *****
+    int val_{};
+    Base_class  &operator [] (int const & i) const  { return *this; };  // TCPL p550,4
+    void         operator () (int const & i) const  {};                 // TODO??: Return type?  What should be const?
+    Base_class  *operator -> ()              const  { return  *this; }; // TCPL p554
+    Base_class  &operator *  () const { return *ptr_; };        // TCPL p554
+
+    void *operator new (size_t){};  // TCPL p557
+    void *operator new[] (size_t){};
+    void operator delete (void *, size_t){};
+    void operator delete[] (void *, size_t){};
+
+
+    // ********** Special Case Increment/Decrement Unary Operators ***** for scalars, pointers and iterators // TCPL p557
+    Base_class &operator++ (){};    // Prefix  Unary
+ // Base_class  operator++ (){};    // Prefix  Unary TODO??: No Ref, WRONG?
+    Base_class &operator-- (){};    // Prefix  Unary
+    Base_class  operator++ (int){}; // Postfix Unary - NOTE: int here is a dummy flag only, used to denoate postfix!
+    Base_class  operator-- (int){}; // Postfix Unary - NOTE: int here is a dummy flag only, used to denoate postfix!
+
+    // ***** Unary  operators *****
+    // Base_class  operator!(Base_class &rhs){};                        // todo:?? pre-fix unary
+    void operator!(){}; // todo:?? pre-fix unary
+    // ********** Postfix Unary  operators *********
+    // ********** Prefix  Unary  operators *********
+
+
+    Base_class operator&= (Base_class const &rhs){};
+    Base_class operator& (Base_class const &rhs){};
+    Base_class operator&& (Base_class const &rhs){}; // todo: What is this even?
+
+    bool operator<= (Base_class const &){}; // TODO??: What about spaceship operator?
+    bool operator>= (Base_class const &){}; // TODO??: What about spaceship operator?
+    bool operator!= (Base_class const &){}; // TODO??: What about spaceship operator?
 
     size_t size (){}; // todo: add nothrow, final
     void   clear (){};
     void   reset (){};
     void   capacity (){};
 
-    void operator<< (Base_class rhs){}; // todo:?? bitshift
-    void operator>> (Base_class &rhs){};
-    void operator() (Base_class &rhs){};
-    //void * operator new (){};
+    void operator<< (Base_class const &rhs){}; // todo:?? bitshift
+    void operator>> (Base_class const &rhs){};
+    void operator() (Base_class const &rhs){};
 
     // *** Setters and getters ***
+    // *** Ancillary Member Functions ***
+    // *** Ancillary Functions ***
     // *** Ordinary Member Functions ***
-    //void   f () {};
-    auto   f () & {};                               // TODO??: what is this?
-    void   f () && {};                               // TODO??: what is this?
+    // void   f () {};
+    auto f () & {};  // TODO??: what is this?
+    void f () && {}; // TODO??: what is this?
 
     // struct stat st; 			//todo:?? elaborated type specifier example  eg: struct My_type my_var, where struct is needed.
 };
 
+int operator""_UDL(unsigned long long i) { return 42; };        // TCPL p558
 int Base_class::i_static_ = 77;
 
 //    void operator <=>( Base_class const &,  Base_class const &) {};
