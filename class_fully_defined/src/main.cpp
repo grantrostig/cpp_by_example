@@ -321,12 +321,12 @@ crash_signals_register () -> void {
  * 	   ALSO: nonstatic data members must have a POD type, which are: fundamental, enum (enum class??),
  *           POD class (&struct??) or union, ptr to (or array of POD types).
 extern "C" int stat( char * filename, struct stat * st);  // elaborated type specifier example
-*/
-// template <typename T>
 
-class Base_class {
-                                                            // TODO??: Place using statements in public? Currently private. Opinions on better way??
-    using Ptr   = std::unique_ptr<Base_class>;
+// template <typename T>
+*/
+
+class Base_class {                                          // TODO??: Place using statements in public? Currently private. Opinions on better way??
+    using Ptr    = Base_class *;
     using Uptr   = std::unique_ptr<Base_class>;
     using Vi     = std::vector<int>;                        // TODO??: is one ever required to do a typedef instead of using??
     using Vvi    = std::vector<std::vector<int> >;

@@ -69,7 +69,8 @@ HEADERS += \
 
 SOURCES += \
     src/main.cpp \
-####################################################
+ \####################################################
+    tst_test_suite_case_name.cpp
 
 # // Boost specific defines.
 #DEFINES += BOOST_THREAD_VERSION=4
@@ -265,3 +266,6 @@ LIBS += \
 #    CPP11FLAG = -std=c++0x
 #    CPP14FLAG = -std=c++14
 #}
+
+DISTFILES += \
+    what_is_this.qtce

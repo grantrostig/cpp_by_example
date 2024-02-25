@@ -1,0 +1,25 @@
+{
+    "Sources": [
+        {
+            "Compilers": [
+                {
+                    "Id": "vcpp_v19_33_x64",
+                    "Libraries": {
+                    },
+                    "Options": "-O3"
+                }
+            ],
+            "Source": "int main() {\n  return 24;\n}"
+        }
+    ],
+    "WindowState": {
+        "AutoHideTitleBars": false,
+        "ShowCentralWidget": true,
+        "State": {
+            "type": "Base64",
+            "value": "AAAA/wAAAAL9AAAAAgAAAAAAAALaAAADyPwCAAAAAfsAAAA8AHMAbwB1AHIAYwBlAF8AYwBvAGQAZQBfAGUAZABpAHQAbwByAF8AMQBEAG8AYwBrAFcAaQBkAGcAZQB0AQAAAAAAAAPIAAAAbwD///8AAAABAAAC2gAAA8j8AgAAAAH7AAAAKABjAG8AbQBwAGkAbABlAHIAXwAxAEQAbwBjAGsAVwBpAGQAZwBlAHQBAAAAAAAAA8gAAAC5AP///wAAAAAAAAGrAAAABAAAAAQAAAAIAAAACPwAAAAA"
+        },
+        "compiler_1DockWidget": null,
+        "source_code_editor_1DockWidget": true
+    }
+}
