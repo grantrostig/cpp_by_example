@@ -21,7 +21,6 @@ CONFIG += console
 #CONFIG += static wrong? why?
 #QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += \
-        #-std=c++20		    \
         -std=c++23		    \
         #-std=gnu++23		    \
         -O0 		            \
@@ -31,7 +30,7 @@ QMAKE_CXXFLAGS += \
         -fconcepts              \
         #-pedantic              \
         #-pedantic-errors       \
-        #-fsanitize=undefined    \
+        #-fsanitize=undefined #60K link errors possible   \
         -Wall   		        \  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
         -Wextra   		        \
         -Weffc++                \
@@ -46,13 +45,16 @@ QMAKE_CXXFLAGS += \
         #-std=c++17             \
         #-std=gnu++17           \
         #-std=gnu++1z           \
+        #-std=c++20             \
+        #-std=gnu++20           \
+        #-std=c++2a             \
         #-DBOOST_LOG_DYN_LINK   \  		# on compile line not link line.
         #-DBOOST_SYSTEM_NO_DEPRECATED \  	# not sure what it does.
 
 LIBS += \
-        #-lpthread               \
-        #-lrt                    \
-        #-lstdc++_libbacktrace   \
+        -lpthread               \
+        -lrt                    \
+        -lstdc++_libbacktrace   \
         #-lboost_system         \
         #-lboost_coroutine      \
         #-lssl                  \  #  missing this still: undefined reference to symbol 'd2i_PrivateKey_bio@@OPENSSL_1_1_0  related to: OPENSSL_API_COMPAT
@@ -70,9 +72,11 @@ HEADERS += \
 #   $$PWD/..h               \ # probably wrong
 
 SOURCES += \
-    src/main.cpp \
- \####################################################
-    tst_test_suite_case_name.cpp
+    main.cpp \
+    #iostreams.cpp \
+    #global_entities.cpp \
+    #random_toolkit.cpp \
+####################################################
 
 # // Boost specific defines.
 #DEFINES += BOOST_THREAD_VERSION=4
@@ -91,46 +95,45 @@ SOURCES += \
 
 # boost on fedora26 parial list only derived from Unbuntu list
 LIBS += \
-#        -lboost_atomic \
-#        -lboost_chrono \
-#        -lboost_context \
-#        -lboost_coroutine \
-#        -lboost_date_time \
-#        -lboost_fiber \
-#        -lboost_filesystem \
+        -lboost_atomic \
+        -lboost_chrono \
+        -lboost_context \
+        -lboost_coroutine \
+        -lboost_date_time \
+        -lboost_fiber \
+        -lboost_filesystem \
 #        -lboost_graph_parallel \
-#        -lboost_graph \
-#        -lboost_iostreams \
-#        -lboost_locale \
-#        -lboost_log_setup \
-#        -lboost_log \
-#        -lboost_math_c99f \
-#        -lboost_math_c99l \
-#        -lboost_math_c99 \
-#        -lboost_math_tr1f \
-#        -lboost_math_tr1l \
-#        -lboost_math_tr1 \
+        -lboost_graph \
+        -lboost_iostreams \
+        -lboost_locale \
+        -lboost_log_setup \
+        -lboost_log \
+        -lboost_math_c99f \
+        -lboost_math_c99l \
+        -lboost_math_c99 \
+        -lboost_math_tr1f \
+        -lboost_math_tr1l \
+        -lboost_math_tr1 \
 #        -lboost_mpi_python-py27 \
 #        -lboost_mpi_python-py35 \
 #        -lboost_mpi_python \
 #        -lboost_mpi \
-#        -lboost_prg_exec_monitor \
-#        -lboost_program_options \
+        -lboost_prg_exec_monitor \
+        -lboost_program_options \
 #        -lboost_python-py27 \
 #        -lboost_python-py35 \
 #        -lboost_python \
-#        -lboost_random \
-#        -lboost_regex \
-#        -lboost_serialization \
+        -lboost_random \
+        -lboost_regex \
+        -lboost_serialization \
 #        -lboost_signals \
-#        -lboost_signals2 \
-#        -lboost_system \
-         -lboost_thread \
-#        -lboost_timer \
-#        -lboost_type_erasure \
-#        -lboost_unit_test_framework \
-#        -lboost_wave \
-#        -lboost_wserialization
+        -lboost_system \
+        -lboost_thread \
+        -lboost_timer \
+        -lboost_type_erasure \
+        -lboost_unit_test_framework \
+        -lboost_wave \
+        -lboost_wserialization
 
 # boost on ubuntu 17.04
 #LIBS += \
@@ -185,7 +188,7 @@ LIBS += \
 #    LIBS += -L$$BOOST_PATH/stage/lib
 #}
 
-#DISTFILES += \
+DISTFILES += \
 #    ../../bin/mk_src.sh \
 #    CMakeLists.cmake \
 #    Makefile \
@@ -230,10 +233,10 @@ LIBS += \
 #    README.txt
 
 # Default rules for deployment.
-#unix {
-#    target.path = $$[QT_INSTALL_PLUGINS]/generic
-#}
-#!isEmpty(target.path): INSTALLS += target
+unix {
+    target.path = $$[QT_INSTALL_PLUGINS]/generic
+}
+!isEmpty(target.path): INSTALLS += target
 
 #unix: PRE_TARGETDEPS += $$PWD/../build-lib_tty-Desktop-Debug/liblib_tty.a
 
@@ -268,6 +271,3 @@ LIBS += \
 #    CPP11FLAG = -std=c++0x
 #    CPP14FLAG = -std=c++14
 #}
-
-DISTFILES += \
-    what_is_this.qtce

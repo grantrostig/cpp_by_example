@@ -130,32 +130,39 @@ std::string build_greeting(std::string const& subject) {
  // return static_cast<                                 std::ostringstream&&           >(str_builder).str();
  // return static_cast< typename std::remove_reference< std::ostringstream&  >::type&& >(str_builder).str();
 
- /* Simon Toth:
-std::move is an unconditional xvalue cast, typically denoting that the state of the object being cast is no longer required and can be consumed during the expression evaluation.
-    chatGPT:
-std::move is a cast that produces an rvalue-reference to an object, enabling move semantics. It allows efficient transfer of resources from one object to another. When you use std::move(x), you’re allowing the compiler to cannibalize x. It’s commonly used in constructors, operator methods, and standard-library algorithms to move resources instead of copying them12.
-    Gemini:
-std::move is not technically a cast itself, but it behaves similarly to an rvalue reference cast in specific contexts. Here's a breakdown:
- **Functionality:**
-  * `std::move` is a function from the `<utility>` header in C++.
-  * Its primary purpose is to **convert an lvalue (expression referring to a named variable) to an rvalue (expression that evaluates to a temporary value)**.
-  * This conversion enables functions and operations to **potentially transfer ownership** of resources held by the lvalue, allowing for efficient move semantics.
- **Behavior:**
-  * When applied to an rvalue, `std::move` has no effect, as rvalues are already treated as temporary expressions.
-  * When applied to an lvalue of a movable type, `std::move` creates an **rvalue reference** to the lvalue, indicating that the object's resources can be moved from.
-  * This rvalue reference can then be used in contexts where rvalues are expected, such as function arguments expecting to receive ownership of the object.
- **Comparison to Casts:**
-  * While `std::move` might resemble an rvalue reference cast at times, it has some key differences:
-      * **Clarity:** `std::move` explicitly conveys the intent to potentially move the object, improving code readability.
-      * **Safety:** Using `std::move` avoids potential misuse of casts, which can lead to unintended consequences if not used carefully.
- **In essence, `std::move` is a safer and more expressive alternative to an rvalue reference cast in the context of move semantics.**
+    /* Simon Toth:
+   std::move is an unconditional xvalue cast, typically denoting that the state of the object being cast is no longer required and can
+   be consumed during the expression evaluation. chatGPT: std::move is a cast that produces an rvalue-reference to an object, enabling
+   move semantics. It allows efficient transfer of resources from one object to another. When you use std::move(x), you’re allowing
+   the compiler to cannibalize x. It’s commonly used in constructors, operator methods, and standard-library algorithms to move
+   resources instead of copying them12. Gemini: std::move is not technically a cast itself, but it behaves similarly to an rvalue
+   reference cast in specific contexts. Here's a breakdown:
+    **Functionality:**
+     * `std::move` is a function from the `<utility>` header in C++.
+     * Its primary purpose is to **convert an lvalue (expression referring to a named variable) to an rvalue (expression that
+   evaluates to a temporary value)**.
+     * This conversion enables functions and operations to **potentially transfer ownership** of resources held by the lvalue,
+   allowing for efficient move semantics.
+    **Behavior:**
+     * When applied to an rvalue, `std::move` has no effect, as rvalues are already treated as temporary expressions.
+     * When applied to an lvalue of a movable type, `std::move` creates an **rvalue reference** to the lvalue, indicating that the
+   object's resources can be moved from.
+     * This rvalue reference can then be used in contexts where rvalues are expected, such as function arguments expecting to receive
+   ownership of the object.
+    **Comparison to Casts:**
+     * While `std::move` might resemble an rvalue reference cast at times, it has some key differences:
+         * **Clarity:** `std::move` explicitly conveys the intent to potentially move the object, improving code readability.
+         * **Safety:** Using `std::move` avoids potential misuse of casts, which can lead to unintended consequences if not used
+   carefully.
+    **In essence, `std::move` is a safer and more expressive alternative to an rvalue reference cast in the context of move
+   semantics.**
 
- GCC's std::move impl:
-    template<typename _Tp>
-    _GLIBCXX_NODISCARD
-    constexpr typename std::remove_reference<_Tp>::type&&
-    move(_Tp&& __t) noexcept
-    { return static_cast<typename std::remove_reference<_Tp>::type&&>(__t); } */
+    GCC's std::move impl:
+       template<typename _Tp>
+       _GLIBCXX_NODISCARD
+       constexpr typename std::remove_reference<_Tp>::type&&
+       move(_Tp&& __t) noexcept
+       { return static_cast<typename std::remove_reference<_Tp>::type&&>(__t); } */
 }
 void test1 () {  // Marc
     std::string greeting1{build_greeting("world")};
