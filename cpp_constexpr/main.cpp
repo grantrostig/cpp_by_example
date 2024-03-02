@@ -301,23 +301,79 @@ constexpr auto factorial(int val)
     return val * factorial( val - 1);
 }
 
-constexpr auto call_factorial(int val)
+constexpr auto factorial2(int val)
 {
+    if (val == 0) return 1;
+    return val * factorial( val - 1);
+}
+
+constexpr auto factorial3(int i)
+{
+	int f{1};
+	for (int j{2}; j <= i; ++j)
+	{
+		f *= j;
+	}
+
+	return f;
+}
+
+// vishal
+constexpr auto factorial(int val){
+    auto result{ 1 };
+    std::vector<int> v(val+1);
+    v[0] = 1;
+    std::iota(v.begin(), v.end(), 1);
+
+    //for (int i{1}; i< (val +1); ++i)
+    for (auto i : std::ranges::iota_view{ 1, val +1})
+        result *= i;
+    return result;
+}
+
+
+template <std::size_t...Is>
+constexpr auto factorial4_impl(std::index_sequence<Is...>)
+{
+	return (1 * ... * (Is + 1));
+}
+
+template <std::size_t I>
+constexpr auto factorial4()
+{
+	return factorial4_impl(std::make_index_sequence<I>());
+}
+
+constexpr auto call_factorial(int val) {
     auto ice{std::is_constant_evaluated()? 1: -1};
-    return factorial(val) * ice;
+    //int r {rand()};
+    std::vector<int> v{1,323,33};
+    v.push_back(val);
+    v.push_back(ice*val);
+    //v.push_back(rand());
+    return factorial(val) * ice * v[1];
 }
 
 
 void test1 () { std::cout<< "START                ExampleJonsTake test1. ++++++++++++++++++++++++"<<std::endl;
-    auto myValue{call_factorial(6)};
+    //auto myValue{call_factorial(6)};
+    constexpr auto myValue{call_factorial(6)};
+    //std::array<int, call_factorial(6)> myValues;
+    //std::cout << sizeof(myValues) << "\n";
     std::cout << "myValue: " << myValue << "\n";
+
+	static_assert(factorial3(6) == 720);
+	static_assert(factorial3(1) == 1);
+    static_assert(factorial4<1>() == 1);
+	static_assert(factorial4<6>() == 720);
+    static_assert(factorial4<10>() == 3628800);
 
     std::cout<< "END                  ExampleJonsTake test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace ExampleP10 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 /** Constexpr/consteval function parameters are not constexpr (but can be used as arguments to other constexpr functions)
-  The parameters of a constexpr function are not constexpr (and thus cannot be used in constant expressions). Such parameters can be
+ OBVIOUS: The parameters of a constexpr function are not constexpr (and thus cannot be used in constant expressions). Such parameters can be
 declared as const (in which case they are treated as runtime constants), but not constexpr. This is because a constexpr function can
 be evaluated at runtime (which wouldn’t be possible if the parameters were compile-time constants).
   However, an exception is made in one case: a constexpr function can pass those parameters as arguments to another constexpr function, and that subsequent
