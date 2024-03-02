@@ -235,16 +235,17 @@ auto crash_signals_register() -> void {
 
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
- /* Using consteval to make constexpr execute at compile-time C++20
-     The downside of consteval functions is that such functions can’t evaluate at runtime, making them less flexible than constexpr
-    functions, which can do either. Therefore, it would still be useful to have a convenient way to force constexpr functions to
-    evaluate at compile-time (even when the return value is being used where a constant expression is not required), so that we could
-    have compile-time evaluation when possible, and runtime evaluation when we can’t.                      Consteval functions provides a way to make this
-    happen, using a neat helper function:
-// Uses abbreviated function template (C++20) and `auto` return type to make this function work with any type of value
-// See 'related content' box below for more info (you don't need to know how these work to use this function) */
-
+namespace ExampleP08 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+/** Using consteval to make constexpr execute at compile-time C++20.
+ The downside of consteval functions is that such functions can’t evaluate at runtime, making them less flexible than constexpr
+functions, which can do either. Therefore, it would still be useful to have a convenient way to force constexpr functions to
+evaluate at compile-time (even when the return value is being used where a constant expression is not required), so that we could
+have compile-time evaluation when possible, and runtime evaluation when we can’t.
+ Consteval functions provides a way to make this happen, using a neat helper function:
+ Uses abbreviated function template (C++20) and `auto` return type to make this function work with any type of value
+ We cover auto return types in lesson 10.9 -- Type deduction for functions.
+ We cover abbreviated function templates (auto parameters) in lesson 11.8 -- Function templates with multiple template types.
+*/
 consteval auto compileTime (auto value) {
     static_assert(std::is_constant_evaluated());
     return value;
@@ -255,16 +256,16 @@ constexpr int greater(int x, int y)  {
     return (x > y ? x : y);
 }
 
-void test1 () { std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+void test1 () { std::cout<< "START                ExampleP08 test1. ++++++++++++++++++++++++"<<std::endl;
     std::cout << greater(5, 6) << '\n';              // may or may not execute at compile-time
     std::cout << compileTime(greater(5, 6)) << '\n'; // will execute at compile-time
     int x { 5 };
     std::cout << greater(x, 6) << '\n';              // we can still call the constexpr version at runtime if we wish
 
-    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+    std::cout<< "END                  ExampleP08 test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example2 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace ExampleNM1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 // Constexpr/consteval function parameters are not constexpr (but can be used as arguments to other constexpr functions)
 constexpr int goo(int c) {
     static_assert(std::is_constant_evaluated());
@@ -279,7 +280,7 @@ constexpr int foo(int b) {
     //return { goo(b),std::is_constant_evaluated() };
 }
 
-void test1 () { std::cout<< "START                Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+void test1 () { std::cout<< "START                ExampleNM1 test1. ++++++++++++++++++++++++"<<std::endl;
     constexpr int a { 5 };
     int           b { rand() };
     //constexpr auto bar1{ foo(a) };
@@ -288,43 +289,87 @@ void test1 () { std::cout<< "START                Example2 test1. ++++++++++++++
     std::cout << "=" << foo << endl; // okay: constant expression a can be used as argument to constexpr function foo()
     //std::cout << "foo(a)=" << bar1.first << "," << bar1.second << endl; // okay: constant expression a can be used as argument to constexpr function foo()
     //std::cout << "foo(b)=" << bar3.first << "," << bar3.second << endl; // okay: constant expression a can be used as argument to constexpr function foo()
-    std::cout<< "END                  Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+    std::cout<< "END                  ExampleNM1 test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example3 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-// Constexpr/consteval function parameters are not constexpr (but can be used as arguments to other constexpr functions)
+namespace ExampleP10 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+/** Constexpr/consteval function parameters are not constexpr (but can be used as arguments to other constexpr functions)
+  The parameters of a constexpr function are not constexpr (and thus cannot be used in constant expressions). Such parameters can be
+declared as const (in which case they are treated as runtime constants), but not constexpr. This is because a constexpr function can
+be evaluated at runtime (which wouldn’t be possible if the parameters were compile-time constants).
+  However, an exception is made in one case: a constexpr function can pass those parameters as arguments to another constexpr function, and that subsequent
+constexpr function can be resolved at compile-time. This allows constexpr functions to still be resolved at compile-time when they
+call other constexpr functions (including themselves recursively).
+  Perhaps surprisingly, the parameters of a consteval function are
+not considered to be constexpr within the function either (even though consteval functions can only be evaluated at compile-time).
+This decision was made for the sake of consistency.
+*/
 constexpr int goo(int c) {
     //static_assert(std::is_constant_evaluated());
-
     //if (std::is_constant_evaluated()) cout << "WHAT\n";
     //else cout << "Who\n.";
-
-    return c; }
+    return c;
+}
 
 constexpr int foo(int b) {
-    static_assert(std::is_constant_evaluated());
-    if ( std::is_constant_evaluated() ) cout << "WHAT\n";
-    //constexpr int b2 { b }; // compile error: b is not a constant expression within foo()
+    //static_assert(std::is_constant_evaluated());
+    //if ( std::is_constant_evaluated() ) cout << "WHAT\n";
+ // constexpr int b2 { b }; // compile error: b is not a constant expression within foo()
     return goo(b);          // okay: b can still be used as argument to constexpr function goo()
 }
-constinit int e { 5 };
-void test1 () { std::cout<< "START                Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+
+//constinit int e { 5 };
+void test1 () { std::cout<< "START                ExampleP10 test1. ++++++++++++++++++++++++"<<std::endl;
     constexpr int a { 5 };
-    const     int c { 5 };
-    static constinit int d { 5 };  // B constinit int f { 5 };
-    int           b { rand() };
     std::cout << foo(a) << endl; // okay: constant expression a can be used as argument to constexpr function foo()
-    std::cout << foo(b) << endl; //
-    std::cout << foo(c) << endl; //
-    std::cout << foo(3) << endl; //
-    std::cout<< "END                  Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+
+ // const     int c { 5 };
+ // static constinit int d { 5 };  // B constinit int f { 5 };
+ // int           b { rand() };
+ // std::cout << foo(b) << endl; //
+ // std::cout << foo(c) << endl; //
+ // std::cout << foo(3) << endl; //
+    std::cout<< "END                  ExampleP10 test1. ++++++++++++++++++++++++"<<std::endl;
+} } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace ExampleP12 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+/** Can a constexpr function call a non-constexpr function?
+    The answer is yes, but only when the constexpr function is being evaluated in a non-constant context. A non-constexpr function may not
+    be called when a constexpr function is evaluating in a constant context (because then the constexpr function wouldn’t be able to
+    produce a compile-time constant value).
+*/
+constexpr int someConstexprFcn(){
+    return 1212;
+}
+int someNonConstexprFcn(){
+    return 121212;
+}
+constexpr int someFunction() {
+    if (std::is_constant_evaluated()) // if compile-time evaluation
+        return someConstexprFcn();    // calculate some value at compile time
+    else                              // runtime evaluation
+        return someNonConstexprFcn(); // calculate some value at runtime
+}
+
+constexpr int someFunction(bool b) {
+    if (b)
+        return someConstexprFcn();
+    else
+        return someNonConstexprFcn();
+}
+
+void test1 () { std::cout<< "START                ExampleP12 test1. ++++++++++++++++++++++++"<<std::endl;
+    int i12 { someFunction(12) };
+    int i13 { someFunction(13) };
+    std::cout<< "END                  ExampleP12 test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
-    //Example1::test1 ();
-    //Example2::test1 ();
-    //if (not std::is_constant_evaluated()) cout << "WHAT\n";
-    Example3::test1 ();
+    //if (not std::is_constant_evaluated()) cout << "WHAT\n";  // TODO??: can we output via constexpr?  iostreams is not??
+    //ExampleNM1::test1 ();
+    ExampleP08::test1 ();
+    ExampleP10::test1 ();
+    ExampleP12::test1 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
