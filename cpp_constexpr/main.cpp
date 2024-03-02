@@ -286,10 +286,33 @@ void test1 () { std::cout<< "START                ExampleNM1 test1. ++++++++++++
     //constexpr auto bar1{ foo(a) };
     //auto bar3 = foo(b);
 
-    std::cout << "=" << foo << endl; // okay: constant expression a can be used as argument to constexpr function foo()
+    //std::cout << "=" << foo << endl; // okay: constant expression a can be used as argument to constexpr function foo()
     //std::cout << "foo(a)=" << bar1.first << "," << bar1.second << endl; // okay: constant expression a can be used as argument to constexpr function foo()
     //std::cout << "foo(b)=" << bar3.first << "," << bar3.second << endl; // okay: constant expression a can be used as argument to constexpr function foo()
     std::cout<< "END                  ExampleNM1 test1. ++++++++++++++++++++++++"<<std::endl;
+} } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace ExampleJonsTake { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+//
+
+constexpr auto factorial(int val)
+{
+    if (val == 0) return 1;
+    return val * factorial( val - 1);
+}
+
+constexpr auto call_factorial(int val)
+{
+    auto ice{std::is_constant_evaluated()? 1: -1};
+    return factorial(val) * ice;
+}
+
+
+void test1 () { std::cout<< "START                ExampleJonsTake test1. ++++++++++++++++++++++++"<<std::endl;
+    auto myValue{call_factorial(6)};
+    std::cout << "myValue: " << myValue << "\n";
+
+    std::cout<< "END                  ExampleJonsTake test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace ExampleP10 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
@@ -366,9 +389,10 @@ void test1 () { std::cout<< "START                ExampleP12 test1. ++++++++++++
 
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     //if (not std::is_constant_evaluated()) cout << "WHAT\n";  // TODO??: can we output via constexpr?  iostreams is not??
-    ExampleP08::test1 ();
-    ExampleP10::test1 ();
-    ExampleP12::test1 ();
+    //ExampleP08::test1 ();
+    //ExampleP10::test1 ();
+    //ExampleP12::test1 ();
+    ExampleJonsTake::test1 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
