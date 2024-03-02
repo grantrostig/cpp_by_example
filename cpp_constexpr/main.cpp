@@ -366,7 +366,6 @@ void test1 () { std::cout<< "START                ExampleP12 test1. ++++++++++++
 
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     //if (not std::is_constant_evaluated()) cout << "WHAT\n";  // TODO??: can we output via constexpr?  iostreams is not??
-    //ExampleNM1::test1 ();
     ExampleP08::test1 ();
     ExampleP10::test1 ();
     ExampleP12::test1 ();
