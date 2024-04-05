@@ -260,9 +260,10 @@ public:
 class State_Machine {
 public:
     virtual ~State_Machine() {};
-    bool add_state(     State_base const & state_base ) { bool result {false}; return result; };
-    bool initial_state( State_base const & state_base ) { bool result {false}; return result; };
-    bool start()                                        { bool result {false}; return result; };
+    bool start()                                            { bool result {false}; return result; };
+    bool add_state(     State_base const & state_base )     { bool result {false}; return result; };
+    bool initial_state( State_base const & state_base )     { bool result {false}; return result; };
+    bool gr_enter_this_state_AKA_entered_OR_transition_to( State_base const & state_base ) { bool result {false}; return result; };
 
 };
 
@@ -403,6 +404,7 @@ void test1 () {
     state_machine.start();
 
     do { // *** Event Loop ***
+        state_machine.( state_start );
         // Event generation happens here.  TODO?: In a realistic scenario they would also happen while below processing is done?
         // Check events
         // Calculate and execute current situation
