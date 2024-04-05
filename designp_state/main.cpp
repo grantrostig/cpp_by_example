@@ -54,6 +54,7 @@
 #include <climits>
 #include <csignal>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <source_location>
 #include <string>
@@ -247,23 +248,45 @@ auto crash_signals_register() -> void {
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+class State_shistory;
 
 class State_base {  // TODO?: fill in required base stuff
+    std::unique_ptr<State_shistory> shistory_;
 public:
-    virtual ~State_base() {};
-    virtual void on_Entry() =0;
+    virtual ~State_base() {};      // TODO?: Fill in required base stuff, is there more than this line if using rule of 0?
+    //virtual void stub() =0;   // TODO?: Correct way to make class purevirtual?
+    virtual void on_Entry() {};
     virtual void on_Exit() {};
-    virtual void gr_enter_this_state_AKA_entered_OR_transition_to() {};
+    virtual void gr1_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
+        // on_exit(state_history);
+    };
     virtual void handle_event_OR_request() {};
 };
 
-class State_Machine {
+class State_Machine {  // TODO?: fill in required base stuff
+protected:
+    //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
+    std::unique_ptr<State_base> current_state_;
 public:
-    virtual ~State_Machine() {};
-    bool start()                                            { bool result {false}; return result; };
-    bool add_state(     State_base const & state_base )     { bool result {false}; return result; };
-    bool initial_state( State_base const & state_base )     { bool result {false}; return result; };
-    bool gr_enter_this_state_AKA_entered_OR_transition_to( State_base const & state_base ) { bool result {false}; return result; };
+    //virtual ~State_Machine() {};  // TODO?: not needed since not a base class?
+
+// TODO?: how would I write a constructor like this?:
+    //State_Machine( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
+    //State_Machine( State_base * state_base ) { current_state_ = state_base; };
+
+    //bool initial_state( std::unique_ptr<State_base> state_base ) {
+    bool initial_state( State_base * const state_base ) {  // TODO?: Is a const ptr correct here, is it needed, is it better than non-const?
+        bool result {true};
+        current_state_.reset( state_base );  // TODO?: This looks wrong!!  But I didn't give it a pointer when it was initialized?
+        return result;
+    };
+    bool start()                                            { bool result {true}; return result; };
+    bool add_state(     State_base const & state_base )     { bool result {true}; return result; };
+    bool gr2_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
+        bool result {true};
+        current_state_->gr1_enter_this_state_AKA_entered_OR_transition_to( state_base );
+        return result;
+    };
 
 };
 
@@ -275,119 +298,119 @@ class State_shistory : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override { bool result {true};};
 };
 
 class State_start1 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
 };
 
 class State_end : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
 };
 
 class State_identify2 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
 };
-/*
-class State_validate3 : public State_base {
+
+/* class State_validate3 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_pt_path4 : public State_base { // patient's desired service
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_pt_complaint5 : public State_base { // patient's presenting complaint
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_history6 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_symptoms7 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_examination8 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_signs09 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_differential_diagnosis10 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_working_diagnosis11 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_diagnosis_finalization12 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_informed_consent13 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_treatment14 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 
 class State_Treatment_result_assesment15 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
 };
 */
 
@@ -399,13 +422,14 @@ void test1 () {
 
     state_machine.add_state( state_start );
     state_machine.add_state( state_end );
-    state_machine.initial_state( state_start );
+    state_machine.initial_state( &state_start );
 
     state_machine.start();
 
     do { // *** Event Loop ***
-        state_machine.( state_start );
-        // Event generation happens here.  TODO?: In a realistic scenario they would also happen while below processing is done?
+        // Event generation happens here including changes to state_machine.  TODO?: In a realistic scenario they would also happen while below processing is done?
+        state_machine.gr2_enter_this_state_AKA_entered_OR_transition_to( & state_start );
+
         // Check events
         // Calculate and execute current situation
     } while (true);
