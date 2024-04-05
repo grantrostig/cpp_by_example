@@ -253,7 +253,8 @@ public:
     virtual ~State_base() {};
     virtual void on_Entry() =0;
     virtual void on_Exit() {};
-    virtual void enter_this_state_AKA_entered_OR_transition() {};
+    virtual void gr_enter_this_state_AKA_entered_OR_transition_to() {};
+    virtual void handle_event_OR_request() {};
 };
 
 class State_Machine {
@@ -265,7 +266,6 @@ public:
 
 };
 
-
 class Transition_base {  // TODO?: fill in required base stuff
 public:
 };
@@ -274,120 +274,121 @@ class State_shistory : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_start1 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_end : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_identify2 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
-
+/*
 class State_validate3 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_pt_path4 : public State_base { // patient's desired service
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_pt_complaint5 : public State_base { // patient's presenting complaint
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_history6 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_symptoms7 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_examination8 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_signs09 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_differential_diagnosis10 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_working_diagnosis11 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_diagnosis_finalization12 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_informed_consent13 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_treatment14 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
 
 class State_Treatment_result_assesment15 : public State_base {
 public:
     void on_Entry() override {};
     void on_Exit() override {};
-    void enter_this_state_AKA_entered_OR_transition() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to() override {};
 };
+*/
 
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
