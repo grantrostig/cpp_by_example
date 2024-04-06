@@ -1,7 +1,7 @@
 /** Copyright (c) Grant Rostig, grantrostig.com 2023. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
     Purpose:        "State" design pattern
                     Example is the process a doctor uses to see a patient in clinical practice.
-    References:     Design Patterns - Gamma et al. Page 305, 1995
+    References:     Design Patterns - Gamma et al. 1995 - Page 305,
                     Pattern Languages of Progam Design Volume 1 - Page 383
                     Pattern Languages of Progam Design Volume 2 - Page 119
                     The State Machine Framwork - Qt Documentation
@@ -80,16 +80,12 @@ inline constexpr char           CHAR_NULL{CHAR_MIN};        // Value is unset/no
 inline constexpr signed char    SCHAR_NULL{SCHAR_MIN};       // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
 inline constexpr unsigned char  UCHAR_NULL{UCHAR_MAX};       // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
 inline constexpr std::string    STRING_NULL{"NULL"};    // Value is unset/not-set, similar to how a SQL DB shows an unset field as NULL, which is different than zero length or some magic number.  Here we turn it into a magic number and hope for the best.
-
  // Some crude logging that prints source location, where X prints a variable, and R adds \n\r (which is usefull when tty in in RAW or CBREAK mode. Requires C++20.
 #define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
 #define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
 #define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
 #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
-
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-
-
 /** Requires that a type has insertion operator
     Concept definition - used by a template below.
     Some value needs to be incorporated with above text:
@@ -106,7 +102,6 @@ concept Insertable = requires( std::ostream & out ) {
     requires not std::same_as<std::string, Container>;                                    // OR $ std::is_same <std::string, Container>::value OR std::is_same_v<std::string, Container>;
     { out << typename Container::value_type {} } -> std::convertible_to<std::ostream & >; // OR just $ { out << typename Container::value_type {} };
 };
-
 /** Prints contents of a container such as a vector of int's.
     Insertable Concept used by Templated Function definition
     Older version is here for the record:
@@ -251,69 +246,65 @@ auto crash_signals_register() -> void {
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 class Chatbot_doctor;
-class State_shistory;
+                                    // class State_shistory;
 
-/* The State class declares methods that all Concrete State classes/instances???
+/** The State class declares methods that all Concrete State classes/instances???
    should implement and also provides a backreference to the Context object, associated
    with the State. This backreference can be used by States to transition the
    Context to another State. */
 class State_base {  // TODO?: fill in required base stuff
     std::unique_ptr<Chatbot_doctor> chatbot_doctor_AKA_context_;
-    std::unique_ptr<State_shistory> shistory_;
+                                                                    // std::unique_ptr<State_shistory> shistory_;  // NOT USED, idea comes from Qt State Framework
 protected:
     virtual ~State_base() {};      // TODO?: Fill in required base stuff, is there more than this line if using rule of 0?
-    //virtual void stub() =0;   // TODO?: Correct way to make class purevirtual?
+                                                                    //virtual void stub() =0;   // TODO?: Correct way to make class purevirtual?
 public:
     void set_chatbot_doctor( Chatbot_doctor * cd ) {
         chatbot_doctor_AKA_context_.reset( cd ) ;           //chatbot_doctor_AKA_context_ = cd;
     }
     virtual void handle_it1() =0;
     virtual void handle_it2() =0;
-    //virtual void on_Entry() {};
-    //virtual void on_Exit() {};
+                                                                    //virtual void on_Entry() {};
+                                                                    //virtual void on_Exit() {};
     //virtual void gr1_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
         // on_exit(state_history);
     //};
     //virtual void handle_event_OR_request() {};
 };
 
-/** The Context in this case the doctor,
-    defines the interface of interest to clients. It also maintains a
-    reference to an instance of a State subclass, which represents the current
-    state of the Context. */
-class Chatbot_doctor {  // TODO?: fill in required base stuff
+class Chatbot_doctor {   // The Context in this case the doctor, defines the interface of interest to clients. It also maintains a reference to an instance of a State subclass, which represents the current state of the Context. */
 protected:
     std::unique_ptr<State_base> current_state_uptr_;        //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
 public:
-                        //virtual ~Chatbot_doctor() {};  // TODO?: not needed since not a base class?
-
-                        // TODO?: how would I write a constructor like this?:
-                        //Chatbot_doctor( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
-                        //Chatbot_doctor( State_base * state_base ) { current_state_ = state_base; };
-
-                        //bool initial_state( std::unique_ptr<State_base> state_base ) {
+                        /*virtual ~Chatbot_doctor() {};  // TODO?: not needed since not a base class?
+                           TODO?: how would I write a constructor like this?:
+                          Chatbot_doctor( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
+                          Chatbot_doctor( State_base * state_base ) { current_state_ = state_base; };
+                          bool initial_state( std::unique_ptr<State_base> state_base ) { */
     bool initial_state( State_base * const state_base ) {  // TODO?: Is a const ptr correct here, is it needed, is it better than non-const?
         bool result {true};
         gr2_enter_this_state_AKA_entered_OR_transition_to(state_base);
         return result;
     };
-    bool start()                                            { bool result {true}; return result; };
+                                                                                    // bool start() { bool result {true}; return result; };
     bool add_state(     State_base const & state_base )     { bool result {true}; return result; };
     bool gr2_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
         bool result {true};
         if ( not current_state_uptr_.get()) {
-            current_state_uptr_.reset( state_base );  // TODO?: This looks wrong!!  But I didn't give it a pointer when it was initialized?
+            current_state_uptr_.reset( state_base );  // TODO?: This looks wrong, I want to set it!!  But I didn't give it a pointer when it was initialized?
         } else throw;
         current_state_uptr_->set_chatbot_doctor(this);
         return result;
     };
-    /** The doctor delegates part of its behavior to the current State instance we own. */
     void Request1() {
-        current_state_uptr_->handle_it1();
+        current_state_uptr_->handle_it1(); // The doctor delegates part of its behavior to the current State instance which we own.
+    }
+    void Request2() {
+        current_state_uptr_->handle_it2(); // The doctor delegates part of its behavior to the current State instance which we own.
     }
 };
 
-class Transition_base {  // TODO?: fill in required base stuff
+/* class Transition_base {  // TODO?: fill in required base stuff
 public:
 };
 
@@ -322,12 +313,12 @@ public:
     void on_Entry() override {};
     void on_Exit() override {};
     void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override { bool result {true};};
-};
+}; */
 
 class State_start1 : public State_base {
 public:
-    void on_Entry() override {};
-    void on_Exit() override {};
+    // void on_Entry() override {};
+    // void on_Exit() override {};
     void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
     void process(){
         if (true) { transition_to( state_identify2 ); }
@@ -337,15 +328,15 @@ public:
 
 class State_end : public State_base {
 public:
-    void on_Entry() override {};
-    void on_Exit() override {};
+    // void on_Entry() override {};
+    // void on_Exit() override {};
     void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
 };
 
 class State_identify2 : public State_base {
 public:
-    void on_Entry() override {};
-    void on_Exit() override {};
+    // void on_Entry() override {};
+    // void on_Exit() override {};
     void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
 };
 
@@ -470,11 +461,6 @@ void test1 () {
 void test2 () {
     std::cout<< "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
 
-    /**
-     * Concrete States implement various behaviors, associated with a state of the
-     * Context.
-     */
-
     class ConcreteStateA : public State {
     public:
         void Handle1() override;
@@ -526,7 +512,8 @@ void test2 () {
 
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
 
-    Example1::test1 ();
+    //Example1::test1 ();
+    //Example1::test2 ();
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
