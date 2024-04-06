@@ -306,6 +306,10 @@ public:
     void on_Entry() override {};
     void on_Exit() override {};
     void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
+    void process(){
+        if (true) { transition_to( state_identify2 ); }
+            else exit(0);
+    }
 };
 
 class State_end : public State_base {
@@ -419,6 +423,10 @@ void test1 () {
     State_Machine   state_machine {};
     State_start1    state_start {};
     State_end       state_end {};
+
+    //State_Machine state_machine_pref1 { &state_start };
+    //State_Machine state_machine_pref2 {  state_start };
+    //State_Machine state_machine_pref3 { std::move( state_start ) };
 
     state_machine.add_state( state_start );
     state_machine.add_state( state_end );
