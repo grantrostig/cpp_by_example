@@ -45,7 +45,6 @@
     #ifdef GR_DEBUG
     #endif GR_DEBUG
  */
-
 //#include "global_entities.h"
 #include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
 //#include <bits/stdc++.h>
@@ -64,7 +63,6 @@
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
-
 static_assert(CHAR_MIN < 0, "char is signed");
 //static_assert(CHAR_MIN == 0, "char is unsigned");
 #if CHAR_MIN < 0
@@ -242,20 +240,20 @@ auto crash_signals_register() -> void {
     std::signal( SIGSEGV, crash_tracer );
 }
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-// ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ======================================================================
+// =========================== EXAMPLEs begin ===========================
+// ======================================================================
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 class Chatbot_doctor;
                                     // class State_shistory;
-
 /** The State class declares methods that all Concrete State classes/instances???
    should implement and also provides a backreference to the Context object, associated
    with the State. This backreference can be used by States to transition the
    Context to another State. */
 class State_base {  // TODO?: fill in required base stuff
-    std::unique_ptr<Chatbot_doctor> chatbot_doctor_AKA_context_;
-                                                                    // std::unique_ptr<State_shistory> shistory_;  // NOT USED, idea comes from Qt State Framework
 protected:
+    std::unique_ptr<Chatbot_doctor> chatbot_doctor_AKA_context_;
     virtual ~State_base() {};      // TODO?: Fill in required base stuff, is there more than this line if using rule of 0?
                                                                     //virtual void stub() =0;   // TODO?: Correct way to make class purevirtual?
 public:
@@ -276,17 +274,17 @@ class Chatbot_doctor {   // The Context in this case the doctor, defines the int
 protected:
     std::unique_ptr<State_base> current_state_uptr_;        //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
 public:
-                        /*virtual ~Chatbot_doctor() {};  // TODO?: not needed since not a base class?
+                        /* virtual ~Chatbot_doctor() {};  // TODO?: not needed since not a base class?
                            TODO?: how would I write a constructor like this?:
-                          Chatbot_doctor( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
-                          Chatbot_doctor( State_base * state_base ) { current_state_ = state_base; };
-                          bool initial_state( std::unique_ptr<State_base> state_base ) { */
+                           Chatbot_doctor( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
+                           Chatbot_doctor( State_base * state_base ) { current_state_ = state_base; };
+                           bool initial_state( std::unique_ptr<State_base> state_base ) { */
     bool initial_state( State_base * const state_base ) {  // TODO?: Is a const ptr correct here, is it needed, is it better than non-const?
         bool result {true};
         gr2_enter_this_state_AKA_entered_OR_transition_to(state_base);
         return result;
     };
-                                                                                    // bool start() { bool result {true}; return result; };
+                                                                                    // bool start()  { bool result {true}; return result; };
     bool add_state(     State_base const & state_base )     { bool result {true}; return result; };
     bool gr2_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
         bool result {true};
@@ -303,7 +301,6 @@ public:
         current_state_uptr_->handle_it2(); // The doctor delegates part of its behavior to the current State instance which we own.
     }
 };
-
 /* class Transition_base {  // TODO?: fill in required base stuff
 public:
 };
@@ -317,29 +314,41 @@ public:
 
 class State_start1 : public State_base {
 public:
-    // void on_Entry() override {};
-    // void on_Exit() override {};
-    void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
-    void process(){
-        if (true) { transition_to( state_identify2 ); }
+    /* void on_Entry() override {};
+       void on_Exit() override {}; */
+    void handle_it1(){
+        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
+            else exit(0);
+    }
+    void handle_it2(){
+        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
             else exit(0);
     }
 };
 
 class State_end : public State_base {
 public:
-    // void on_Entry() override {};
-    // void on_Exit() override {};
-    void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
+    void handle_it1(){
+        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
+            else exit(0);
+    }
+    void handle_it2(){
+        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
+            else exit(0);
+    }
 };
 
 class State_identify2 : public State_base {
 public:
-    // void on_Entry() override {};
-    // void on_Exit() override {};
-    void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override {};
+    void handle_it1(){
+        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
+            else exit(0);
+    }
+    void handle_it2(){
+        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
+            else exit(0);
+    }
 };
-
 /* class State_validate3 : public State_base {
 public:
     void on_Entry() override {};
@@ -460,52 +469,12 @@ void test1 () {
 }
 void test2 () {
     std::cout<< "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
-
-    class ConcreteStateA : public State {
-    public:
-        void Handle1() override;
-
-        void Handle2() override {
-            std::cout << "ConcreteStateA handles request2.\n";
-        }
-    };
-
-    class ConcreteStateB : public State {
-    public:
-        void Handle1() override {
-            std::cout << "ConcreteStateB handles request1.\n";
-        }
-        void Handle2() override {
-            std::cout << "ConcreteStateB handles request2.\n";
-            std::cout << "ConcreteStateB wants to change the state of the context.\n";
-            this->context_->TransitionTo(new ConcreteStateA);
-        }
-    };
-
-    void ConcreteStateA::Handle1() {
-        {
-            std::cout << "ConcreteStateA handles request1.\n";
-            std::cout << "ConcreteStateA wants to change the state of the context.\n";
-
-            this->context_->TransitionTo(new ConcreteStateB);
-        }
-    }
-
-    /**
-     * The client code.
-     */
-    void ClientCode() {
-        Context *context = new Context(new ConcreteStateA);
-        context->Request1();
-        context->Request2();
-        delete context;
-    }
-
-    int main() {
-        ClientCode();
-        return 0;
-    }
-
+    State_start1 state_start1;
+    State_end state_end;
+    State_identify2 state_indentify2;
+    Chatbot_doctor chatbot_doctor;
+    chatbot_doctor.initial_state( &state_start1 );  // TODO?: Should be a move to transfer ownership?
+    chatbot_doctor.Request1();
     std::cout<< "END                  Example1 test2. ++++++++++++++++++++++++"<<std::endl;
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
