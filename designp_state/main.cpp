@@ -59,6 +59,7 @@
 #include <source_location>
 #include <string>
 #include <stacktrace>
+#include <typeinfo>
 #include <vector>
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
@@ -248,46 +249,68 @@ auto crash_signals_register() -> void {
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+class Chatbot_doctor;
 class State_shistory;
 
+/* The State class declares methods that all Concrete State classes/instances???
+   should implement and also provides a backreference to the Context object, associated
+   with the State. This backreference can be used by States to transition the
+   Context to another State. */
 class State_base {  // TODO?: fill in required base stuff
+    std::unique_ptr<Chatbot_doctor> chatbot_doctor_AKA_context_;
     std::unique_ptr<State_shistory> shistory_;
-public:
+protected:
     virtual ~State_base() {};      // TODO?: Fill in required base stuff, is there more than this line if using rule of 0?
     //virtual void stub() =0;   // TODO?: Correct way to make class purevirtual?
-    virtual void on_Entry() {};
-    virtual void on_Exit() {};
-    virtual void gr1_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
+public:
+    void set_chatbot_doctor( Chatbot_doctor * cd ) {
+        chatbot_doctor_AKA_context_.reset( cd ) ;           //chatbot_doctor_AKA_context_ = cd;
+    }
+    virtual void handle_it1() =0;
+    virtual void handle_it2() =0;
+    //virtual void on_Entry() {};
+    //virtual void on_Exit() {};
+    //virtual void gr1_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
         // on_exit(state_history);
-    };
-    virtual void handle_event_OR_request() {};
+    //};
+    //virtual void handle_event_OR_request() {};
 };
 
-class State_Machine {  // TODO?: fill in required base stuff
+/** The Context in this case the doctor,
+    defines the interface of interest to clients. It also maintains a
+    reference to an instance of a State subclass, which represents the current
+    state of the Context. */
+class Chatbot_doctor {  // TODO?: fill in required base stuff
 protected:
-    //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
-    std::unique_ptr<State_base> current_state_;
+    std::unique_ptr<State_base> current_state_uptr_;        //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
 public:
-    //virtual ~State_Machine() {};  // TODO?: not needed since not a base class?
+                        //virtual ~Chatbot_doctor() {};  // TODO?: not needed since not a base class?
 
-// TODO?: how would I write a constructor like this?:
-    //State_Machine( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
-    //State_Machine( State_base * state_base ) { current_state_ = state_base; };
+                        // TODO?: how would I write a constructor like this?:
+                        //Chatbot_doctor( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
+                        //Chatbot_doctor( State_base * state_base ) { current_state_ = state_base; };
 
-    //bool initial_state( std::unique_ptr<State_base> state_base ) {
+                        //bool initial_state( std::unique_ptr<State_base> state_base ) {
     bool initial_state( State_base * const state_base ) {  // TODO?: Is a const ptr correct here, is it needed, is it better than non-const?
         bool result {true};
-        current_state_.reset( state_base );  // TODO?: This looks wrong!!  But I didn't give it a pointer when it was initialized?
+        gr2_enter_this_state_AKA_entered_OR_transition_to(state_base);
         return result;
     };
     bool start()                                            { bool result {true}; return result; };
     bool add_state(     State_base const & state_base )     { bool result {true}; return result; };
     bool gr2_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
         bool result {true};
-        current_state_->gr1_enter_this_state_AKA_entered_OR_transition_to( state_base );
+        if ( not current_state_uptr_.get()) {
+            current_state_uptr_.reset( state_base );  // TODO?: This looks wrong!!  But I didn't give it a pointer when it was initialized?
+        } else throw;
+        current_state_uptr_->set_chatbot_doctor(this);
         return result;
     };
-
+    /** The doctor delegates part of its behavior to the current State instance we own. */
+    void Request1() {
+        current_state_uptr_->handle_it1();
+    }
 };
 
 class Transition_base {  // TODO?: fill in required base stuff
@@ -420,7 +443,7 @@ public:
 
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-    State_Machine   state_machine {};
+    Chatbot_doctor   state_machine {};
     State_start1    state_start {};
     State_end       state_end {};
 
@@ -443,7 +466,86 @@ void test1 () {
     } while (true);
 
     std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-} } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+}
+void test2 () {
+    std::cout<< "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
+
+    class Context {
+    public:
+        Context(State *state) : state_(nullptr) {
+            TransitionTo(state);
+        }
+        ~Context() {
+            delete state_;
+        }
+        /**
+         * The Context allows changing the State object at runtime.
+         */
+        void TransitionTo(State *state) {
+            std::cout << "Context: Transition to " << typeid(*state).name() << ".\n";
+            if (this->state_ != nullptr)
+                delete this->state_;
+            state_ = state;
+            state_->set_context(this);
+        }
+        void Request2() {
+            this->state_->Handle2();
+        }
+    };
+
+    /**
+     * Concrete States implement various behaviors, associated with a state of the
+     * Context.
+     */
+
+    class ConcreteStateA : public State {
+    public:
+        void Handle1() override;
+
+        void Handle2() override {
+            std::cout << "ConcreteStateA handles request2.\n";
+        }
+    };
+
+    class ConcreteStateB : public State {
+    public:
+        void Handle1() override {
+            std::cout << "ConcreteStateB handles request1.\n";
+        }
+        void Handle2() override {
+            std::cout << "ConcreteStateB handles request2.\n";
+            std::cout << "ConcreteStateB wants to change the state of the context.\n";
+            this->context_->TransitionTo(new ConcreteStateA);
+        }
+    };
+
+    void ConcreteStateA::Handle1() {
+        {
+            std::cout << "ConcreteStateA handles request1.\n";
+            std::cout << "ConcreteStateA wants to change the state of the context.\n";
+
+            this->context_->TransitionTo(new ConcreteStateB);
+        }
+    }
+
+    /**
+     * The client code.
+     */
+    void ClientCode() {
+        Context *context = new Context(new ConcreteStateA);
+        context->Request1();
+        context->Request2();
+        delete context;
+    }
+
+    int main() {
+        ClientCode();
+        return 0;
+    }
+
+    std::cout<< "END                  Example1 test2. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
 
