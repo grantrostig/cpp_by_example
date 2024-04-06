@@ -470,29 +470,6 @@ void test1 () {
 void test2 () {
     std::cout<< "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
 
-    class Context {
-    public:
-        Context(State *state) : state_(nullptr) {
-            TransitionTo(state);
-        }
-        ~Context() {
-            delete state_;
-        }
-        /**
-         * The Context allows changing the State object at runtime.
-         */
-        void TransitionTo(State *state) {
-            std::cout << "Context: Transition to " << typeid(*state).name() << ".\n";
-            if (this->state_ != nullptr)
-                delete this->state_;
-            state_ = state;
-            state_->set_context(this);
-        }
-        void Request2() {
-            this->state_->Handle2();
-        }
-    };
-
     /**
      * Concrete States implement various behaviors, associated with a state of the
      * Context.
