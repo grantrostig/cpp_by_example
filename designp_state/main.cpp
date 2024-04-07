@@ -260,7 +260,8 @@ public:
     void set_chatbot_doctor( Chatbot_doctor * cd ) {
         chatbot_doctor_AKA_context_.reset( cd ) ;           //chatbot_doctor_AKA_context_ = cd;
     }
-    virtual void handle_it1() =0;
+    virtual void say_hello_and_proceed() =0;
+    virtual void say_goodbye_and_exit()  =0;
     virtual void handle_it2() =0;
                                                                     //virtual void on_Entry() {};
                                                                     //virtual void on_Exit() {};
@@ -281,7 +282,7 @@ public:
                            bool initial_state( std::unique_ptr<State_base> state_base ) { */
     bool initial_state( State_base * const state_base ) {  // TODO?: Is a const ptr correct here, is it needed, is it better than non-const?
         bool result {true};
-        gr2_enter_this_state_AKA_entered_OR_transition_to(state_base);
+        gr2_enter_this_state_AKA_entered_OR_transition_to( state_base );
         return result;
     };
                                                                                     // bool start()  { bool result {true}; return result; };
@@ -291,11 +292,11 @@ public:
         if ( not current_state_uptr_.get()) {
             current_state_uptr_.reset( state_base );  // TODO?: This looks wrong, I want to set it!!  But I didn't give it a pointer when it was initialized?
         } else throw;
-        current_state_uptr_->set_chatbot_doctor(this);
+        current_state_uptr_->set_chatbot_doctor( this );
         return result;
     };
     void Request1() {
-        current_state_uptr_->handle_it1(); // The doctor delegates part of its behavior to the current State instance which we own.
+        current_state_uptr_->say_hello_and_proceed(); // The doctor delegates part of its behavior to the current State instance which we own.
     }
     void Request2() {
         current_state_uptr_->handle_it2(); // The doctor delegates part of its behavior to the current State instance which we own.
@@ -316,37 +317,35 @@ class State_start1 : public State_base {
 public:
     /* void on_Entry() override {};
        void on_Exit() override {}; */
-    void handle_it1(){
+    void say_hello_and_proceed(){
+        cout << "Hello patiend, how are you? \n";
         if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
             else exit(0);
     }
+    void say_goodbye_and_exit()  {};
     void handle_it2(){
-        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
-            else exit(0);
     }
 };
 
 class State_end : public State_base {
 public:
-    void handle_it1(){
-        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
-            else exit(0);
+    void say_hello_and_proceed() {}
+    void say_goodbye_and_exit(){
+        cout << "Good to see you, goodbye.\n";
     }
     void handle_it2(){
-        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
-            else exit(0);
     }
 };
 
 class State_identify2 : public State_base {
 public:
-    void handle_it1(){
-        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
-            else exit(0);
-    }
-    void handle_it2(){
+    void ask_name_and_proceed() {
+        cout << "What is you name, etc.:?\n";
         if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
             else exit(0);
+    }
+    void say_goodbye_and_exit() {}
+    void handle_it2(){
     }
 };
 /* class State_validate3 : public State_base {
@@ -443,19 +442,19 @@ public:
 
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-    Chatbot_doctor   state_machine {};
+    Chatbot_doctor  state_machine {};
     State_start1    state_start {};
     State_end       state_end {};
 
-    //State_Machine state_machine_pref1 { &state_start };
-    //State_Machine state_machine_pref2 {  state_start };
-    //State_Machine state_machine_pref3 { std::move( state_start ) };
+    /*State_Machine state_machine_pref1 { &state_start };
+      State_Machine state_machine_pref2 {  state_start };
+      Sate_Machine state_machine_pref3 { std::move( state_start ) }; */
 
     state_machine.add_state( state_start );
     state_machine.add_state( state_end );
     state_machine.initial_state( &state_start );
 
-    state_machine.start();
+    //state_machine.start();
 
     do { // *** Event Loop ***
         // Event generation happens here including changes to state_machine.  TODO?: In a realistic scenario they would also happen while below processing is done?
@@ -469,10 +468,10 @@ void test1 () {
 }
 void test2 () {
     std::cout<< "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
-    State_start1 state_start1;
-    State_end state_end;
+    State_start1    state_start1;
+    State_end       state_end;
     State_identify2 state_indentify2;
-    Chatbot_doctor chatbot_doctor;
+    Chatbot_doctor  chatbot_doctor;
     chatbot_doctor.initial_state( &state_start1 );  // TODO?: Should be a move to transfer ownership?
     chatbot_doctor.Request1();
     std::cout<< "END                  Example1 test2. ++++++++++++++++++++++++"<<std::endl;
@@ -480,10 +479,8 @@ void test2 () {
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
-
     //Example1::test1 ();
     //Example1::test2 ();
-
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
