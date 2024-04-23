@@ -77,7 +77,7 @@ HEADERS += \
     math_grostig.h          \
     random_toolkit.h        \
 #   $$PWD/..h               \ # probably wrong
-ang
+
 SOURCES += \
     main.cpp \
     #iostreams.cpp \

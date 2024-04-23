@@ -2,10 +2,17 @@
     Purpose:        "State" design pattern
                     Example is the process a doctor uses to see a patient in clinical practice.
     References:     Design Patterns - Gamma et al. 1995 - Page 305,
+                    Statecharts: A Visual Formalism for Complex Systems - David Harel 1986,4, Science of Computer Programming 8 1987 Page 231
+                    Discrete Mathematics and its Applications 3ed - Kenneth Rosen 1995, Ch. 10 Modeling Computation, Section 10.3,10.4 Page 663 (OR other editions with similar content)
                     Pattern Languages of Progam Design Volume 1 - Page 383
                     Pattern Languages of Progam Design Volume 2 - Page 119
+                    Pattern Languages of Progam Design Volume 3 - Page 125+
                     The State Machine Framwork - Qt Documentation
-                    Statecharts: A Visual Formalism for Complex Systems - David Harel 1986,4, Science of Computer Programming 8 1987 Page 231
+    Examples:       https://thecandcppclub.com/deepeshmenon/chapter-19-series-on-design-patterns-state-pattern/1181/
+
+    TCP:            https://users.cs.northwestern.edu/~agupta/cs340/project2/TCPIP_State_Transition_Diagram.pdf
+                    https://www.ibm.com/support/pages/flowchart-tcp-connections-and-their-definition
+                    https://www.cs.emory.edu/~cheung/Courses/455/Syllabus/7-transport/tcp-connect7b.html
 
     NOT PRODUCTION QUALITY CODE, just shows learning/teaching example, not real programming, don't copy this style, just playing around
     Reminder of usefull resources:
@@ -244,7 +251,7 @@ auto crash_signals_register() -> void {
 // =========================== EXAMPLEs begin ===========================
 // ======================================================================
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
+// NEED TO REWORK THIS TO APPLY TO TCPstate in Gamma GoF
 class Chatbot_doctor;
                                     // class State_shistory;
 /** The State class declares methods that all Concrete State classes/instances???
@@ -252,7 +259,8 @@ class Chatbot_doctor;
    with the State. This backreference can be used by States to transition the
    Context to another State. */
 class State_base {  // TODO?: fill in required base stuff
-protected:
+//protected:
+public:
     std::unique_ptr<Chatbot_doctor> chatbot_doctor_AKA_context_;
     virtual ~State_base() {};      // TODO?: Fill in required base stuff, is there more than this line if using rule of 0?
                                                                     //virtual void stub() =0;   // TODO?: Correct way to make class purevirtual?
@@ -273,8 +281,8 @@ public:
 
 class Chatbot_doctor {   // The Context in this case the doctor, defines the interface of interest to clients. It also maintains a reference to an instance of a State subclass, which represents the current state of the Context. */
 protected:
-    std::unique_ptr<State_base> current_state_uptr_;        //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
 public:
+    std::unique_ptr<State_base> current_state_uptr_;        //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
                         /* virtual ~Chatbot_doctor() {};  // TODO?: not needed since not a base class?
                            TODO?: how would I write a constructor like this?:
                            Chatbot_doctor( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
@@ -319,8 +327,8 @@ public:
        void on_Exit() override {}; */
     void say_hello_and_proceed(){
         cout << "Hello patiend, how are you? \n";
-        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
-            else exit(0);
+        //if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
+        //else exit(0);
     }
     void say_goodbye_and_exit()  {};
     void handle_it2(){
@@ -341,8 +349,8 @@ class State_identify2 : public State_base {
 public:
     void ask_name_and_proceed() {
         cout << "What is you name, etc.:?\n";
-        if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
-            else exit(0);
+        //if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
+        //else exit(0);
     }
     void say_goodbye_and_exit() {}
     void handle_it2(){
@@ -470,7 +478,7 @@ void test2 () {
     std::cout<< "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
     State_start1    state_start1;
     State_end       state_end;
-    State_identify2 state_indentify2;
+    //State_identify2 state_indentify2;
     Chatbot_doctor  chatbot_doctor;
     chatbot_doctor.initial_state( &state_start1 );  // TODO?: Should be a move to transfer ownership?
     chatbot_doctor.Request1();
@@ -478,9 +486,247 @@ void test2 () {
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
+namespace Example2 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+class Chatbot_doctor;
+                      // class State_shistory;
+/** The State class declares methods that all Concrete State classes/instances???
+   should implement and also provides a backreference to the Context object, associated
+   with the State. This backreference can be used by States to transition the
+   Context to another State. */
+class State_base {  // TODO?: fill in required base stuff
+//protected:
+public:
+    std::unique_ptr<Chatbot_doctor> chatbot_doctor_AKA_context_;
+    virtual ~State_base() {};      // TODO?: Fill in required base stuff, is there more than this line if using rule of 0?
+                              //virtual void stub() =0;   // TODO?: Correct way to make class purevirtual?
+public:
+    void set_chatbot_doctor( Chatbot_doctor * cd ) {
+        chatbot_doctor_AKA_context_.reset( cd ) ;           //chatbot_doctor_AKA_context_ = cd;
+    }
+    virtual void say_hello_and_proceed() =0;
+    virtual void say_goodbye_and_exit()  =0;
+    virtual void handle_it2() =0;
+                                    //virtual void on_Entry() {};
+                                    //virtual void on_Exit() {};
+    //virtual void gr1_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
+    // on_exit(state_history);
+    //};
+    //virtual void handle_event_OR_request() {};
+};
+
+class Chatbot_doctor {   // The Context in this case the doctor, defines the interface of interest to clients. It also maintains a reference to an instance of a State subclass, which represents the current state of the Context. */
+protected:
+public:
+    std::unique_ptr<State_base> current_state_uptr_;        //std::unique_ptr<State_base> current_state_ = std::make_unique<State_base>;  // TODO?: Can this sort of thing make sense in a private member of a class?
+    /* virtual ~Chatbot_doctor() {};  // TODO?: not needed since not a base class?
+       TODO?: how would I write a constructor like this?:
+       Chatbot_doctor( State_base const & state_base ): current_state_ ( state_base) { bool result {false}; };
+       Chatbot_doctor( State_base * state_base ) { current_state_ = state_base; };
+       bool initial_state( std::unique_ptr<State_base> state_base ) { */
+    bool initial_state( State_base * const state_base ) {  // TODO?: Is a const ptr correct here, is it needed, is it better than non-const?
+        bool result {true};
+        gr2_enter_this_state_AKA_entered_OR_transition_to( state_base );
+        return result;
+    };
+       // bool start()  { bool result {true}; return result; };
+    bool add_state(     State_base const & state_base )     { bool result {true}; return result; };
+    bool gr2_enter_this_state_AKA_entered_OR_transition_to( State_base * state_base ) {
+        bool result {true};
+        if ( not current_state_uptr_.get()) {
+            current_state_uptr_.reset( state_base );  // TODO?: This looks wrong, I want to set it!!  But I didn't give it a pointer when it was initialized?
+        } else throw;
+        current_state_uptr_->set_chatbot_doctor( this );
+        return result;
+    };
+    void Request1() {
+        current_state_uptr_->say_hello_and_proceed(); // The doctor delegates part of its behavior to the current State instance which we own.
+    }
+    void Request2() {
+        current_state_uptr_->handle_it2(); // The doctor delegates part of its behavior to the current State instance which we own.
+    }
+};
+/* class Transition_base {  // TODO?: fill in required base stuff
+public:
+};
+
+class State_shistory : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr1_enter_this_state_AKA_entered_OR_transition_to(State_base * state_base ) override { bool result {true};};
+}; */
+
+class State_start1 : public State_base {
+public:
+    /* void on_Entry() override {};
+       void on_Exit() override {}; */
+    void say_hello_and_proceed(){
+        cout << "Hello patiend, how are you? \n";
+        //if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_identify2 ); }
+        //else exit(0);
+    }
+    void say_goodbye_and_exit()  {};
+    void handle_it2(){
+    }
+};
+
+class State_end : public State_base {
+public:
+    void say_hello_and_proceed() {}
+    void say_goodbye_and_exit(){
+        cout << "Good to see you, goodbye.\n";
+    }
+    void handle_it2(){
+    }
+};
+
+class State_identify2 : public State_base {
+public:
+    void ask_name_and_proceed() {
+        cout << "What is you name, etc.:?\n";
+        //if (true) { chatbot_doctor_AKA_context_->gr2_enter_this_state_AKA_entered_OR_transition_to( state_end ); }
+        //else exit(0);
+    }
+    void say_goodbye_and_exit() {}
+    void handle_it2(){
+    }
+};
+/* class State_validate3 : public State_base {
+public:
+    void on_Entry() override {};
+    void on_Exit() override {};
+    void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_pt_path4 : public State_base { // patient's desired service
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_pt_complaint5 : public State_base { // patient's presenting complaint
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_history6 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_symptoms7 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_examination8 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_signs09 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_differential_diagnosis10 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_working_diagnosis11 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_diagnosis_finalization12 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_informed_consent13 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_treatment14 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+
+class State_Treatment_result_assesment15 : public State_base {
+public:
+ void on_Entry() override {};
+ void on_Exit() override {};
+ void gr_enter_this_state_AKA_entered_OR_transition_to(State_base state_base ) override {};
+};
+*/
+
+void test1 () {
+    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+    Chatbot_doctor  state_machine {};
+    State_start1    state_start {};
+    State_end       state_end {};
+
+    /*State_Machine state_machine_pref1 { &state_start };
+      State_Machine state_machine_pref2 {  state_start };
+      Sate_Machine state_machine_pref3 { std::move( state_start ) }; */
+
+    state_machine.add_state( state_start );
+    state_machine.add_state( state_end );
+    state_machine.initial_state( &state_start );
+
+           //state_machine.start();
+
+    do { // *** Event Loop ***
+        // Event generation happens here including changes to state_machine.  TODO?: In a realistic scenario they would also happen while below processing is done?
+        state_machine.gr2_enter_this_state_AKA_entered_OR_transition_to( & state_start );
+
+               // Check events
+               // Calculate and execute current situation
+    } while (true);
+
+    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+}
+void test2 () {
+    std::cout<< "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
+    State_start1    state_start1;
+    State_end       state_end;
+    //State_identify2 state_indentify2;
+    Chatbot_doctor  chatbot_doctor;
+    chatbot_doctor.initial_state( &state_start1 );  // TODO?: Should be a move to transfer ownership?
+    chatbot_doctor.Request1();
+    std::cout<< "END                  Example1 test2. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     //Example1::test1 ();
-    //Example1::test2 ();
+    //Example2::test1 ();
+    //Example2::test2 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
