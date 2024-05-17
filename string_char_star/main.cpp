@@ -5,11 +5,20 @@ using std::cin; using std::cout; using std::cerr; using std::clog; using std::en
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
+static_assert(     std::is_same_v< char *                , std::decay_t<  char[]>  >   );
+static_assert(     std::is_same_v< std::decay_t< char *> , std::decay_t<  char[] > >);
+static_assert( not std::is_same_v< std::decay_t< char *> ,                char[] > );
+
+
 auto take_a_cstring_parameter( char *s ) {
     cout << "Got this:" << typeid(s).name() << "," << s << endl;
     return s;
 }
-auto take_a_char_carray_parameter( char s[99] ){ cout << "Got this:" << typeid(s).name()<<","<< s <<endl; return s; }
+
+auto take_a_char_carray_parameter( char s[99] )
+concept decayable  // just to handle above.
+{ cout << "Got this:" << typeid(s).name()<<","<< s <<endl; return s; }
+
 auto take_a_std_string_parameter(  std::string s ){ cout << "Got this:" << typeid(s).name()<<","<< s <<endl; return s; }
 auto take_a_string_view_parameter( std::string_view s ){ cout << "Got this:" << typeid(s).name()<<","<< s <<endl; return s; }
 
@@ -49,6 +58,13 @@ int main() {
     auto ret2temp= take_a_std_string_parameter("def"s);
     auto ret1svtemp= take_a_string_view_parameter("def");
     auto ret2svtemp= take_a_string_view_parameter("def"s);
+
+    std::string concatination1{ "abc"  + "def"  };
+    std::string concatination2{ "abc"  + "def"s };
+    std::string concatination3{ "abc"s + "def"  };
+    concatination1 = "new" ;
+    concatination1 += "new" ;
+    concatination1 = "new" + "new";
 
     cout << std::to_string(1.05)<<endl;
     std::array<char,20> array1{1,2,3};
