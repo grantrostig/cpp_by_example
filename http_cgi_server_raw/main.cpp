@@ -1,3 +1,54 @@
+/* Copyright Grant Rostig
+   License: Boost 1.0
+
+# SCRIPT to serve c++ from webserver
+# grostig
+sudo dnf install httpd mod_fcgid httpd-devel gcc-c++ mod_fcgid fcgi-devel
+sudo dnf install mod_ssl -y
+sudo cat "
+# grostig
+<IfModule mod_fcgid.c>
+ AddHandler fcgid-script .fcgi
+ FcgidConnectTimeout 20
+</IfModule>
+" >> /etc/httpd/conf.d/fcgid.conf
+
+sudo cat >> /etc/httpd/conf.d/fcgid.conf << EOF
+# grostig
+<IfModule mod_fcgid.c>
+ AddHandler fcgid-script .fcgi
+ FcgidConnectTimeout 20
+</IfModule>
+EOF
+
+sudo systemctl enable httpd.service
+sudo systemctl start httpd.service
+sudo systemctl restart httpd.service
+
+#sudo apachectl reload
+#sudo systemctl restart httpd.service
+
+cd /var/www/html/cgi-bin
+# upload a.out here with 755
+
+Browse to: http://your_vps_ip/cgi-bin/hello.cgi
+
+# FOR: Debian
+# sudo apt update
+# sudo apt install build-essential apache2 libapache2-mod-fcgid
+# sudo mkdir /var/www/html/cgi-bin
+# sudo chown www-data:www-data /var/www/html/cgi-bin
+# sudo cat "
+# <Directory "/var/www/html/cgi-bin">
+#   Options +ExecCGI
+#   AddHandler cgi-script .cgi
+# </Directory>
+# " >>  /etc/apache2/conf-available/cgi-enabled.conf
+# sudo a2enmod cgi
+# sudo a2enconf cgi-enabled
+# sudo systemctl restart apache2
+*/
+
 #include <iostream>
 using namespace std;
 
