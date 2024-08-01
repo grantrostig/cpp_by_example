@@ -56,7 +56,7 @@ constexpr auto increment_mask(uintmax_t &mask, direction d) {
     }
 }
 template <typename Container> concept IntegralContainer = std::integral<typename Container::value_type>;
-} // END Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+} // END detail Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 template <auto start_bit = 7, auto last_bit = 0, detail::IntegralContainer Container = std::string>
     requires std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)>
@@ -67,9 +67,8 @@ struct BitGetter {
     using reference         = bool const &;
     using pointer           = bool const *;
     BitGetter(                                                   ): container_{ nullptr }                                      {}
-    BitGetter( Container&container                               ): container_{ &container }, cont_iter_{ begin(*container_) } {}
+    BitGetter( Container& container                              ): container_{ &container }, cont_iter_{ begin(*container_) } {}
     BitGetter( Container& container, Container::const_iterator it): container_{ &container }, cont_iter_{ it}                  {}
-
     reference operator*() const {
         assert(container_ and "Dereferencing iterator with no container.");
         assert((end(*container_) != cont_iter_) and "Dereferencing past end of container");
@@ -114,38 +113,32 @@ private:
 };
 
 template <auto start_bit = 0, auto last_bit = 7, detail::IntegralContainer Container = std::string>
-auto
-begin(Container &c) {
+auto begin(Container &c) {
     return BitGetter<start_bit, last_bit, Container>{ c };
 }
 
 template <auto start_bit = 0, auto last_bit = 7, detail::IntegralContainer Container = std::string>
-auto
-end(Container &) {
+auto end(Container &) {
     return BitGetter<start_bit, last_bit, Container>{};
 }
-
-} // end namespace
+} // End biterator namespace NNNNNNNNNNNNNNNNNNNNNNNNNN
 
 template <std::size_t bitset_size>
-decltype(auto)
-bitset_out(std::bitset<bitset_size> const &bs, std::ostream &os) {
+decltype(auto) bitset_out(std::bitset<bitset_size> const &bs, std::ostream &os) {
     for(std::size_t i{ 0 }; i < bitset_size; ++i) {
         std::cout << bs[i] << ' ';
     }
     return os << '\n';
 }
 
-decltype(auto)
-vector_char_out(std::vector<char> const &v, std::ostream &os) {
+decltype(auto) vector_char_out(std::vector<char> const &v, std::ostream &os) {
     for(std::size_t i{ 0 }; i < v.size(); ++i) {
         std::cout << short(v[i]) << ' ';
     }
     return os << '\n';
 }
 
-int
-main() {
+int main() {
     std::bitset<8>    small_sink;
     std::vector<bool> bsource{ true, true, false, false, true, true, false, false };
     std::copy(begin(bsource), end(bsource), biterator::bitset_output_iter<8>{ small_sink });
