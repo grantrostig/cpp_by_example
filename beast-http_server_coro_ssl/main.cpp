@@ -451,11 +451,9 @@ void do_listen(net::io_context &ioc, ssl::context &ctx, tcp::endpoint endpoint,
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 5) {
-    std::cerr << "198.58.96.228 Usage: http-server-coro-ssl <address> <port> "
-                 "<doc_root> <threads>\n"
-              << "Example:\n"
-              << "    http-server-coro-ssl 0.0.0.0 8080 . 1\n";
+  if (argc != 5) {  // browser use this: https://localhost:8080
+    std::cerr << "198.58.96.228 Usage: http-server-coro-ssl <address> <port> <doc_root> <threads>.   \n"
+              << "Example: http-server-coro-ssl 0.0.0.0 8080 . 1   \n";
     return EXIT_FAILURE;
   }
   auto const address = net::ip::make_address(argv[1]);
