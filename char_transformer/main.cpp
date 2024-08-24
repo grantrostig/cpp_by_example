@@ -1,4 +1,6 @@
 // code by Jon Kalb https://wandbox.org/permlink/R5tMMsppwL5oSTpy
+// edited by Grant Rostig
+// boost 1.0 license
 #include <algorithm>
 #include <iterator>
 #include <iostream>
@@ -8,7 +10,7 @@
 #include <vector>
 #include <unordered_map>
 
-std::unordered_map<char, int> transform_values
+/* std::unordered_map<char, int> transform_values
     {
         {'T', 3},
         {'h', 3},
@@ -19,7 +21,7 @@ std::unordered_map<char, int> transform_values
         {'x', 2},
         {'t', 3},
         {'.', 1}
-};
+}; */
 
 std::map<char, std::tuple<int, std::vector<int>>> transform_map
     {
