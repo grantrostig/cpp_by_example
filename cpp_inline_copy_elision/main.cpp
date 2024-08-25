@@ -114,3 +114,53 @@ int main() {
     assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
     std::cout << "std::sort() time = " << elapsed << " seconds\n";
 }
+
+/* GNU g++'s implementation of std::sort uses a hybrid sorting algorithm, not just quicksort. Here's a breakdown:
+
+1. Primary algorithm: Introsort
+   std::sort in GNU's libstdc++ primarily uses introsort, which is a hybrid sorting algorithm.
+
+2. Components of Introsort:
+   - Quicksort: Used as the main sorting method.
+   - Heapsort: Used as a fallback if quicksort's recursion depth exceeds a certain limit.
+   - Insertion sort: Used for small subarrays (typically less than 16 elements).
+
+3. How it works:
+   - The algorithm starts with quicksort.
+   - If the recursion depth exceeds a threshold (usually 2*log2(N), where N is the number of elements), it switches to heapsort.
+   - For small subarrays, it uses insertion sort, which is more efficient for small datasets.
+
+4. Advantages:
+   - This hybrid approach combines the average-case efficiency of quicksort with the worst-case efficiency of heapsort.
+   - It avoids quicksort's worst-case scenario (O(n^2)) by switching to heapsort, ensuring O(n log n) worst-case performance.
+   - Using insertion sort for small subarrays improves performance for smaller datasets and as a final step in larger sorts.
+
+5. Implementation details:
+   The exact implementation can vary between different versions of GCC and libstdc++. The source code for the current implementation can be found in the GCC source repository, typically in the file `include/bits/stl_algo.h`.
+
+It's worth noting that while this is the typical implementation in GNU g++, the C++ standard doesn't specify the exact algorithm to be used for std::sort. It only requires that it must have O(n log n) complexity in the average and worst cases.
+===========================
+The `qsort` function in the GNU C Library (glibc), which is used by GCC, doesn't strictly adhere to a single sorting algorithm. Its implementation is more nuanced:
+
+1. Name origin: The name "qsort" suggests QuickSort, but this is somewhat historical and doesn't necessarily reflect the current implementation.
+
+2. Actual implementation: The glibc `qsort` uses a combination of algorithms:
+
+- For small arrays (typically less than 4 elements), it uses insertion sort.
+- For larger arrays, it uses an introsort algorithm.
+
+3. Introsort: This is the primary algorithm used for larger arrays. Introsort is a hybrid sorting algorithm that:
+- Begins with quicksort
+- Switches to heapsort when the recursion depth exceeds a certain level (to avoid quicksort's worst-case scenario)
+- Uses insertion sort for small partitions
+
+4. Optimization: The exact details may vary depending on the version of glibc and can be subject to optimizations and changes over time.
+
+5. Quicksort connection: While introsort does use quicksort as its base, it's designed to avoid quicksort's worst-case O(n^2) time complexity, ensuring a worst-case O(n log n) performance.
+
+So, to directly answer your question: While GNU GCC's `qsort` does use quicksort as part of its algorithm, it's not a pure implementation of quicksort. It's a more sophisticated approach that combines multiple sorting techniques for efficiency and reliability across different input scenarios.
+
+Would you like more details on any aspect of this implementation or its performance characteristics?
+
+
+*/
