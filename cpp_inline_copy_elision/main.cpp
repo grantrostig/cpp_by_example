@@ -36,7 +36,7 @@ void random_float_fill( T(&data)[N] ) {
         //std::numeric_limits<T>::max()
     };
     cout<<"dist:"<<std::numeric_limits<T>::min()<<","<< std::numeric_limits<T>::max()<<endl;
-    std::generate(std::begin(data), std::end(data), [&]{return my_distribution(my_generator);});
+    std::generate(std::begin(data), std::end(data), [&my_distribution, &my_generator](){return my_distribution(my_generator);});
     cout<<"generated."<<endl;
 }
 
@@ -67,6 +67,10 @@ int main(void) {
     printf("\n");
 }*/
 
+int compare2(void const *a, void const *b) {
+    // double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
+    return ( *(double*)a>*(double*)b ) - ( *(double*)a>*(double*)b );
+}
 
 int compare(void const *a, void const *b) {
     // double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
@@ -115,8 +119,8 @@ int main() {
     std::cout << "std::sort() time = " << elapsed << " seconds\n";
 }
 
-/* GNU g++'s implementation of std::sort uses a hybrid sorting algorithm, not just quicksort. Here's a breakdown:
-
+/* Chat GPT type respones:
+>>GNU g++'s implementation of std::sort uses a hybrid sorting algorithm, not just quicksort. Here's a breakdown:
 1. Primary algorithm: Introsort
    std::sort in GNU's libstdc++ primarily uses introsort, which is a hybrid sorting algorithm.
 
@@ -136,9 +140,11 @@ int main() {
    - Using insertion sort for small subarrays improves performance for smaller datasets and as a final step in larger sorts.
 
 5. Implementation details:
-   The exact implementation can vary between different versions of GCC and libstdc++. The source code for the current implementation can be found in the GCC source repository, typically in the file `include/bits/stl_algo.h`.
+   The exact implementation can vary between different versions of GCC and libstdc++. The source code for the current implementation can be found
+    in the GCC source repository, typically in the file `include/bits/stl_algo.h`.
 
-It's worth noting that while this is the typical implementation in GNU g++, the C++ standard doesn't specify the exact algorithm to be used for std::sort. It only requires that it must have O(n log n) complexity in the average and worst cases.
+It's worth noting that while this is the typical implementation in GNU g++, the C++ standard doesn't specify the exact algorithm to be used for std::sort.
+It only requires that it must have O(n log n) complexity in the average and worst cases.
 ===========================
 The `qsort` function in the GNU C Library (glibc), which is used by GCC, doesn't strictly adhere to a single sorting algorithm. Its implementation is more nuanced:
 
@@ -158,9 +164,6 @@ The `qsort` function in the GNU C Library (glibc), which is used by GCC, doesn't
 
 5. Quicksort connection: While introsort does use quicksort as its base, it's designed to avoid quicksort's worst-case O(n^2) time complexity, ensuring a worst-case O(n log n) performance.
 
-So, to directly answer your question: While GNU GCC's `qsort` does use quicksort as part of its algorithm, it's not a pure implementation of quicksort. It's a more sophisticated approach that combines multiple sorting techniques for efficiency and reliability across different input scenarios.
-
-Would you like more details on any aspect of this implementation or its performance characteristics?
-
-
+So, to directly answer your question: While GNU GCC's `qsort` does use quicksort as part of its algorithm, it's not a pure implementation
+of quicksort. It's a more sophisticated approach that combines multiple sorting techniques for efficiency and reliability across different input scenarios.
 */

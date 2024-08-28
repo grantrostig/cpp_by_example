@@ -242,19 +242,111 @@ auto crash_signals_register() -> void {
     std::signal( SIGSEGV, crash_tracer );
 }
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+void f(std::string a) {
+    int b{23};
+    // ...
+    return;
+}
+
+void g() {
+    f(std::string {"A"});
+    std::vector<int> y{};
+    return;
+}
+
+void test1 () {
+    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+    g();
+    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace Example2 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+struct Widget {
+    Widget(){};
+    void member_function() {};
+};
+
+struct Gadget {
+    Gadget(int i, std::string color){};
+};
+
+void foo(Widget a, Gadget b) {
+    return;
+};
+
+struct Foo {
+    std::vector<Widget> mData{};
+
+    void add_widget(Widget const& a) {  // avoids a copy
+        mData.push_back(a);             // but here a copy is required
+    }
+
+    void add_widget(Widget a) {         // copy only if lvalue
+        mData.push_back( std::move(a));             // no copy, move instead
+    }
+};
+
+void test1 () {
+    std::cout<< "START                Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+
+    Widget w{};                 // an lvalue
+    foo(w, Gadget{1, "blue"});
+    w.member_function();        // w is used again
+
+    std::cout<< "END                  Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace Example3 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+std::string f() {
+    std::string a{"A"};
+    int b{23};
+    // ...
+    return a;
+}
+
+bool my_predicate(int v) {
+    bool result{false};
+    if (v>0) result = true;
+    return result;
+};
+
+Widget g() {
+    Widget a{};
+    Widget b{};
+    // ...
+    int some_value{1};
+    if (my_predicate(some_value)) return a;
+    else return b;
+}
+
+void test1 () {
+    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+    g();
+    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace Example4 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
     std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-} } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
-
-    std::string                 STRING_QQQ          {"qqq"};
-    std::vector<char>           QQQ                 {STRING_QQQ.begin(),STRING_QQQ.end()};
     Example1::test1 ();
-
+    Example2::test1 ();
+    Example3::test1 ();
+    Example4::test1 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
