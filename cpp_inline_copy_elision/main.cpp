@@ -1,4 +1,22 @@
-// boost 1.0 license
+/* copyright (c) 2024 Grant Rostig based on work by Jon Kalb / Boost 1.0 license
+
+Inlining:
+qsort vs std::sort and talk about function call elision
+
+As-if rule and compiler order preferences.
+
+Calls to template functions with function pointer
+Calls to template functions with inlined function objects
+Calls to template functions with lambdas
+
+Do we ever pass large objects by value?
+
+Do we every return large objects? (That would be better for const correctness.)
+
+Copy elisions
+passing temporaries.
+RVO
+*/
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -24,20 +42,19 @@ public:
     }
 };
 
-template <class T, unsigned int N>                               // requires std::is_floating_point<T>{};
-void random_float_fill( T(&data)[N] ) {
-    cout<<"start fill."<<endl;
-    std::mt19937 my_generator{std::random_device{}()};
-    cout<<"generator."<<endl;
+template <class T, unsigned int N> // TODO??: implement contracts: requires std::is_floating_point<T>{};
+void random_float_fill(T (&data)[N]) {
+    cout << "start fill." << endl;
+    std::mt19937 my_generator{ std::random_device{}() };
+    cout << "generator." << endl;
     std::uniform_real_distribution<T> my_distribution{
-        0,
-        999999
-        //std::numeric_limits<T>::min(),
-        //std::numeric_limits<T>::max()
+        0, 999999
+        // std::numeric_limits<T>::min(),
+        // std::numeric_limits<T>::max()
     };
-    cout<<"dist:"<<std::numeric_limits<T>::min()<<","<< std::numeric_limits<T>::max()<<endl;
-    std::generate(std::begin(data), std::end(data), [&my_distribution, &my_generator](){return my_distribution(my_generator);});
-    cout<<"generated."<<endl;
+    cout << "dist:" << std::numeric_limits<T>::min() << "," << std::numeric_limits<T>::max() << endl;
+    std::generate(std::begin(data), std::end(data), [&my_distribution, &my_generator]() { return my_distribution(my_generator); });
+    cout << "generated." << endl;
 }
 
 /*  #include <limits.h>      // https://en.cppreference.com/w/c/algorithm/qsort
@@ -67,21 +84,20 @@ int main(void) {
     printf("\n");
 }*/
 
-int compare2(void const *a, void const *b) {
-    // double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
-    return ( *(double*)a>*(double*)b ) - ( *(double*)a>*(double*)b );
-}
-
 int compare(void const *a, void const *b) {
     // double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
     double const difference{ *(double const *)a - *(double const *)b };
-    if( difference > 0) return  1;
-    if( difference < 0) return -1;
+    if(difference > 0) return 1;
+    if(difference < 0) return -1;
     return 0;
 }
 
-int double_comp_old(void const*a, void const*b) {  // does not comply with standard C++ or C since it must return a zero for equality
-    return *(double*)a - *(double*)b < 0? -1: 1;
+int compare2(void const *a, void const *b) {  // Optimization: No branching so can be pipelined? better?
+    return ( *(double*)a > *(double*)b ) - ( *(double*)a < *(double*)b );
+}
+
+int compare_error(void const*a, void const*b) {  // ERROR: Does not comply with standard C++ or C since it must return a zero for equality
+    return *(double*)a - *(double*)b < 0? -1: 1;  // A small negative value would round to 0 rather than -1.
 }
 
 double original_data[ITEM_COUNT];
@@ -89,33 +105,40 @@ double sortable_data[ITEM_COUNT];
 
 int main() {
     random_float_fill(original_data);
-    assert( not std::is_sorted( std::begin(original_data),  std::end(original_data) ));
-    cout<<"filled:"<<endl;
+    //assert( not std::is_sorted( std::begin(original_data),  std::end(original_data) ));
+    //cout<<"$$filled:"<<endl;
     //for (double i:original_data) { cout <<i<< ", "; }; cout <<endl;
     //for (int i{0};i<ITEM_COUNT;++i) { cout << original_data[i] << ", "; } cout <<endl;
     //std::copy(original_data, original_data + ITEM_COUNT, sortable_data);
-    std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data)); cout<<"copy1"<<endl;
+    std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data)); // cout<<"copy1"<<endl;
 
     Timer t{};
     std::qsort(sortable_data, ITEM_COUNT, sizeof(double), compare);  // C lang sort using maybe a quick sort
     double elapsed{t.elapsed()};
     //assert( std::is_sorted( sortable_data,  sortable_data + ITEM_COUNT) );
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) , compare) );
-    assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
+    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
     std::cout << "qsort() time = " << elapsed << " seconds\n";
 
-    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); cout<<"copy2"<<endl;
+    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); // cout<<"copy2"<<endl;
     t.reset();
-    qsort(sortable_data, ITEM_COUNT, sizeof(double), compare);  // C lang sort using maybe a quick sort
+    std::qsort(sortable_data, ITEM_COUNT, sizeof(double), compare2);  // C lang sort using a quick sort variant
     elapsed = t.elapsed();
-    assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
+    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
+    std::cout << "std::qsort() time2 = " << elapsed << " seconds\n";
+
+    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); // cout<<"copy3"<<endl;
+    t.reset();
+    qsort(sortable_data, ITEM_COUNT, sizeof(double), compare);  // C lang sort using a quick sort variant
+    elapsed = t.elapsed();
+    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
     std::cout << "std::qsort() time = " << elapsed << " seconds\n";
 
-    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); cout<<"copy3"<<endl;
+    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); // cout<<"copy4"<<endl;
     t.reset();
-    std::sort(std::begin(sortable_data), std::end(sortable_data));  // C++ sort using maybe a quick sort TODO??: prove it. // OLDER version: std::sort(sortable_data, sortable_data + ITEM_COUNT);
+    std::sort(std::begin(sortable_data), std::end(sortable_data));  // C++ sort using a quick sort variant TODO??: prove it.
     elapsed = t.elapsed();
-    assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
+    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
     std::cout << "std::sort() time = " << elapsed << " seconds\n";
 }
 

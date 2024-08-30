@@ -244,7 +244,7 @@ auto crash_signals_register() -> void {
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-namespace Example1_Pass_by_value_FG { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Example1_Pass_by_value_functions { // 35 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 void f(std::string a) {
     int b{23};
@@ -265,7 +265,7 @@ void test1 () {
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example2_Pass_by_value_Widget { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Example2_Pass_by_value_Widget { // 37 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 struct Widget {
     Widget(){};
@@ -276,19 +276,7 @@ struct Gadget {
     Gadget(int i, std::string color) {};
 };
 
-struct Foo {
-    std::vector<Widget> mData{};
-
-    void add_widget(Widget const& a) {      // Avoids a copy.
-        mData.push_back(a);                 // but here a copy is required.
-    }
-
-    void add_widget(Widget a) {             // Copy only if lvalue.
-        mData.push_back( std::move(a) );    // No copy, move instead.
-    }
-};
-
-void f(Widget a, Gadget b) {
+void foo(Widget a, Gadget b) {
     // clog << ".";
     return;
 };
@@ -297,14 +285,71 @@ void test1 () {
     std::cout<< "START                Example2 test1. ++++++++++++++++++++++++"<<std::endl;
 
     Widget w{};                 // an lvalue
-    f(w, Gadget{1, "blue"});
+    foo(w, Gadget{1, "blue"});  // w must be copied, Gadget is temp and need not be copied again/can't be!
     w.member_function();        // w is used again
 
     std::cout<< "END                  Example2 test1. ++++++++++++++++++++++++"<<std::endl;
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example3_Return_value_optimization_Predicate { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Example3_Pass_by_value_Widget2 { // 38 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+struct Widget {
+    Widget(){};
+    void member_function() {};
+};
+
+/* struct Gadget {
+    Gadget(int i, std::string color) {};
+}; */
+
+struct Foo {
+    std::vector<Widget> mData{};
+
+    void add_widget1(Widget const& a) {      // Avoids a copy.
+        mData.push_back(a);                 // but here a copy is required.
+    }
+
+    void add_widget2(Widget a) {             // Copy only if lvalue.
+        mData.push_back( std::move(a) );    // No copy, move instead.
+    }
+};
+
+void test1 () {
+    std::cout<< "START                Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+
+    Widget a{};                 // an lvalue
+    Foo f{};                    // an lvalue
+    f.add_widget1(a);           // lvalue or rvalue/temp parameter
+    f.add_widget2(a);           // lvalue parameter
+    f.add_widget2(Widget{});    // rvalue/temp parameter
+
+    std::cout<< "END                  Example2 test1. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace Example4_Return_value_optimization_Functions { // 41-43 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+std::string f() {
+    std::string a{"A"};
+    int b{23};
+    // ...
+    return a;  // RVO
+}
+
+void g() {
+    std::string x{f()};
+}
+
+void test1 () {
+    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+    g();
+    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+
+namespace Example5_Return_value_optimization_Predicate_no { // 44 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 std::string f() {
     std::string a{"A"};
@@ -335,31 +380,40 @@ void test1 () {
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example4_Pass_by_value_Copy_ellision { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+namespace Example6_Return_value_optimization_Ternary_no { // 45 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+Example2_Pass_by_value_Widget::Widget f() {
+    Example2_Pass_by_value_Widget::Widget a;
+    return Example5_Return_value_optimization_Predicate_no::my_predicate( 42 )? a: Example2_Pass_by_value_Widget::Widget{};
+}
+void test1 () {
+    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+    f();
+    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+namespace Example7_Return_value_optimization_RVO_Copy_ellision { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
     std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
-namespace Example5_Return_value_optimization_RVO_Copy_ellision { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
-void test1 () {
-    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-}
-} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-int main(int argc, char* arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
-    Example1_Pass_by_value_FG::test1();
+int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
+    Example1_Pass_by_value_functions::test1();
 
     Example2_Pass_by_value_Widget::test1();
 
-    Example3_Return_value_optimization_Predicate::test1();
+    Example3_Pass_by_value_Widget2::test1();
 
-    Example4_Pass_by_value_Copy_ellision::test1 ();
+    Example4_Return_value_optimization_Functions::test1 ();
 
-    Example5_Return_value_optimization_RVO_Copy_ellision::test1 ();
+    Example5_Return_value_optimization_Predicate_no::test1 ();
+
+    Example6_Return_value_optimization_Ternary_no::test1 ();
+
+    Example7_Return_value_optimization_RVO_Copy_ellision::test1 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
