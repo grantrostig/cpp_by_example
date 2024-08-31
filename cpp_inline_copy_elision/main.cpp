@@ -30,7 +30,9 @@ constexpr int item_count{523'221};    // large number, based on system memory si
 
 struct Timer {
     using Clock =  std::chrono::high_resolution_clock;
-    using Second = std::chrono::duration< double, std::ratio<1> >;
+    using Second = std::chrono::duration< double, std::ratio<1> >;  // TODO??: magic number!!
+    // using Second2= std::chrono::seconds ;  // TODO??: magic number!!
+    // using Second3= std::chrono::duration< double,            1  >;  // TODO??: magic number!!
     std::chrono::time_point<Clock> beginning_;
 public:
     Timer(): beginning_ {Clock::now()} {}
@@ -82,6 +84,13 @@ int main(void) {
     printf("\n");
 }*/
 
+int i{};
+bool less_double(double const & a, double const & b) {
+    i++;
+    bool const result{ a < b };
+    return result;
+}
+
 int compare(void const *a, void const *b) {
     // double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
     double const difference{ *(double const *)a - *(double const *)b };
@@ -90,11 +99,11 @@ int compare(void const *a, void const *b) {
     return 0;
 }
 
-int compare2(void const *a, void const *b) {  // Optimization: No branching so can be pipelined? better?
+int compare_non_branching(void const *a, void const *b) {  // Optimization: No branching so can be pipelined? better?
     return ( *(double*)a > *(double*)b ) - ( *(double*)a < *(double*)b );
 }
 
-int compare_error(void const*a, void const*b) {  // ERROR: Does not comply with standard C++ or C since it must return a zero for equality
+int compare_old(void const*a, void const*b) {  // TODO??: really?
     return *(double*)a - *(double*)b < 0? -1: 1;  // A small negative value would round to 0 rather than -1.
 }
 
@@ -108,7 +117,7 @@ int main() {
     //for (double i:original_data) { cout <<i<< ", "; }; cout <<endl;
     //for (int i{0};i<ITEM_COUNT;++i) { cout << original_data[i] << ", "; } cout <<endl;
     //std::copy(original_data, original_data + ITEM_COUNT, sortable_data);
-    std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data)); // cout<<"copy1"<<endl;
+    std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data)); // cout<<"copy1"<<endl; // [begin,end) end one beyond value ~ sentinel
 
     Timer t{};
     std::qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using maybe a quick sort
@@ -116,28 +125,36 @@ int main() {
     //assert( std::is_sorted( sortable_data,  sortable_data + ITEM_COUNT) );
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) , compare) );
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "qsort() time = " << elapsed << " seconds\n";
-
-    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy2"<<endl;
-    t.reset();
-    std::qsort(sortable_data, item_count, sizeof(double), compare2);  // C lang sort using a quick sort variant
-    elapsed = t.elapsed();
-    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "std::qsort() time2 = " << elapsed << " seconds\n";
+    std::cout << "C lang qsort() time: " << elapsed << " seconds\n";
 
     std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy3"<<endl;
     t.reset();
     qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using a quick sort variant
     elapsed = t.elapsed();
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "std::qsort() time = " << elapsed << " seconds\n";
+    std::cout << "C lang qsort() time: " << elapsed << " seconds\n";
+
+    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy2"<<endl;
+    t.reset();
+    std::qsort(sortable_data, item_count, sizeof(double), compare_non_branching);  // C lang sort using a quick sort variant
+    elapsed = t.elapsed();
+    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
+    std::cout << "std::qsort() compare_non_branching: " << elapsed << " seconds\n";
+
+    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy4"<<endl;
+    t.reset();
+    std::sort(std::begin(sortable_data), std::end(sortable_data), less_double);  // C++ sort using a quick sort variant TODO??: prove it.
+    elapsed = t.elapsed();
+    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
+    std::cout << "std:: sort() less_double time: " << elapsed << " seconds\n";
 
     std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy4"<<endl;
     t.reset();
     std::sort(std::begin(sortable_data), std::end(sortable_data));  // C++ sort using a quick sort variant TODO??: prove it.
+    //std::sort(std::begin(sortable_data), std::end(sortable_data), std::less<double>{});  // C++ sort using a quick sort variant TODO??: prove it.
     elapsed = t.elapsed();
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "std::sort() time = " << elapsed << " seconds\n";
+    std::cout << "std:: sort() time: " << elapsed << " seconds\n";
 }
 
 /* Chat GPT type respones:

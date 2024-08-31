@@ -33,7 +33,7 @@ QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2
         -std=c++23		    \
         #-std=gnu++23		    \
         -O0 		            \
-        -g3 		            \
+        #-g3 		            \
         #-ggdb 		            \
         #-ggdb3 	            \
         -fconcepts              \
