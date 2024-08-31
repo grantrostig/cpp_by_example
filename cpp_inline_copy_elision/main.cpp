@@ -26,9 +26,7 @@ RVO
 #include <random>
 
 using std::cout; using std::endl;
-constexpr int ITEM_COUNT{523'221};  // large number, based on system memory size limitations.  TODO??: seg fault in random_fill(), what?, why? but only with this larger number.
-//constexpr int ITEM_COUNT{200'000};  // large number, based on system memory size limitations.  TODO??: seg fault in random_fill(), what?, why? but only with this larger number.
-//constexpr int ITEM_COUNT{100};  // large number, based on system memory size limitations.  TODO??: seg fault in random_fill(), what?, why? but only with this larger number.
+constexpr int item_count{523'221};    // large number, based on system memory size limitations.  TODO??: seg fault in random_fill(), what?, why? but only with this larger number.
 
 struct Timer {
     using Clock =  std::chrono::high_resolution_clock;
@@ -100,8 +98,8 @@ int compare_error(void const*a, void const*b) {  // ERROR: Does not comply with 
     return *(double*)a - *(double*)b < 0? -1: 1;  // A small negative value would round to 0 rather than -1.
 }
 
-double original_data[ITEM_COUNT];
-double sortable_data[ITEM_COUNT];
+double original_data[item_count];
+double sortable_data[item_count];
 
 int main() {
     random_float_fill(original_data);
@@ -113,28 +111,28 @@ int main() {
     std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data)); // cout<<"copy1"<<endl;
 
     Timer t{};
-    std::qsort(sortable_data, ITEM_COUNT, sizeof(double), compare);  // C lang sort using maybe a quick sort
+    std::qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using maybe a quick sort
     double elapsed{t.elapsed()};
     //assert( std::is_sorted( sortable_data,  sortable_data + ITEM_COUNT) );
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) , compare) );
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
     std::cout << "qsort() time = " << elapsed << " seconds\n";
 
-    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); // cout<<"copy2"<<endl;
+    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy2"<<endl;
     t.reset();
-    std::qsort(sortable_data, ITEM_COUNT, sizeof(double), compare2);  // C lang sort using a quick sort variant
+    std::qsort(sortable_data, item_count, sizeof(double), compare2);  // C lang sort using a quick sort variant
     elapsed = t.elapsed();
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
     std::cout << "std::qsort() time2 = " << elapsed << " seconds\n";
 
-    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); // cout<<"copy3"<<endl;
+    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy3"<<endl;
     t.reset();
-    qsort(sortable_data, ITEM_COUNT, sizeof(double), compare);  // C lang sort using a quick sort variant
+    qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using a quick sort variant
     elapsed = t.elapsed();
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
     std::cout << "std::qsort() time = " << elapsed << " seconds\n";
 
-    std::copy(original_data, original_data + ITEM_COUNT, sortable_data); // cout<<"copy4"<<endl;
+    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy4"<<endl;
     t.reset();
     std::sort(std::begin(sortable_data), std::end(sortable_data));  // C++ sort using a quick sort variant TODO??: prove it.
     elapsed = t.elapsed();

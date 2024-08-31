@@ -393,13 +393,6 @@ void test1 () {
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example7_Return_value_optimization_RVO_Copy_ellision { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
-void test1 () {
-    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-    std::cout<< "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-}
-} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     Example1_Pass_by_value_functions::test1();
 
@@ -412,8 +405,6 @@ int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc,
     Example5_Return_value_optimization_Predicate_no::test1 ();
 
     Example6_Return_value_optimization_Ternary_no::test1 ();
-
-    Example7_Return_value_optimization_RVO_Copy_ellision::test1 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
