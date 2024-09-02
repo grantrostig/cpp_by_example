@@ -115,7 +115,8 @@ HEADERS += \
 #    KitchenSink.h           \
 #    math_grostig.h          \
 #    random_toolkit.h        \
-#    $$PWD/..h               \ # probably wrong
+ \#    $$PWD/..h               \ # probably wrong
+    compilation_unit_2_fn.hpp
 
 SOURCES += \
     main.cpp \
