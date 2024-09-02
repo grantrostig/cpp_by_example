@@ -21,142 +21,126 @@ RVO
 #include <cassert>
 #include <chrono>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <limits>
 #include <random>
 
 using std::cout; using std::endl;
-constexpr int item_count{523'221};    // large number, based on system memory size limitations.  TODO??: seg fault in random_fill(), what?, why? but only with this larger number.
+constexpr int item_count{2'000'000};  // Large number, based on system memory size limitations.
+double original_data[item_count];   // C lang array used by both languages, to illustrate C++ optimization beyond C lang.
+double sortable_data[item_count];
+int loop_counter_less_fn{};
+
 
 struct Timer {
     using Clock =  std::chrono::high_resolution_clock;
-    using Second = std::chrono::duration< double, std::ratio<1> >;  // TODO??: magic number!!
-    // using Second2= std::chrono::seconds ;  // TODO??: magic number!!
-    // using Second3= std::chrono::duration< double,            1  >;  // TODO??: magic number!!
+    //using Second = std::chrono::duration< double, std::ratio<1>>;  // TODO??: remove magic number
+    using Second = std::chrono::milliseconds;
     std::chrono::time_point<Clock> beginning_;
 public:
     Timer(): beginning_ {Clock::now()} {}
     void reset() { beginning_ = Clock::now(); }
-    double elapsed() const {
-        return std::chrono::duration_cast<Second>( Clock::now() - beginning_ ).count();
+    auto elapsed() const {                                  // TODO??: Why was it double??
+        return std::chrono::duration_cast<Second>(Clock::now() - beginning_).count();
     }
 };
 
 template <class T, unsigned int N> // TODO??: implement contracts: requires std::is_floating_point<T>{};
+//void random_float_fill(T &(data[N])) {
+//void random_float_fill(T &data[N]) {
+//void random_float_fill(T data[N]) {
 void random_float_fill(T (&data)[N]) {
-    cout << "start fill." << endl;
-    std::mt19937 my_generator{ std::random_device{}() };
-    cout << "generator." << endl;
+    std::mt19937 my_generator{ std::random_device{}() }; // TODO??: why {}() not shown on cppref //std::random_device my_random_device{}; std::mt19937 my_generator{ my_random_device() };
     std::uniform_real_distribution<T> my_distribution{
-        0, 999999
-        // std::numeric_limits<T>::min(),
-        // std::numeric_limits<T>::max()
+        std::numeric_limits<T>::min(),
+        std::numeric_limits<T>::max()
     };
-    cout << "dist:" << std::numeric_limits<T>::min() << "," << std::numeric_limits<T>::max() << endl;
-    std::generate(std::begin(data), std::end(data), [&my_distribution, &my_generator]() { return my_distribution(my_generator); });
-    cout << "generated." << endl;
+    std::ranges::generate( data, [&my_distribution, &my_generator]() { return my_distribution(my_generator); });
 }
 
-/*  #include <limits.h>      // https://en.cppreference.com/w/c/algorithm/qsort
-#include <stdio.h>
-#include <stdlib.h>
-
-int compare_ints(const void* a, const void* b) {
-    int arg1 = *(const int*)a;
-    int arg2 = *(const int*)b;
-    if (arg1 < arg2) return -1;
-    if (arg1 > arg2) return 1;
-    return 0;
-           // return (arg1 > arg2) - (arg1 < arg2); // possible shortcut
-           // return arg1 - arg2; // erroneous shortcut: undefined behavior in case of
-           // integer overflow, such as with INT_MIN here
-}
-
-int main(void) {
-    int ints[] = {-2, 99, 0, -743, 2, INT_MIN, 4};
-    int size = sizeof ints / sizeof *ints;
-    printf("%ld \n", sizeof *ints);  // TODO??: why pointer???, why not just int?
-    printf("%ld \n", sizeof ints);
-    printf("%ld \n", sizeof(int));
-    qsort(ints, size, sizeof(int), compare_ints);
-    for (int i = 0; i < size; i++)
-        printf("%d ", ints[i]);
-    printf("\n");
-}*/
-
-int i{};
-bool less_double(double const & a, double const & b) {
-    i++;
+bool less_fn(double const & a, double const & b) {
+    //loop_counter_less_fn++;
     bool const result{ a < b };
     return result;
 }
+bool my_less_fn (){};
 
-int compare(void const *a, void const *b) {
-    // double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
-    double const difference{ *(double const *)a - *(double const *)b };
+int compare(void const *a, void const *b) {  // ERROR: double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
+    //double const difference{ *(double const *)a - *(double const *)b };
+    double const difference{ *static_cast<double const *>(a) - *static_cast<double const *>(b) };
     if(difference > 0) return 1;
     if(difference < 0) return -1;
     return 0;
 }
 
 int compare_non_branching(void const *a, void const *b) {  // Optimization: No branching so can be pipelined? better?
-    return ( *(double*)a > *(double*)b ) - ( *(double*)a < *(double*)b );
+    return (( *static_cast<double const *>(a) > *static_cast<double const *>(b) )
+              - ( *static_cast<double const *>(a) < *static_cast<double const *>(b) ));
 }
-
-int compare_old(void const*a, void const*b) {  // TODO??: really?
-    return *(double*)a - *(double*)b < 0? -1: 1;  // A small negative value would round to 0 rather than -1.
-}
-
-double original_data[item_count];
-double sortable_data[item_count];
 
 int main() {
     random_float_fill(original_data);
-    //assert( not std::is_sorted( std::begin(original_data),  std::end(original_data) ));
-    //cout<<"$$filled:"<<endl;
-    //for (double i:original_data) { cout <<i<< ", "; }; cout <<endl;
-    //for (int i{0};i<ITEM_COUNT;++i) { cout << original_data[i] << ", "; } cout <<endl;
-    //std::copy(original_data, original_data + ITEM_COUNT, sortable_data);
-    std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data)); // cout<<"copy1"<<endl; // [begin,end) end one beyond value ~ sentinel
+    // assert( not std::is_sorted( std::begin(original_data),  std::end(original_data), compare ));
+    // for (double i:original_data) { cout <<i<< ", "; }; cout <<endl;
+
+    // *** Some old, new, and probably bad ways to copy a C array :) ***
+    memcpy( original_data, sortable_data, item_count*sizeof(double));  // C lang
+    assert( std::equal(std::begin(original_data), std::end(original_data), std::begin(sortable_data)));
+    for( unsigned long i{}; i<item_count; ++i ) sortable_data[i] = original_data[i];  // C lang
+    for( double i : original_data ) {  // C++ ranges misapplied?
+        static long j{};
+        sortable_data[j++] = i;
+    }
+    std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data));  // [begin,end) end one beyond value ~ sentinel
+    std::ranges::copy( original_data, sortable_data);
 
     Timer t{};
-    std::qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using maybe a quick sort
-    double elapsed{t.elapsed()};
-    //assert( std::is_sorted( sortable_data,  sortable_data + ITEM_COUNT) );
-    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) , compare) );
+    qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using maybe a quick sort
+    auto elapsed{t.elapsed()};
     //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "C lang qsort() time: " << elapsed << " seconds\n";
+    std::cout << "C lang qsort():                           " << elapsed << "\n";
 
-    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy3"<<endl;
+    std::ranges::copy( original_data, sortable_data);
     t.reset();
-    qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using a quick sort variant
+    std::qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using a quick sort variant
     elapsed = t.elapsed();
-    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "C lang qsort() time: " << elapsed << " seconds\n";
+    std::cout << "C lang std::qsort():                      " << elapsed << "\n";
 
-    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy2"<<endl;
+    std::ranges::copy( original_data, sortable_data);
     t.reset();
     std::qsort(sortable_data, item_count, sizeof(double), compare_non_branching);  // C lang sort using a quick sort variant
     elapsed = t.elapsed();
-    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "std::qsort() compare_non_branching: " << elapsed << " seconds\n";
+    std::cout << "C lang std::qsort() compare_non_branch:   " << elapsed << "\n";
 
-    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy4"<<endl;
+    std::ranges::copy( original_data, sortable_data);
     t.reset();
-    std::sort(std::begin(sortable_data), std::end(sortable_data), less_double);  // C++ sort using a quick sort variant TODO??: prove it.
+    std::sort(std::begin(sortable_data), std::end(sortable_data), less_fn);  // C++ sort using a quick sort variant TODO??: prove it.
     elapsed = t.elapsed();
-    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "std:: sort() less_double time: " << elapsed << " seconds\n";
+    std::cout << "C++ std::sort() less_double_fn:           " << elapsed << "\n";
 
-    std::copy(original_data, original_data + item_count, sortable_data); // cout<<"copy4"<<endl;
+    std::ranges::copy( original_data, sortable_data);
     t.reset();
-    std::sort(std::begin(sortable_data), std::end(sortable_data));  // C++ sort using a quick sort variant TODO??: prove it.
-    //std::sort(std::begin(sortable_data), std::end(sortable_data), std::less<double>{});  // C++ sort using a quick sort variant TODO??: prove it.
+    std::ranges::sort(sortable_data, less_fn);  // C++ sort using a quick sort variant TODO??: prove it.
     elapsed = t.elapsed();
-    //assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "std:: sort() time: " << elapsed << " seconds\n";
+    std::cout << "C++ std::ranges::sort() less_double_fn:   " << elapsed << "\n";
+    std::ranges::copy( original_data, sortable_data);
+    t.reset();
+    std::ranges::sort(sortable_data);  // C++ sort using a quick sort variant TODO??: prove it.
+    elapsed = t.elapsed();
+    std::cout << "C++ std::ranges::sort():                  " << elapsed << "\n";
+
+
+    std::ranges::copy( original_data, sortable_data);
+    t.reset();
+    std::ranges::sort(sortable_data, std::less<double>{});  // C++ sort using a quick sort variant TODO??: prove it.
+    elapsed = t.elapsed();
+    std::cout << "C++ std::ranges::sort() std::less<double>:" << elapsed << "\n";
+
+    cout << loop_counter_less_fn << endl;
 }
 
+// Balance of commented code/text is various items of potential interest and followup.
 /* Chat GPT type respones:
 >>GNU g++'s implementation of std::sort uses a hybrid sorting algorithm, not just quicksort. Here's a breakdown:
 1. Primary algorithm: Introsort
@@ -205,3 +189,30 @@ The `qsort` function in the GNU C Library (glibc), which is used by GCC, doesn't
 So, to directly answer your question: While GNU GCC's `qsort` does use quicksort as part of its algorithm, it's not a pure implementation
 of quicksort. It's a more sophisticated approach that combines multiple sorting techniques for efficiency and reliability across different input scenarios.
 */
+
+/*  #include <limits.h>      // https://en.cppreference.com/w/c/algorithm/qsort
+#include <stdio.h>
+#include <stdlib.h>
+
+int compare_ints(const void* a, const void* b) {
+ int arg1 = *(const int*)a;
+ int arg2 = *(const int*)b;
+ if (arg1 < arg2) return -1;
+ if (arg1 > arg2) return 1;
+ return 0;
+        // return (arg1 > arg2) - (arg1 < arg2); // possible shortcut
+        // return arg1 - arg2; // erroneous shortcut: undefined behavior in case of
+        // integer overflow, such as with INT_MIN here
+}
+
+int main(void) {
+ int ints[] = {-2, 99, 0, -743, 2, INT_MIN, 4};
+ int size = sizeof ints / sizeof *ints;
+ printf("%ld \n", sizeof *ints);  // TODO??: why pointer???, why not just int?
+ printf("%ld \n", sizeof ints);
+ printf("%ld \n", sizeof(int));
+ qsort(ints, size, sizeof(int), compare_ints);
+ for (int i = 0; i < size; i++)
+     printf("%d ", ints[i]);
+ printf("\n");
+}*/
