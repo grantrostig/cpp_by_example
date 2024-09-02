@@ -119,6 +119,7 @@ HEADERS += \
     compilation_unit_2_fn.hpp
 
 SOURCES += \
+    compilation_unit_2_fn.cpp \
     main.cpp \
 #    iostreams.cpp \
 #    global_entities.cpp \
