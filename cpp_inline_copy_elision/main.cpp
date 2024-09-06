@@ -75,7 +75,7 @@ inline int compare(void const *a, void const *b) {  // ERROR: double difference_
 
 inline int compare_non_branching(void const *a, void const *b) {  // Optimization: No branching so can be pipelined? better?
     int result {( *static_cast<double const *>(a) > *static_cast<double const *>(b) )
-              - ( *static_cast<double const *>(a) < *static_cast<double const *>(b) )};
+              - ( *static_cast<double const *>(a) < *static_cast<double const *>(b) )};  // TODO??: See comment at end below for overflow concerns!!
     return result;
 }
 
@@ -114,27 +114,27 @@ inline void post_sort() {
 int main() {
     random_float_fill(original_data);
     prepare_for_sort();
-    qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using maybe a quick sort
+    qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using a quick sort variant TODO??: prove it.
     post_sort();
     std::cout << "$$C lang qsort() compare:                   " << elapsed << endl;
 
     prepare_for_sort();
-    qsort(sortable_data, item_count, sizeof(double), compare_cu_linked);  // C lang sort using maybe a quick sort
+    qsort(sortable_data, item_count, sizeof(double), compare_cu_linked);
     post_sort();
     std::cout << "$$C lang qsort() compare_cu_linked:         " << elapsed << endl;
 
     prepare_for_sort();
-    qsort(sortable_data, item_count, sizeof(double), compare_cu_inline);  // C lang sort using maybe a quick sort
+    qsort(sortable_data, item_count, sizeof(double), compare_cu_inline);
     post_sort();
     std::cout << "$$C lang qsort() compare_cu_inline:         " << elapsed << endl;
 
     prepare_for_sort();
-    std::qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using a quick sort variant
+    std::qsort(sortable_data, item_count, sizeof(double), compare);
     post_sort();
     std::cout << "$$C lang std::qsort() compare:              " << elapsed << endl;
 
     prepare_for_sort();
-    std::qsort(sortable_data, item_count, sizeof(double), compare_non_branching);  // C lang sort using a quick sort variant
+    std::qsort(sortable_data, item_count, sizeof(double), compare_non_branching);
     post_sort();
     std::cout << "$$C lang std::qsort() compare_non_branch:   " << elapsed << endl;
 
@@ -144,26 +144,26 @@ int main() {
     std::cout << "$$C++ std::sort() less_double_fn:           " << elapsed << endl;
 
     prepare_for_sort();
-    std::sort(std::begin(sortable_data), std::end(sortable_data), std::less<double>{} );  // C++ sort using a quick sort variant TODO??: prove it.
+    std::sort(std::begin(sortable_data), std::end(sortable_data), std::less<double>{} );
     post_sort();
     std::cout << "$$C++ std::sort() std::less<double>:        " << elapsed << "\n";
 
     prepare_for_sort();
-    std::ranges::sort(sortable_data, less_fn_sort);  // C++ sort using a quick sort variant TODO??: prove it.
+    std::ranges::sort(sortable_data, less_fn_sort);
     post_sort();
     std::cout << "$$C++ std::ranges::sort() less_double_fn:   " << elapsed << endl;
 
     prepare_for_sort();
-    std::ranges::sort(sortable_data);  // C++ sort using a quick sort variant TODO??: prove it.
+    std::ranges::sort(sortable_data);
     post_sort();
     std::cout << "$$C++ std::ranges::sort():                  " << elapsed << endl;
 
     prepare_for_sort(); //t.reset();
-    std::ranges::sort(sortable_data, std::ranges::less() );  // C++ sort using a quick sort variant TODO??: prove it.
+    std::ranges::sort(sortable_data, std::ranges::less() );
     /*  Other approaches to try:
-    //std::ranges::sort(sortable_data, [](double a, double b){return a<b;} );  // C++ sort using a quick sort variant TODO??: prove it.
+    //std::ranges::sort(sortable_data, [](double a, double b){return a<b;} );
     //struct { bool operator()(double a, double b) const { return a < b; } } custom_less;
-    //std::ranges::sort(sortable_data, custom_less);  // C++ sort using a quick sort variant TODO??: prove it.
+    //std::ranges::sort(sortable_data, custom_less);
     */
     post_sort();
     std::cout << "$$std::ranges::sort() std::ranges::less()   " << elapsed << "\n"; //std::cout << "C++ std::!ranges::sort() std::less<double>" << elapsed_here << "\n";
