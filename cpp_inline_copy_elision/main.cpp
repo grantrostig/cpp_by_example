@@ -29,32 +29,32 @@ RVO
 #include <random>
 
 using std::cout; using std::endl;
-constexpr int item_count{2'000'000};  // Large number, based on system memory size limitations.
-double original_data[item_count];   // C lang array used by both languages, to illustrate C++ optimization beyond C lang.
+constexpr int item_count{2'000'000};    // Large number, based on system memory size limitations.
+double original_data[item_count];       // C lang array used by both languages, to illustrate C++ optimization beyond C lang.
 double sortable_data[item_count];
-int loop_counter_less_fn{};
-int loop_counter_compare_fn{};
-int loop_counter_compare_non_branching_fn{};
+//int loop_counter_less_fn{};
+//int loop_counter_compare_fn{};
+//int loop_counter_compare_non_branching_fn{};
 
 struct Timer {
     using Clock =  std::chrono::high_resolution_clock;
     //using Second = std::chrono::duration< double, std::ratio<1>>;  // TODO??: remove magic number. Why was it double?? Is that correct?
-    using Second = std::chrono::milliseconds;
+    using time_unit = std::chrono::milliseconds;
     std::chrono::time_point<Clock> beginning_{};
 public:
     Timer(): beginning_{Clock::now()} {}
     void reset() { beginning_ = Clock::now(); }
-    auto elapsed() const {                                  // TODO??: Why was it double?? Is that correct?
-        return std::chrono::duration_cast<Second>(Clock::now() - beginning_).count();
+    auto elapsed() const {                                  // TODO??: Why was it double?? now long??  is auto required here for different_units?
+        return std::chrono::duration_cast<time_unit>(Clock::now() - beginning_).count();
     }
 };
 Timer t{};
 auto elapsed {Timer{}.elapsed()};
 
 template <class T, unsigned int N>                          // TODO??: implement contracts: requires std::is_floating_point<T>{};
-void random_float_fill(T (&data)[N]) {                      // TODO??: why not these? void random_float_fill(T &(data[N])) { //void random_float_fill(T &data[N]) { //void random_float_fill(T data[N]) {
-    std::mt19937 my_generator{ std::random_device{}() };    // TODO??: why {}() not shown on cppref //std::random_device my_random_device{}; std::mt19937 my_generator{ my_random_device() };
-    std::uniform_real_distribution<T> my_distribution{
+void random_float_fill(T (&data)[N]) {                                              // TODO??later: why not these? void random_float_fill(T &(data[N])) { //void random_float_fill(T &data[N]) { //void random_float_fill(T data[N]) {
+    std::mt19937 my_generator{ std::random_device{}() };                            // TODO??later: why {}() not shown on cppref //std::random_device my_random_device{}; std::mt19937 my_generator{ my_random_device() };
+    std::uniform_real_distribution<T> my_distribution{      // TODO??: real for array of double, what about array of int?
         std::numeric_limits<T>::min(),
         std::numeric_limits<T>::max()
     };
@@ -62,15 +62,11 @@ void random_float_fill(T (&data)[N]) {                      // TODO??: why not t
 }
 
 inline bool less_fn_sort(double const & a, double const & b) {
-    //loop_counter_less_fn++;
     bool const result{ a < b };
     return result;
 }
-//bool my_less_fn (){return true;};
 
 inline int compare(void const *a, void const *b) {  // ERROR: double difference_new{ *(double*)a <=> *(double*)b };  // TODO??: doesn't work for c array.
-    //double const difference{ *(double const *)a - *(double const *)b };
-    //loop_counter_compare_fn++;
     double const difference{ *static_cast<double const *>(a) - *static_cast<double const *>(b) };
     if(difference > 0) return 1;
     if(difference < 0) return -1;
@@ -78,26 +74,32 @@ inline int compare(void const *a, void const *b) {  // ERROR: double difference_
 }
 
 inline int compare_non_branching(void const *a, void const *b) {  // Optimization: No branching so can be pipelined? better?
-    //loop_counter_compare_non_branching_fn++;
     int result {( *static_cast<double const *>(a) > *static_cast<double const *>(b) )
               - ( *static_cast<double const *>(a) < *static_cast<double const *>(b) )};
     return result;
 }
 
+extern int compare_cu_linked(void const *, void const *);
+
 void prepare_for_sort() {
-    assert( not std::is_sorted( std::begin(original_data),  std::end(original_data), less_fn_sort ));
-    // for (double i:original_data) { cout <<i<< ", "; }; cout <<endl;
-    // std::copy( std::begin(original_data), std::end(original_data), std::ostream_iterator<double>( std::cout, ", " ));
+    assert( not std::is_sorted( std::begin(original_data),  std::end(original_data) ));
+    /*
+    // cout<<endl; for (double i:original_data) { cout <<i<< ", "; }; cout <<endl;
+    // std::copy( std::begin(original_data), std::end(original_data), std::ostream_iterator<double>( std::cout, ", " ));  // TODo?? Is there another simpler way?
 
            // *** Some old, new, and probably bad ways to copy a C array :) ***
-    //memcpy( original_data, sortable_data, item_count*sizeof(double));  // C lang
-    //assert( std::equal(std::begin(original_data), std::end(original_data), std::begin(sortable_data)));
-    //for( unsigned long i{}; i<item_count; ++i ) sortable_data[i] = original_data[i];  // C lang
-    /* for( double i : original_data ) {  // C++ "range for" misapplied!?
-        static long j{0};
+    memcpy( sortable_data, original_data, item_count*sizeof(double));  // C lang
+    assert( std::equal(std::begin(original_data), std::end(original_data), std::begin(sortable_data)));
+    for( unsigned long i{}; i<item_count; ++i ) sortable_data[i] = original_data[i];  // C lang
+    assert( std::equal(std::begin(original_data), std::end(original_data), std::begin(sortable_data)));
+    long j{0};
+    for( double i : original_data ) {  // C++ "range for" misapplied!?
         sortable_data[j++] = i;
-    } */
-    //std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data));  // [begin,end) end one beyond value ~ sentinel
+    }
+    assert( std::equal(std::begin(original_data), std::end(original_data), std::begin(sortable_data)));
+    std::copy(std::begin(original_data), std::end(original_data), std::begin(sortable_data));  // [begin,end) end one beyond value ~ sentinel
+    assert( std::equal(std::begin(original_data), std::end(original_data), std::begin(sortable_data)));
+    */
     std::ranges::copy( original_data, sortable_data);
     assert( std::equal(std::begin(original_data), std::end(original_data), std::begin(sortable_data)));
     t.reset();
@@ -106,81 +108,69 @@ void prepare_for_sort() {
 inline void post_sort() {
     elapsed = t.elapsed();
     assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data), less_fn_sort ));
+    assert( not std::is_sorted( std::begin(original_data),  std::end(original_data), less_fn_sort ));
 }
 
 int main() {
     random_float_fill(original_data);
-
-    //assert( not std::is_sorted( std::begin(original_data),  std::end(original_data), less_fn_sort ));
-    //assert( not std::is_sorted( std::begin(original_data),  std::end(original_data), compare ));
-    //assert( not std::is_sorted( original_data, original_data+item_count, compare ));
-    // for (double i:original_data) { cout <<i<< ", "; }; cout <<endl;
-    // std::copy( std::begin(original_data), std::end(original_data), std::ostream_iterator<double>( std::cout, ", " ));
-
     prepare_for_sort();
     qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using maybe a quick sort
-    //auto elapsed{t.elapsed()};
-    elapsed = t.elapsed();
-    std::cout << "C lang qsort() compare:                   " << elapsed << endl;
+    post_sort();
+    std::cout << "$$C lang qsort() compare:                   " << elapsed << endl;
 
     prepare_for_sort();
-    qsort(sortable_data, item_count, sizeof(double), compare_cu2);  // C lang sort using maybe a quick sort
-    //auto elapsed{t.elapsed()};
-    elapsed = t.elapsed();
-    std::cout << "C lang qsort() compare_cu2:               " << elapsed << endl;
+    qsort(sortable_data, item_count, sizeof(double), compare_cu_linked);  // C lang sort using maybe a quick sort
+    post_sort();
+    std::cout << "$$C lang qsort() compare_cu_linked:         " << elapsed << endl;
 
     prepare_for_sort();
     qsort(sortable_data, item_count, sizeof(double), compare_cu_inline);  // C lang sort using maybe a quick sort
-    //auto elapsed{t.elapsed()};
-    elapsed = t.elapsed();
-    std::cout << "C lang qsort() compare_cu_inline:         " << elapsed << endl;
+    post_sort();
+    std::cout << "$$C lang qsort() compare_cu_inline:         " << elapsed << endl;
 
     prepare_for_sort();
     std::qsort(sortable_data, item_count, sizeof(double), compare);  // C lang sort using a quick sort variant
     post_sort();
-    assert( std::is_sorted( std::begin(sortable_data),  std::end(sortable_data) ));
-    std::cout << "C lang std::qsort() compare:              " << elapsed << endl;
+    std::cout << "$$C lang std::qsort() compare:              " << elapsed << endl;
 
     prepare_for_sort();
     std::qsort(sortable_data, item_count, sizeof(double), compare_non_branching);  // C lang sort using a quick sort variant
     post_sort();
-    std::cout << "C lang std::qsort() compare_non_branch:   " << elapsed << endl;
+    std::cout << "$$C lang std::qsort() compare_non_branch:   " << elapsed << endl;
 
     prepare_for_sort();
     std::sort(std::begin(sortable_data), std::end(sortable_data), less_fn_sort);  // C++ sort using a quick sort variant TODO??: prove it.
     post_sort();
-    std::cout << "C++ std::sort() less_double_fn:           " << elapsed << endl;
+    std::cout << "$$C++ std::sort() less_double_fn:           " << elapsed << endl;
 
     prepare_for_sort();
     std::sort(std::begin(sortable_data), std::end(sortable_data), std::less<double>{} );  // C++ sort using a quick sort variant TODO??: prove it.
     post_sort();
-    std::cout << "C++ std::sort() std::less<double>:        " << elapsed << "\n";
+    std::cout << "$$C++ std::sort() std::less<double>:        " << elapsed << "\n";
 
     prepare_for_sort();
-    //std::sort(std::begin(sortable_data), std::end(sortable_data) , less_fn_sort);  // C++ sort using a quick sort variant TODO??: prove it.
     std::ranges::sort(sortable_data, less_fn_sort);  // C++ sort using a quick sort variant TODO??: prove it.
     post_sort();
-    std::cout << "C++ std::ranges::sort() less_double_fn:   " << elapsed << endl;
+    std::cout << "$$C++ std::ranges::sort() less_double_fn:   " << elapsed << endl;
 
     prepare_for_sort();
-    //std::sort(std::begin(sortable_data), std::end(sortable_data));
     std::ranges::sort(sortable_data);  // C++ sort using a quick sort variant TODO??: prove it.
     post_sort();
-    std::cout << "C++ std::ranges::sort():                  " << elapsed << endl;
+    std::cout << "$$C++ std::ranges::sort():                  " << elapsed << endl;
 
     prepare_for_sort(); //t.reset();
-    std::sort(std::begin(sortable_data), std::end(sortable_data), std::less<double>{} );  // C++ sort using a quick sort variant TODO??: prove it.
-    //std::ranges::sort(sortable_data, std::ranges::less() );  // C++ sort using a quick sort variant TODO??: prove it.
+    std::ranges::sort(sortable_data, std::ranges::less() );  // C++ sort using a quick sort variant TODO??: prove it.
+    /*  Other approaches to try:
     //std::ranges::sort(sortable_data, [](double a, double b){return a<b;} );  // C++ sort using a quick sort variant TODO??: prove it.
     //struct { bool operator()(double a, double b) const { return a < b; } } custom_less;
     //std::ranges::sort(sortable_data, custom_less);  // C++ sort using a quick sort variant TODO??: prove it.
-    //auto elapsed_here = t.elapsed();
+    */
     post_sort();
-    std::cout << "C++ std::!ranges::sort() std::less<double>" << elapsed << "\n"; //std::cout << "C++ std::!ranges::sort() std::less<double>" << elapsed_here << "\n";
+    std::cout << "$$std::ranges::sort() std::ranges::less()   " << elapsed << "\n"; //std::cout << "C++ std::!ranges::sort() std::less<double>" << elapsed_here << "\n";
+    std::cout << "###"<<endl;
 }
 
-// Balance of commented code/text is various items of potential interest and followup.
+// ******** Balance of commented code/text is various items of potential interest and followup. *********
 /* Chat GPT type respones:
 >>GNU g++'s implementation of std::sort uses a hybrid sorting algorithm, not just quicksort. Here's a breakdown:
 1. Primary algorithm: Introsort

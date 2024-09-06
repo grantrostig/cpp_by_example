@@ -29,7 +29,6 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/
         #-fconcepts             \
         #-funsigned-char         \
-        \
         -std=c++23		    \
         #-std=gnu++23		    \
         -O0 		            \
