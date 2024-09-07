@@ -246,10 +246,10 @@ auto crash_signals_register() -> void {
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 struct Widget {
     Widget() {};
-    void member_function() {};
+    void member_function() const {};
 };
-
 namespace Example1_Pass_by_value_functions { // 35-6 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+// https://godbolt.org/z/rc8YPqsdd
 void f(std::string const a) {
     int b{23};
     return;
@@ -271,11 +271,11 @@ struct Gadget {
     Gadget(int const i, std::string const color) {};
 };
 
-void foo(Widget const a, Gadget const b) { clog << "."; return; };
+void f(Widget const a, Gadget const b) { clog << "."; return; };
 
 void test1 () { std::cout<< "START                Example2 test1. ++++++++++++++++++++++++"<<std::endl;
-    Widget w{};                 // an lvalue
-    foo(w, Gadget{1, "blue"});  // w must be copied, Gadget is temp and need not be copied again/can't be!
+    Widget const w{};                 // an lvalue
+    f(w, Gadget{1, "blue"});  // w must be copied, Gadget is temp and need not be copied again/can't be!
     w.member_function();        // w is used again
     std::cout<< "END                  Example2 test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
@@ -283,10 +283,10 @@ void test1 () { std::cout<< "START                Example2 test1. ++++++++++++++
 namespace Example3_Pass_by_value_Widget2 { // 38 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 struct Foo {
     std::vector<Widget> mData{};
-    void add_widget1(Widget const& a) {      // Avoids a copy.
+    void add_widget1(Widget const& a) {     // Avoids a copy.
         mData.push_back(a);                 // but here a copy is required.
     }
-    void add_widget2(Widget a) {             // Copy only if lvalue.
+    void add_widget2(Widget a) {            // Copy only if lvalue.
         mData.push_back( std::move(a) );    // No copy, move instead.
     }
 };
@@ -301,7 +301,6 @@ void test1 () { std::cout<< "START                Example3 test1. ++++++++++++++
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace Example4_Return_value_optimization_Functions { // 41-43 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
 std::string f() {
     std::string a{"A"};
     int b{23};
@@ -313,8 +312,7 @@ void g() {
     std::string x{f()};
 }
 
-void test1 () {
-    std::cout<< "START                Example4 test1. ++++++++++++++++++++++++"<<std::endl;
+void test1 () { std::cout<< "START                Example4 test1. ++++++++++++++++++++++++"<<std::endl;
     g();
     std::cout<< "END                  Example4 test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
