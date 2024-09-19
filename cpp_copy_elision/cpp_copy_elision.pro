@@ -118,6 +118,7 @@ HEADERS += \
 #    $$PWD/..h               \ # probably wrong
 
 SOURCES += \
+#    compiler_explorer_code.cpp \
     main.cpp \
 #    iostreams.cpp \
 #    global_entities.cpp \
