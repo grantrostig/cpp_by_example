@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <iostream>
 #include <print>
+
 #include <iostream>
 
 
@@ -56,7 +57,7 @@ int main() {
     std::cout << v4 << '\n';                                        //
     std::cout << v5 << '\n';                                        //
     std::cout << v6 << '\n';                                        //
-    std::cout << v7 << '\n';                                        //
+    std::cout << v7 << '\n' << std::endl;                                        //
 
     std::cout << std::setw(10) << std::setfill('*') << v2 << '\n';  // ***70 mi/h
     std::cout << std::format("{:*^10}\n", v3);                      // *110 km/h*
@@ -65,15 +66,15 @@ int main() {
     std::println("{::N[.2f]U[dn]}", v6);                            // 31.29 m⋅s⁻¹
     std::println("{:%N}", v7);                                      // 31
 
-    std::cout << "The seven defining constants of the SI and the seven corresponding units they define:\n";
+    std::cout << "\nThe seven defining constants of the SI and the seven corresponding units they define:\n";
     std::cout << MP_UNITS_STD_FMT::format("- hyperfine transition frequency of Cs: {} = {::N[.0]}\n",
                                            1. * si2019::hyperfine_structure_transition_frequency_of_cs,
                                           (1. * si2019::hyperfine_structure_transition_frequency_of_cs).in(Hz));
     std::cout << MP_UNITS_STD_FMT::format("- speed of light in vacuum:             {} = {::N[.20e]}\n",
                                            1. * si2019::speed_of_light_in_vacuum,
                                           (1. * si2019::speed_of_light_in_vacuum).in(m / s));
-    std::cout<< 1. * si2019::speed_of_light_in_vacuum << std::endl;
-    std::cout<< (1. * si2019::speed_of_light_in_vacuum).in(m / s) << std::endl;
+    std::cout << "\t\t\t\t" <<  1. * si2019::speed_of_light_in_vacuum << std::endl;
+    std::cout << "\t\t\t\t" << (1. * si2019::speed_of_light_in_vacuum).in(m / s) << std::endl;
     std::cout << MP_UNITS_STD_FMT::format("- Planck constant:                      {} = {::N[.8e]}\n",
                                           1. * si2019::planck_constant, (1. * si2019::planck_constant).in(J * s));
     std::cout << MP_UNITS_STD_FMT::format("- elementary charge:                    {} = {::N[.9e]}\n",

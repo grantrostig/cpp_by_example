@@ -41,10 +41,18 @@
 //License: Boost Software License.  See LICENSE.txt for full license.
 
 //#include "global_entities.h"
+#include <mp-units/compat_macros.h>
+#include <mp-units/ext/format.h>
+#include <mp-units/format.h>
+#include <mp-units/ostream.h>
+#include <mp-units/systems/international.h>
+#include <mp-units/systems/isq.h>
+#include <mp-units/systems/si.h>
 
-#include <dlib/numeric_constants.h>
+//#include <dlib/numeric_constants.h>
 //#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
 //#include <bits/stdc++.h>
+
 #include <cassert>
 #include <chrono>
 #include <climits>
@@ -56,17 +64,15 @@
 #include <stacktrace>
 #include <vector>
 
-#include <mp-units/format.h>
-#include <mp-units/ostream.h>
-#include <mp-units/systems/international.h>
-#include <mp-units/systems/isq.h>
-#include <mp-units/systems/si.h>
 #include <format>
 #include <iomanip>
 #include <print>
 //import mp_units;
 
 using namespace mp_units;
+using namespace mp_units::si;
+using namespace mp_units::si::unit_symbols; // mp_units::si::unit_symbols::
+using namespace mp_units::international::unit_symbols;
 
 
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
@@ -260,59 +266,68 @@ auto crash_signals_register() -> void {
 }
 } // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-enum class FCC_HAM_class {
+// ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+enum FCC_HAM_class {
+//enum class FCC_HAM_class {  // TODO??: Won't print via cout easily.
     Technician,
     General,
     Extra
 };
 
-//using Frequency_row = std::vector<std::string>
-std::chrono::year_month_day constexpr fCC_revision_date_default{2024y,std::chrono::September,18d};
+std::chrono::year_month_day constexpr fcc_revision_date_default{2024y, std::chrono::September, 18d};
+
 struct Frequency_row {
-    // std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
-    std::string                             band_name{};
-    float                                   band_meters{};
-    FCC_HAM_class                           fcc_ham_class{};
-    std::chrono::year_month_day             fCC_revision_date{};
-    //{"1 cm",1.2,"2024/09/18"},
-    //{"1  m",1.2,"2024/09/18"}
+    std::string                     band_name{};
+    std::string                     band_plan_name{};
+    quantity<second>                time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
+    quantity<second>                time_period_per_cycle_end{0*second};
+    quantity<hertz>                 frequency_begin{0*hertz};  // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
+    quantity<hertz>                 frequency_end{0*hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
+    quantity<si::centi<m>>          band_meters_begin{0*cm};
+    quantity<si::centi<metre>>      band_meters_end{0*m};
+    FCC_HAM_class                   fcc_ham_class{};
+    string                          band_restictions{};
+    std::chrono::year_month_day     fcc_revision_date{};
+
     //std::ostream operator<<() {};
 };
-// ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // d = vt;                  distance = velocity * t;
-// distance =               m
+// distance =               m (meters)
+// time =                   sec (seconds)
 // velocity =               m/sec
-// time =                   sec
-
-// full cycle =             meters?? between peaks of a radio wave
-
-// period/cycle = t         sec/cycle
-
+// Period (AKA Cycle) in sec = m = meters between period of a radio wave
+// Period/Cycle = t         sec/cycle
+// Frequency = f            cycle/sec or Hz
 // Wavelenght = Lambda      m/cycle
 
-// Lambda=frequency= cycle/sec
-
-
-std::vector<Frequency_row> const frequency_rows {
-    {"70 cm", 1.2, FCC_HAM_class::General, {2024y,std::chrono::September,19d}},
-    {"1 cm", 1.2, FCC_HAM_class::General, fCC_revision_date_default},
-    {"1  m", 1.2, FCC_HAM_class::General, fCC_revision_date_default}
+std::vector<Frequency_row> frequency_rows {
+    {"444 Band", "PPP", 99*second, 99*second, 3*si::hertz, 5'600'000*si::hertz, 70*cm, 1.2*m, FCC_HAM_class::General, "Normal", {2024y, std::chrono::September,19d}}
 };
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+void calculate( Frequency_row & i ) {
+    i.time_period_per_cycle_begin = 1 / i.frequency_begin;
+    i.time_period_per_cycle_end   = 1 / i.frequency_end;
+    //i.band_meters_begin = si2019::speed_of_light_in_vacuum / i.frequency_begin;
+    //i.band_meters_end = si2019::speed_of_light_in_vacuum / i.frequency_end;
+};
+
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-    for (auto & i:frequency_rows) { cout << i.band_meters <<", "<< i.band_name <<", "<< i.fCC_revision_date <<endl; }
-    //for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
-
-
+    for (auto & i:frequency_rows) { calculate(i); };
+    for (auto const & i:frequency_rows) { cout << i.band_name <<", "<< i.frequency_begin <<", "<<i.frequency_end <<", "
+             << i.time_period_per_cycle_begin <<", "<< i.time_period_per_cycle_end <<", "<< i.fcc_ham_class <<", "
+             << i.fcc_revision_date <<endl;
+    }
+    //for (auto & i:frequency_rows) { cout << i << endl; }
+    //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
 
-    std::string                 STRING_QQQ          {"qqq"};
-    std::vector<char>           QQQ                 {STRING_QQQ.begin(),STRING_QQQ.end()};
     Example1::test1 ();
 
     cout << "###" << endl;
