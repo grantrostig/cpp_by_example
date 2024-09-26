@@ -281,11 +281,11 @@ struct Frequency_row {
     std::string                     band_name{};
     std::string                     band_plan_name{};
     quantity<second>                time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
-    quantity<second>                time_period_per_cycle_end{0*second};
+    quantity<second>                time_period_per_cycle_end{0*si::second};
     quantity<hertz>                 frequency_begin{0*hertz};  // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
-    quantity<hertz>                 frequency_end{0*hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
-    quantity<si::centi<m>>          band_meters_begin{0*cm};
-    quantity<si::centi<metre>>      band_meters_end{0*m};
+    quantity<hertz>                 frequency_end{0*si::hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
+    quantity<si::centi<m>>          wavelength_begin{0*cm};
+    quantity<si::centi<metre>>      wavelength_end{0*nm};
     FCC_HAM_class                   fcc_ham_class{};
     string                          band_restictions{};
     std::chrono::year_month_day     fcc_revision_date{};
@@ -295,31 +295,36 @@ struct Frequency_row {
 // d = vt;                  distance = velocity * t;
 // distance =               m (meters)
 // time =                   sec (seconds)
-// velocity =               m/sec
-// Period (AKA Cycle) in sec = m = meters between period of a radio wave
-// Period/Cycle = t         sec/cycle
-// Frequency = f            cycle/sec or Hz
-// Wavelenght = Lambda      m/cycle
+// velocity =               m/sec, in this use case we use "c" the speed of light in vacumm.
+// The time "Period" of a "Cycle" of a sine wave.
+// Period in sec = time between period of a radio wave.  // Not used: Period in m = meters between period of a radio wave.
+// Period/Cycle in sec      sec AKA sec/cycle which is more proper in our view.
+// Frequency f in Hz        Hz 1/sec AKA cycles/sec  kHz or kC (cycles, now obsolete)
+// Wavelenght = Lambda in meters or cm or mm    AKA m/cycle
 
 std::vector<Frequency_row> frequency_rows {
-    {"444 Band", "PPP", 99*second, 99*second, 3*si::hertz, 5'600'000*si::hertz, 70*cm, 1.2*m, FCC_HAM_class::General, "Normal", {2024y, std::chrono::September,19d}}
+    {"444 Band",  "CW", 100*si::second, 200*si::second, 3*si::hertz, 5'600'000*si::hertz, 70*cm, 1.2*m, FCC_HAM_class::General, "Normal", {2024y, std::chrono::September,19d}},
+    {"444 Band2", "CW", 100*si::second, 200*si::second, 3*si::hertz, 5'600'000*si::hertz, 70*cm, 1.2*m, FCC_HAM_class::General, "Normal", {2024y, std::chrono::September,19d}}
 };
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 void calculate( Frequency_row & i ) {
     i.time_period_per_cycle_begin = 1 / i.frequency_begin;
-    i.time_period_per_cycle_end   = 1 / i.frequency_end;
-    //i.band_meters_begin = si2019::speed_of_light_in_vacuum / i.frequency_begin;
-    //i.band_meters_end = si2019::speed_of_light_in_vacuum / i.frequency_end;
+    i.time_period_per_cycle_end   = inverse( i.frequency_end);  // TODO??: wants a dimension
+    //i.wavelength_begin = si2019::speed_of_light_in_vacuum / i.frequency_begin;
+    //i.wavelength_end = si2019::speed_of_light_in_vacuum / i.frequency_end;
 };
 
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
     for (auto & i:frequency_rows) { calculate(i); };
-    for (auto const & i:frequency_rows) { cout << i.band_name <<", "<< i.frequency_begin <<", "<<i.frequency_end <<", "
-             << i.time_period_per_cycle_begin <<", "<< i.time_period_per_cycle_end <<", "<< i.fcc_ham_class <<", "
-             << i.fcc_revision_date <<endl;
+    for (auto const & i:frequency_rows) { cout << i.band_name <<", "<< i.band_plan_name <<", "
+             << i.frequency_begin             <<", "<< i.frequency_end <<", "
+             << i.wavelength_begin            <<", "<< i.wavelength_end <<", "
+             << i.band_restictions <<", "<< i.fcc_ham_class <<"," << i.fcc_revision_date <<
+             << i.time_period_per_cycle_begin <<", "<< i.time_period_per_cycle_end
+             << endl;
     }
     //for (auto & i:frequency_rows) { cout << i << endl; }
     //cout << frequency_rows << endl; }
@@ -327,9 +332,7 @@ void test1 () {
 } } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
-
     Example1::test1 ();
-
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
