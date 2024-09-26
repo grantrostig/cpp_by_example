@@ -278,17 +278,17 @@ enum FCC_HAM_class {
 std::chrono::year_month_day constexpr fcc_revision_date_default{2024y, std::chrono::September, 18d};
 
 struct Frequency_row {
-    std::string                     band_name{};
-    std::string                     band_plan_name{};
-    quantity<second>                time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
-    quantity<second>                time_period_per_cycle_end{0*si::second};
-    quantity<hertz>                 frequency_begin{0*hertz};  // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
-    quantity<hertz>                 frequency_end{0*si::hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
-    quantity<si::centi<m>>          wavelength_begin{0*cm};
-    quantity<si::nano<metre>>      wavelength_end{0*nm};
-    FCC_HAM_class                   fcc_ham_class{};
-    string                          band_restictions{};
-    std::chrono::year_month_day     fcc_revision_date{};
+    std::string                         band_name{};
+    std::string                         band_plan_name{};
+    quantity<second, int>               time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
+    quantity<second>                    time_period_per_cycle_end{0*si::second};
+    quantity<hertz>                     frequency_begin{0*hertz};  // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
+    quantity<si::kilo<hertz>,double>    frequency_end{0*si::hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
+    quantity<si::centi<m>>              wavelength_begin{0*cm};
+    quantity<si::nano<metre>>           wavelength_end{0*nm};
+    FCC_HAM_class                       fcc_ham_class{};
+    string                              band_restictions{};
+    std::chrono::year_month_day         fcc_revision_date{};
 
     //std::ostream operator<<() {};
 };
