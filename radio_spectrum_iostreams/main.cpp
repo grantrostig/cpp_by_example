@@ -285,7 +285,7 @@ struct Frequency_row {
     quantity<hertz>                 frequency_begin{0*hertz};  // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
     quantity<hertz>                 frequency_end{0*si::hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
     quantity<si::centi<m>>          wavelength_begin{0*cm};
-    quantity<si::centi<metre>>      wavelength_end{0*nm};
+    quantity<si::nano<metre>>      wavelength_end{0*nm};
     FCC_HAM_class                   fcc_ham_class{};
     string                          band_restictions{};
     std::chrono::year_month_day     fcc_revision_date{};
@@ -322,7 +322,7 @@ void test1 () {
     for (auto const & i:frequency_rows) { cout << i.band_name <<", "<< i.band_plan_name <<", "
              << i.frequency_begin             <<", "<< i.frequency_end <<", "
              << i.wavelength_begin            <<", "<< i.wavelength_end <<", "
-             << i.band_restictions <<", "<< i.fcc_ham_class <<"," << i.fcc_revision_date <<
+             << i.band_restictions <<", "<< i.fcc_ham_class <<"," << i.fcc_revision_date
              << i.time_period_per_cycle_begin <<", "<< i.time_period_per_cycle_end
              << endl;
     }
