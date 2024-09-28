@@ -12,7 +12,6 @@
 
 #include <iostream>
 
-
 using namespace mp_units;
 using namespace mp_units::si;
 using namespace mp_units::si::unit_symbols; // mp_units::si::unit_symbols::
@@ -35,8 +34,6 @@ static_assert(2 * m * (3 * m) == 6 * m2);
 static_assert(10 * km / (5 * km) == 2);
 
 static_assert(1000 / (1 * s) == 1 * kHz);
-
-
 
 constexpr QuantityOf<isq::speed> auto avg_speed(QuantityOf<isq::length> auto d,
           QuantityOf<isq::time> auto t) {
