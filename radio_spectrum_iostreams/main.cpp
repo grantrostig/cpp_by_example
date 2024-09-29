@@ -41,9 +41,10 @@
 //License: Boost Software License.  See LICENSE.txt for full license.
 
 //#include "global_entities.h"
+
 #include <mp-units/compat_macros.h>
-#include <mp-units/ext/format.h>
-#include <mp-units/format.h>
+//#include <mp-units/ext/format.h>
+//#include <mp-units/format.h>
 #include <mp-units/ostream.h>
 #include <mp-units/systems/international.h>
 #include <mp-units/systems/isq.h>
@@ -57,16 +58,19 @@
 #include <chrono>
 #include <climits>
 #include <csignal>
+#include <iomanip>
 #include <iostream>
+#include <locale>
 #include <optional>
 #include <source_location>
+#include <span>
 #include <string>
+#include <string_view>
 #include <stacktrace>
 #include <vector>
 
-#include <format>
-#include <iomanip>
-#include <print>
+//#include <format>
+//#include <print>
 //import mp_units;
 //import std;
 
@@ -281,17 +285,13 @@ std::chrono::year_month_day constexpr fcc_revision_date_default{2024y, std::chro
 struct Frequency_row {
     std::string                         band_name{};
     std::string                         band_plan_name{};
-    quantity<second, int>               time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
-    quantity<second>                    time_period_per_cycle_end{0*si::second};
-
-    quantity<hertz,int>                     frequency_begin{40*si::kilo<hertz>};  // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
-    //quantity<si::kilo<hertz>,double>    frequency_end{42*si::hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
-    quantity<hertz,int>                     frequency_end{42*si::hertz};  // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
-
-    quantity<metre>                     wavelength_begin{0*cm};
-    // quantity<si::centi<m>>              wavelength_begin{0*cm};
-    quantity<metre>                     wavelength_end{0*nm};
-    // quantity<si::nano<metre>>           wavelength_end{0*nm};
+    quantity<second, double>            time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
+    quantity<second, double>            time_period_per_cycle_end{0*si::second};
+    quantity<hertz, double>             frequency_begin{40*si::kilo<hertz>};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
+    //quantity<si::kilo<hertz>,double>    frequency_end{42*si::hertz};          // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
+    quantity<hertz, double>             frequency_end{42*si::hertz};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
+    quantity<metre, double>             wavelength_begin{0*cm};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
+    quantity<metre, double>             wavelength_end{0*nm};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
     FCC_HAM_class                       fcc_ham_class{};
     string                              band_restictions{};
     std::chrono::year_month_day         fcc_revision_date{};
@@ -308,33 +308,71 @@ struct Frequency_row {
 // Frequency f in Hz        Hz 1/sec AKA cycles/sec  kHz or kC (cycles, now obsolete)
 // Wavelenght = Lambda in meters or cm or mm    AKA m/cycle */
 std::vector<Frequency_row> frequency_rows {
-    {"444 Band",  "CW", 100*si::second, 200*si::second, 3*kHz, 5'600'000*si::hertz, 70*cm, 1.2*m, FCC_HAM_class::General, "Normal", {2024y, std::chrono::September,19d}},
-    {"444 Band2", "CW", 100*si::second, 200*si::second, 3*si::hertz, 5'600'000*si::hertz, 70*cm, 1.2*m, FCC_HAM_class::General, "Normal", {2024y, std::chrono::September,19d}}
+    {"444 Band",  "CW"  , 0*si::second,     0*si::second
+                        , 2*si::hertz,            5'600'000*si::hertz
+                        , 0*si::metre,      0*si::metre
+                        , FCC_HAM_class::General, "Normal, 1500W, 2.8kHz BW.", {2024y, std::chrono::September,19d}},
+    {"444 Band2", "CW"  , 0*si::second,     0*si::second
+                        , 1*si::hertz,      5*si::kilo<hertz>
+                        , 0*si::metre,      0*si::metre
+                        , FCC_HAM_class::General, "Normal, 100W, 500Hz", {2024y, std::chrono::September,19d}}
 };
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 void calculate( Frequency_row & i ) {
-    // i.time_period_per_cycle_begin = 1 / i.frequency_begin;
-    // i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+    auto junk_sec                   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
 
-    auto junk2 = 1 / i.frequency_begin ;
+    quantity<si::nano<second>,double> junk_sec1      = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+    quantity<si::second,double> junk_sec2      = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
 
-    constexpr auto junk3 = 1. * si2019::speed_of_light_in_vacuum ;
-    constexpr auto junk4= si2019::speed_of_light_in_vacuum * 1. ;
-    constexpr auto junk5= si2019::planck_constant * 1. ;
-    i.wavelength_begin = 1. / i.frequency_begin * si2019::speed_of_light_in_vacuum ;
-    //i.wavelength_begin = si2019::speed_of_light_in_vacuum * inverse( i.frequency_begin);
-    //i.wavelength_begin = si2019::speed_of_light_in_vacuum inverse i.frequency_begin;
-    //i.wavelength_end = si2019::speed_of_light_in_vacuum / i.frequency_end;
+    cout << "junk_sec :" << junk_sec <<endl;
+    cout << "junk_sec1:" << junk_sec1 <<endl;
+    cout << "junk_sec2:" << junk_sec2 <<endl;
+
+    i.time_period_per_cycle_begin   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+    i.time_period_per_cycle_end     = 1 / i.frequency_end;
+    i.wavelength_begin              = (1. / i.frequency_begin) * si2019::speed_of_light_in_vacuum ;
+    i.wavelength_end                = (1. / i.frequency_end) * si2019::speed_of_light_in_vacuum ;
 };
 void test1 () {
     std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-    //for (auto & i:frequency_rows) { calculate(i); };
-    for (auto const & i:frequency_rows) { cout << i.band_name <<", "<< i.band_plan_name <<", "
-             << i.frequency_begin             <<", "<< i.frequency_end <<", "
-             << i.wavelength_begin            <<", "<< i.wavelength_end <<", "
-             << i.band_restictions <<", "<< i.fcc_ham_class <<"," << i.fcc_revision_date <<", "
-             << i.time_period_per_cycle_begin <<", "<< i.time_period_per_cycle_end
+    for (auto & i:frequency_rows) { calculate(i); };
+
+    std::locale loc_orig{};                 // No commas at thousands.
+    cout << "locale_orig:" << loc_orig.name() <<", ";
+    std::locale loc{std::locale("en_US")};  // Has commas at thousands.
+    cout << "locale:     " << loc.name() <<", "<< endl; // l.global() << endl;
+    cout.imbue(loc);
+
+    auto const      default_precision{std::cout.precision()};  // https://en.cppreference.com/w/cpp/io/manip/setprecision
+    auto constexpr  max_precision{std::numeric_limits<long double>::digits10 + 1};
+
+    for (auto const & i:frequency_rows) {
+            cout
+             << std::setprecision(8)
+             << std::setw(10)
+             << i.band_name <<" - "
+             << std::setw(10)
+             << i.band_plan_name <<"; "
+             << std::setw(18)
+             << i.frequency_begin             <<" - "
+             << std::setw(18)
+             << i.frequency_end <<"; "
+             << std::setw(18)
+             << i.wavelength_begin <<" - "
+             << std::setw(18)
+             << i.wavelength_end <<"; "
+
+             << std::setprecision(default_precision)
+             << i.band_restictions <<"; "
+             << i.fcc_ham_class <<"; "
+             << i.fcc_revision_date <<"; "
+             << std::setprecision(8)
+             << std::setw(14)
+             << i.time_period_per_cycle_begin <<" - "
+             << std::setw(14)
+             << i.time_period_per_cycle_end
+             << std::setprecision(default_precision)
              << endl;
     }
     //for (auto & i:frequency_rows) { cout << i << endl; }
