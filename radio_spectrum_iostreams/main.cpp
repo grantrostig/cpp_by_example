@@ -273,30 +273,53 @@ auto crash_signals_register() -> void {
 
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+auto const      default_precision{std::cout.precision()};  // https://en.cppreference.com/w/cpp/io/manip/setprecision
+auto constexpr  max_precision{std::numeric_limits<long double>::digits10 + 1};
+uint8_t constexpr fcc_iaru_precision{3};
+std::chrono::year_month_day constexpr fcc_revision_date_default{2024y, std::chrono::September, 18d};
 enum FCC_HAM_class {
 //enum class FCC_HAM_class {  // TODO??: Won't print via cout easily.
-    Technician,
-    General,
-    Extra
+    Technician,  // Lowest
+    General,     // Middle
+    Extra        // Best   NOTE: Older grandfathered in, but not provided in this program:  Novice, Expert
+};
+//  RF: Covers all ranges below and more? TODO?:?
+enum FCC_IARU_HAM_frequency_range {  // 47.I.D CFR 97.3(b)(3) P.6/54 includes only ones not commented out, others from other references
+    EHF, //  30 -   300 GHz Includes Satellite phones
+    SHF, //   3 -    30 GHz Includes           Cell phones & Satellite phones
+    UHF, // 300 - 3,000 MHz Includes FM & TV & Cell phones
+    vHF, //  30 -   300 MHz Includes FM & TV
+     HF, //   3 -    29 MHz
+     MF, // 300 - 3,000 kHz Includes AM
+     LF, //  30 -   300 kHz
+ // VLF, //   3 -    30 kHz
+ // ULF, // 300 -  3000 Hz
+ // SLF, //  30 -   300 Hz
+ // ELF, //   3 -    30 Hz
 };
 
-std::chrono::year_month_day constexpr fcc_revision_date_default{2024y, std::chrono::September, 18d};
-
+enum FCC_IARU_band_plan_category {
+    CW,
+};
+std::string constexpr fcc_ham_class{"General"};
 struct Frequency_row {
     std::string                         band_name{};
     std::string                         band_plan_name{};
-    quantity<second, double>            time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
-    quantity<second, double>            time_period_per_cycle_end{0*si::second};
-    quantity<hertz, double>             frequency_begin{40*si::kilo<hertz>};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
-    //quantity<si::kilo<hertz>,double>    frequency_end{42*si::hertz};          // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
-    quantity<hertz, double>             frequency_end{42*si::hertz};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
-    quantity<metre, double>             wavelength_begin{0*cm};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
-    quantity<metre, double>             wavelength_end{0*nm};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
+    mp_units::quantity<hertz, double>             frequency_begin{40*si::kilo<hertz>};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
+    // mp_units::quantity<si::kilo<hertz>,double>
+    mp_units::quantity<hertz, double>             frequency_end{42*si::hertz};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
     FCC_HAM_class                       fcc_ham_class{};
-    string                              band_restictions{};
-    std::chrono::year_month_day         fcc_revision_date{};
-
-    //std::ostream operator<<() {};
+    std::string                         band_restictions{};
+    std::chrono::year_month_day         fcc_revision_date{};  // TODO??: std::ostream operator<<() {};
+    mp_units::quantity<metre, double>             wavelength_begin{0*cm};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
+    mp_units::quantity<metre, double>             wavelength_end{0*nm};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
+    mp_units::quantity<second, double>            time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
+    mp_units::quantity<second, double>            time_period_per_cycle_end{0*si::second};
+};
+struct Meter_band_row {
+    std::string                           bank_name{};
+    mp_units::quantity<si::metre,double>  band_begin{};
+    mp_units::quantity<si::metre,double>  band_end{};
 };
 /* d = vt;                  distance = velocity * t;
 // distance =               m (meters)
@@ -307,49 +330,118 @@ struct Frequency_row {
 // Period/Cycle in sec      sec AKA sec/cycle which is more proper in our view.
 // Frequency f in Hz        Hz 1/sec AKA cycles/sec  kHz or kC (cycles, now obsolete)
 // Wavelenght = Lambda in meters or cm or mm    AKA m/cycle */
-std::vector<Frequency_row> frequency_rows {
-    {"444 Band",  "CW"  , 0*si::second,     0*si::second
-                        , 2*si::hertz,            5'600'000*si::hertz
-                        , 0*si::metre,      0*si::metre
-                        , FCC_HAM_class::General, "Normal, 1500W, 2.8kHz BW.", {2024y, std::chrono::September,19d}},
-    {"444 Band2", "CW"  , 0*si::second,     0*si::second
-                        , 1*si::hertz,      5*si::kilo<hertz>
-                        , 0*si::metre,      0*si::metre
-                        , FCC_HAM_class::General, "Normal, 100W, 500Hz", {2024y, std::chrono::September,19d}}
+std::vector<Frequency_row> frequency_rows{
+    {"444 Band",  "CW"
+      , 2*si::hertz,      5'600'000*si::hertz
+      , FCC_HAM_class::General, "Normal, 1500W, 2.8kHz BW.", {2024y, std::chrono::September,19d}
+      , 0*si::metre,      0*si::metre
+      , 0*si::second,     0*si::second },
+    {"444 Band2", "CW"
+      , 1*si::hertz,      5*si::kilo<hertz>
+      , FCC_HAM_class::General, "Normal, 100W, 500Hz", {2024y, std::chrono::September,19d}
+      , 0*si::metre,      0*si::metre
+      , 0*si::second,     0*si::second }
+};
+/* ### HF (High Frequency)         "X" means not used in USA HAM regulations
+    2200 meters:         kHz
+     630 meters:         kHz
+     160 meters: 1.8-2.0 MHz
+      80 meters: 3.5-4.0 MHz
+      75 meters:         MHz is this used or just talked about by Elmer? LOL :)
+      60 meters:         MHz
+      40 meters: 7.0-7.3 MHz
+      30 meters: 10-10.1 MHz
+      20 meters: 14-14.35 MHz
+      15 meters: 18-21   MHz
+      12 meters: 24-24.9 MHz
+      10 meters: 28-29.7 MHz
+  ### VHF (Very High Frequency)
+       6 meters:        50-54 MHz
+       2 meters:      144-148 MHz
+    1.25 meters:      222-225 MHz
+      70 centimeters: 430-440 MHz
+  ### UHF (Ultra High Frequency)
+      33 centimeters:    902-928 MHz
+      23 centimeters:  1240-1260 MHz
+      13 centimeters:  2300-2400 MHz
+       9 centimeters:  3300-3500 MHz
+     X 6 centimeters:  5650-5850 MHz
+       5 centimeters:
+       3 centimeters:
+       1 centimeters: */
+std::vector<Meter_band_row> const fcc_iaru_bands {
+    {"6   meter",   6.0*si::metre ,   6.2*si::metre},
+    {"12  meter",  12.0*si::metre ,  12.2*si::metre},
+    {"30  meter",  30.0*si::metre ,  30.2*si::metre},
+    {"40  meter",  40.0*si::metre ,  40.2*si::metre},
+    {"60  meter",  60.0*si::metre ,  60.2*si::metre}
 };
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
+//template<typename template_T, typename template_R>
+//void print_thousands_scaled( mp_units::quantity<template_T,template_R>, auto num) {
+//void print_thousands_scaled( mp_units::quantity_character, auto num) {
+mp_units::quantity<> print_hz_thousands_scaled(auto num) {
+    std::vector<> my_scaled_symbols {
+        si::unit_symbols::Hz,
+        si::unit_symbols::kHz,
+        si::unit_symbols::MHz,
+        si::unit_symbols::GHz,
+    };
+    mp_units::quantity result{si::unit_symbols::Hz};
+    bool done{false};
+    while (! done) {
+        if (num < ( 1E3 - .1)) {
+            done=true;
+        }
+        else {
+            num/= 1E3;
+            num = num of my_scaled_symbols.at(j);
+        }
+    };
+    return result;
+}
+
+void my_print(char const * text, auto num) {
+    cout
+    << std::setprecision(fcc_iaru_precision)
+    << "│ " << std::setw(8) << text <<      " │defaultfloat| "
+    << std::setw(24) << std::defaultfloat << num <<      " │ is actual default in none used.\n"
+    << std::setprecision(4)
+    << "│ " << std::setw(8) << text <<      " │ fixed      │ "
+    << std::setw(24) << std::fixed        << num <<      " │\n"
+    << "│ " << std::setw(8) << text <<      " │ scientific │ "
+    << std::setw(24) << std::scientific   << num <<      " │\n";
+  //<< "│ " << std::setw(8) << text <<      " │ hexfloat   │ "
+  //<< std::setw(24) << std::hexfloat     << num <<      " │\n"
+}
 void calculate( Frequency_row & i ) {
-    auto junk_sec                   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
-
-    quantity<si::nano<second>,double> junk_sec1      = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
-    quantity<si::second,double> junk_sec2      = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
-
+    auto junk_sec                                   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+    mp_units::quantity<si::nano<second>,double> junk_sec1     = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+    mp_units::quantity<si::second,double> junk_sec2           = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
     cout << "junk_sec :" << junk_sec <<endl;
     cout << "junk_sec1:" << junk_sec1 <<endl;
     cout << "junk_sec2:" << junk_sec2 <<endl;
 
-    i.time_period_per_cycle_begin   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
-    i.time_period_per_cycle_end     = 1 / i.frequency_end;
+    i.time_period_per_cycle_begin   =  1. / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+    i.time_period_per_cycle_end     =  1. / i.frequency_end;
     i.wavelength_begin              = (1. / i.frequency_begin) * si2019::speed_of_light_in_vacuum ;
     i.wavelength_end                = (1. / i.frequency_end) * si2019::speed_of_light_in_vacuum ;
 };
 void test1 () {
-    std::cout<< "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-    for (auto & i:frequency_rows) { calculate(i); };
-
+    cout << "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
+    cout << std::setprecision(fcc_iaru_precision);
     std::locale loc_orig{};                 // No commas at thousands.
     cout << "locale_orig:" << loc_orig.name() <<", ";
     std::locale loc{std::locale("en_US")};  // Has commas at thousands.
     cout << "locale:     " << loc.name() <<", "<< endl; // l.global() << endl;
     cout.imbue(loc);
-
-    auto const      default_precision{std::cout.precision()};  // https://en.cppreference.com/w/cpp/io/manip/setprecision
-    auto constexpr  max_precision{std::numeric_limits<long double>::digits10 + 1};
-
+    for (auto & i:frequency_rows) { calculate(i); };
+    cout << "Within 50 Km of earth USA HAMs of "<< fcc_ham_class <<" class have permissions as follows:\n";
     for (auto const & i:frequency_rows) {
             cout
-             << std::setprecision(8)
+             << std::setprecision(fcc_iaru_precision)
              << std::setw(10)
              << i.band_name <<" - "
              << std::setw(10)
@@ -362,26 +454,43 @@ void test1 () {
              << i.wavelength_begin <<" - "
              << std::setw(18)
              << i.wavelength_end <<"; "
-
-             << std::setprecision(default_precision)
              << i.band_restictions <<"; "
              << i.fcc_ham_class <<"; "
              << i.fcc_revision_date <<"; "
-             << std::setprecision(8)
              << std::setw(14)
              << i.time_period_per_cycle_begin <<" - "
              << std::setw(14)
              << i.time_period_per_cycle_end
-             << std::setprecision(default_precision)
              << endl;
-    }
-    //for (auto & i:frequency_rows) { cout << i << endl; }
-    //cout << frequency_rows << endl; }
+    }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
-} } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
+}
+void test2() {
+    std::cout << "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
+    #define MY_NUM .12345678901234567890/10000.0
+    mp_units::quantity<si::second, double> constexpr seconds_thousands  {MY_NUM*si::second};
+    mp_units::quantity<si::hertz, double>  constexpr hz_thousands       {MY_NUM*si::hertz};
+    mp_units::quantity<si::metre, double>  constexpr metre_thousands    {MY_NUM*si::metre};
+    mp_units::quantity<si2019::speed_of_light_in_vacuum, double> constexpr light_speed_thousands {MY_NUM*si2019::speed_of_light_in_vacuum};
+    #undef MY_NUM
+    cout << seconds_thousands
+         <<"; "
+    << hz_thousands
+         <<"; "
+    << metre_thousands
+         <<"; "
+    << light_speed_thousands
+         <<"; " <<endl<<endl;
+    my_print("1000", seconds_thousands);
+    my_print("1000", hz_thousands);
+    my_print("1000", metre_thousands);
+    my_print("1000", light_speed_thousands);
+    std::cout << "END                  Example1 test2. ++++++++++++++++++++++++"<<std::endl;
+}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     Example1::test1 ();
+    Example1::test2 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
