@@ -305,16 +305,17 @@ std::string constexpr fcc_ham_class{"General"};
 struct Frequency_row {
     std::string                         band_name{};
     std::string                         band_plan_name{};
-    mp_units::quantity<hertz, double>             frequency_begin{40*si::kilo<hertz>};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
+    mp_units::quantity<hertz, double>   frequency_begin{40*si::kilo<hertz>};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
     // mp_units::quantity<si::kilo<hertz>,double>
-    mp_units::quantity<hertz, double>             frequency_end{42*si::hertz};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
+    mp_units::quantity<hertz, double>   frequency_end{42*si::hertz};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
     FCC_HAM_class                       fcc_ham_class{};
     std::string                         band_restictions{};
     std::chrono::year_month_day         fcc_revision_date{};  // TODO??: std::ostream operator<<() {};
-    mp_units::quantity<metre, double>             wavelength_begin{0*cm};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
-    mp_units::quantity<metre, double>             wavelength_end{0*nm};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
-    mp_units::quantity<second, double>            time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
-    mp_units::quantity<second, double>            time_period_per_cycle_end{0*si::second};
+    // Following are calculated before use.
+    mp_units::quantity<metre, double>   wavelength_begin{0*cm};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
+    mp_units::quantity<metre, double>   wavelength_end{0*nm};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
+    mp_units::quantity<second, double>  time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
+    mp_units::quantity<second, double>  time_period_per_cycle_end{0*si::second};
 };
 struct Meter_band_row {
     std::string                           bank_name{};
@@ -334,20 +335,19 @@ std::vector<Frequency_row> frequency_rows{
     {"444 Band",  "CW"
       , 2*si::hertz,      5'600'000*si::hertz
       , FCC_HAM_class::General, "Normal, 1500W, 2.8kHz BW.", {2024y, std::chrono::September,19d}
-      , 0*si::metre,      0*si::metre
-      , 0*si::second,     0*si::second },
+    },
     {"444 Band2", "CW"
       , 1*si::hertz,      5*si::kilo<hertz>
       , FCC_HAM_class::General, "Normal, 100W, 500Hz", {2024y, std::chrono::September,19d}
-      , 0*si::metre,      0*si::metre
-      , 0*si::second,     0*si::second }
+    }
 };
-/* ### HF (High Frequency)         "X" means not used in USA HAM regulations
+/*
     2200 meters:         kHz
      630 meters:         kHz
+   ### HF (High Frequency)         "X" means not used in USA HAM regulations
      160 meters: 1.8-2.0 MHz
       80 meters: 3.5-4.0 MHz
-      75 meters:         MHz is this used or just talked about by Elmer? LOL :)
+    X 75 meters:         MHz is this used or just talked about by Elmer? LOL :)
       60 meters:         MHz
       40 meters: 7.0-7.3 MHz
       30 meters: 10-10.1 MHz
@@ -379,10 +379,10 @@ std::vector<Meter_band_row> const fcc_iaru_bands {
 // ++++++++++++++++ EXAMPLEs begin ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 namespace Example1 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-//template<typename template_T, typename template_R>
+/*template<typename template_T, typename template_R>
 //void print_thousands_scaled( mp_units::quantity<template_T,template_R>, auto num) {
 //void print_thousands_scaled( mp_units::quantity_character, auto num) {
-mp_units::quantity<> print_hz_thousands_scaled(auto num) {
+mp_units::quantity<> hz_thousands_scaled(auto num) {
     std::vector<> my_scaled_symbols {
         si::unit_symbols::Hz,
         si::unit_symbols::kHz,
@@ -401,6 +401,34 @@ mp_units::quantity<> print_hz_thousands_scaled(auto num) {
         }
     };
     return result;
+}*/
+
+void print_hz_thousands_scaled(auto num) {
+    cout << std::setprecision(fcc_iaru_precision);
+    /*  si::unit_symbols::Hz,
+        si::unit_symbols::kHz,
+        si::unit_symbols::MHz,
+        si::unit_symbols::GHz,
+        si::unit_symbols:: P?Hz,
+    */
+    if (num < 1'000.0) {
+        quantity<si::hertz> n{num};
+        cout << n;
+    } else if (num < 1'000'000) {
+        quantity<si::kilo<si::hertz>> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000) {
+        quantity<si::mega<si::hertz>> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000) {
+        quantity<si::giga<si::hertz>> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000'000) {
+        quantity<si::peta<si::hertz>> n{num};
+        cout << n;
+    } else
+        throw "number is too large";
+    return;
 }
 
 void my_print(char const * text, auto num) {
