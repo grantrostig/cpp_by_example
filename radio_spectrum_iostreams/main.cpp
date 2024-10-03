@@ -403,27 +403,42 @@ mp_units::quantity<> hz_thousands_scaled(auto num) {
     return result;
 }*/
 
-void print_hz_thousands_scaled(auto num) {
-    cout << std::setprecision(fcc_iaru_precision);
+// TODO??: Rename below from hz to more generic once working as attempted below in comments.
+// TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
+//inline void print_hz_thousands_scaled(auto const num) {  // TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
+void print_hz_thousands_scaled(mp_units::quantity<si::hertz,double> const num) {
+    cout << std::setprecision(fcc_iaru_precision)
+         << std::setw(10);
     /*  si::unit_symbols::Hz,
         si::unit_symbols::kHz,
         si::unit_symbols::MHz,
         si::unit_symbols::GHz,
-        si::unit_symbols:: P?Hz,
+        si::unit_symbols::PHz,
     */
-    if (num < 1'000.0) {
-        quantity<si::hertz> n{num};
-        cout << n;
-    } else if (num < 1'000'000) {
+    /* This works:
         quantity<si::kilo<si::hertz>> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000) {
+        cout << n;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
+    */
+    //if (num * si::hertz < 1'000.0 * si::hertz) {
+    if (num < 1'000.0 * si::hertz) {
+        //quantity<si::hertz> n{num};
+        cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
+    } else if (num < 1'000'000 * si::hertz) {
+        //if (type_of num, si::hertz) {
+            quantity<si::kilo<si::hertz>> n{num};
+            cout << n;
+        //}
+        //else {  // Presume metres  TODO: fix below for si::kilo<si::metres>
+            //quantity<si::kilo<si::hertz>> n{num};
+            //cout << n;
+        //}
+    } else if (num < 1'000'000'000 * si::hertz) {
         quantity<si::mega<si::hertz>> n{num};
         cout << n;
-    } else if (num < 1'000'000'000'000) {
+    } else if (num < 1'000'000'000'000 * si::hertz) {
         quantity<si::giga<si::hertz>> n{num};
         cout << n;
-    } else if (num < 1'000'000'000'000'000) {
+    } else if (num < 1'000'000'000'000'000 * si::hertz) {
         quantity<si::peta<si::hertz>> n{num};
         cout << n;
     } else
@@ -432,8 +447,7 @@ void print_hz_thousands_scaled(auto num) {
 }
 
 void my_print(char const * text, auto num) {
-    cout
-    << std::setprecision(fcc_iaru_precision)
+    cout << std::setprecision(fcc_iaru_precision)
     << "│ " << std::setw(8) << text <<      " │defaultfloat| "
     << std::setw(24) << std::defaultfloat << num <<      " │ is actual default in none used.\n"
     << std::setprecision(4)
@@ -441,17 +455,16 @@ void my_print(char const * text, auto num) {
     << std::setw(24) << std::fixed        << num <<      " │\n"
     << "│ " << std::setw(8) << text <<      " │ scientific │ "
     << std::setw(24) << std::scientific   << num <<      " │\n";
-  //<< "│ " << std::setw(8) << text <<      " │ hexfloat   │ "
-  //<< std::setw(24) << std::hexfloat     << num <<      " │\n"
+  //<< "│ " << std::setw(8) << text <<      " │ hexfloat   │ " //<< std::setw(24) << std::hexfloat     << num <<      " │\n"
 }
 void calculate( Frequency_row & i ) {
-    auto junk_sec                                   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
-    mp_units::quantity<si::nano<second>,double> junk_sec1     = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
-    mp_units::quantity<si::second,double> junk_sec2           = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
-    cout << "junk_sec :" << junk_sec <<endl;
-    cout << "junk_sec1:" << junk_sec1 <<endl;
-    cout << "junk_sec2:" << junk_sec2 <<endl;
-
+    /* Testing a few ideas, not needed for production
+        auto junk_sec                                   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+        mp_units::quantity<si::nano<second>,double> junk_sec1     = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+        mp_units::quantity<si::second,double> junk_sec2           = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
+        cout << "junk_sec :" << junk_sec <<endl;
+        cout << "junk_sec1:" << junk_sec1 <<endl;
+        cout << "junk_sec2:" << junk_sec2 <<endl; */
     i.time_period_per_cycle_begin   =  1. / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
     i.time_period_per_cycle_end     =  1. / i.frequency_end;
     i.wavelength_begin              = (1. / i.frequency_begin) * si2019::speed_of_light_in_vacuum ;
@@ -474,11 +487,15 @@ void test1 () {
              << i.band_name <<" - "
              << std::setw(10)
              << i.band_plan_name <<"; "
-             << std::setw(18)
-             << i.frequency_begin             <<" - "
-             << std::setw(18)
-             << i.frequency_end <<"; "
-             << std::setw(18)
+             << std::setw(18);
+             //<< i.frequency_begin
+            print_hz_thousands_scaled( i.frequency_begin );
+            cout <<" - "
+             << std::setw(18);
+             //<< i.frequency_end <<"; "
+            print_hz_thousands_scaled( i.frequency_end );
+            cout
+             <<"; "<< std::setw(18)
              << i.wavelength_begin <<" - "
              << std::setw(18)
              << i.wavelength_end <<"; "
