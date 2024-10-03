@@ -189,7 +189,7 @@ auto crash_tracer(int signal_number) -> void {
         /* IGNORE using namespace std::chrono_literals;
     std::chrono::duration my_duration = 2s;
     cerr << "Wait time:" << 2s << " + in variable:"<< my_duration <<endl;
-    std::this_thread::sleep_for( my_duration ); // sleep(2);  // seconds
+    std::this_thread::sleep_for( my_duration ); // sleep(2);  // second
     std::this_thread::sleep_for( std::chrono_literals::s::1 ); //todo??: how to do this?
     LOGGER_LOC( my_tracer(): Now- after stacktrace documenting a catastrophic error- we need to abort().);
     */
@@ -310,7 +310,7 @@ struct Frequency_row {
     // Following are calculated before use.
     mp_units::quantity<metre, double>   wavelength_begin{0*cm};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
     mp_units::quantity<metre, double>   wavelength_end{0*nm};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
-    mp_units::quantity<second, double>  time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 seconds
+    mp_units::quantity<second, double>  time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 second
     mp_units::quantity<second, double>  time_period_per_cycle_end{0*si::second};
 };
 struct Meter_band_row {
@@ -320,7 +320,7 @@ struct Meter_band_row {
 };
 /* d = vt;                  distance = velocity * t;
 // distance =               m (meters)
-// time =                   sec (seconds)
+// time =                   sec (second)
 // velocity =               m/sec, in this use case we use "c" the speed of light in vacumm.
 // The time "Period" of a "Cycle" of a sine wave.
 // Period in sec = time between period of a radio wave.  // Not used: Period in m = meters between period of a radio wave.
@@ -438,7 +438,50 @@ void print_hz_thousands_scaled(mp_units::quantity<si::hertz,double> const num) {
         quantity<si::peta<si::hertz>> n{num};
         cout << n;
     } else
-        throw "number is too large";
+        throw std::logic_error("number is too large"s);  // TODO??: doesn't print
+    return;
+}
+
+void print_metre_thousands_scaled(mp_units::quantity<si::metre,double> const num) {
+    cout << std::setprecision(fcc_iaru_precision)
+         << std::setw(10);
+    if (num < 1'000.0 * si::metre) {
+        cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
+    } else if (num < 1'000'000 * si::metre) {
+        quantity<si::kilo<si::metre>> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000 * si::metre) {
+        quantity<si::mega<si::metre>> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000 * si::metre) {
+        quantity<si::giga<si::metre>> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000'000 * si::metre) {
+        quantity<si::peta<si::metre>> n{num};
+        cout << n;
+    } else
+        throw std::logic_error("number is too large"s);  // TODO??: doesn't print
+    return;
+}
+void print_second_thousands_scaled(mp_units::quantity<si::second,double> const num) {
+    cout << std::setprecision(fcc_iaru_precision)
+         << std::setw(10);
+    if (num >= 0.001 * si::second) {
+        cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
+    } else if (num >= 0.000'000'1 * si::second) {
+        quantity<si::milli<si::second>> n{num};
+        cout << n;
+    } else if (num >= 0.000'000'001 * si::second) {
+        quantity<si::micro<si::second>> n{num};
+        cout << n;
+    } else if (num >= 0.000'000'000'001 * si::second) {
+        quantity<si::nano<si::second>> n{num};
+        cout << n;
+    } else if (num >= 0.000'000'000'000'001 * si::second) {
+        quantity<si::pico<si::second>> n{num};
+        cout << n;
+    } else
+        throw std::logic_error("number is too large"s);  // TODO??: doesn't print
     return;
 }
 
@@ -478,43 +521,60 @@ void test1 () {
     cout << "Within 50 Km of earth USA HAMs of "<< fcc_ham_class <<" class have permissions as follows:\n";
     for (auto const & i:frequency_rows) {
             cout
-             << std::setprecision(fcc_iaru_precision)
-             << std::setw(10)
-             << i.band_name <<" - "
-             << std::setw(10)
-             << i.band_plan_name <<"; "
-             << std::setw(18);
-             //<< i.frequency_begin
+                << std::left                    // left align text
+                << std::setprecision(fcc_iaru_precision)
+                << std::setw(10)
+                << i.band_name <<" - "
+                << std::setw(10)
+                << i.band_plan_name <<"; "
+                << std::right                    // left align text
+                << std::setw(10);
+                                  //<< i.frequency_begin
             print_hz_thousands_scaled( i.frequency_begin );
             cout <<" - "
-             << std::setw(18);
-             //<< i.frequency_end <<"; "
+                << std::setw(10);
+                                  //<< i.frequency_end <<"; "
             print_hz_thousands_scaled( i.frequency_end );
             cout
-             <<"; "<< std::setw(18)
-             << i.wavelength_begin <<" - "
-             << std::setw(18)
-             << i.wavelength_end <<"; "
-             << i.band_restictions <<"; "
-             << i.fcc_ham_class <<"; "
-             << i.fcc_revision_date <<"; "
-             << std::setw(14)
-             << i.time_period_per_cycle_begin <<" - "
-             << std::setw(14)
-             << i.time_period_per_cycle_end
-             << endl;
+                <<"; "
+                << std::setw(10);
+                                    // << i.wavelength_begin
+            print_metre_thousands_scaled( i.wavelength_begin );
+            cout
+                <<" - "
+                << std::setw(10);
+                                    // << i.wavelength_end
+            print_metre_thousands_scaled( i.wavelength_end );
+            cout
+                <<"; "
+                << std::setw(25)
+                << std::left                    // left align text
+                << i.band_restictions <<"; "
+                << std::right                    // left align text
+                << std::setw(9)
+                << i.fcc_ham_class <<"; "
+                << i.fcc_revision_date <<"; "
+                << std::setw(14);
+                                            //<< i.time_period_per_cycle_begin
+            print_second_thousands_scaled( i.time_period_per_cycle_begin );
+            cout
+                <<" - " << std::setw(14);
+                                        //<< i.time_period_per_cycle_end
+            print_second_thousands_scaled( i.time_period_per_cycle_end );
+            cout
+            << endl;
     }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
 }
 void test2() {
     std::cout << "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
     #define MY_NUM .12345678901234567890/10000.0
-    mp_units::quantity<si::second, double> constexpr seconds_thousands  {MY_NUM*si::second};
+    mp_units::quantity<si::second, double> constexpr second_thousands  {MY_NUM*si::second};
     mp_units::quantity<si::hertz, double>  constexpr hz_thousands       {MY_NUM*si::hertz};
     mp_units::quantity<si::metre, double>  constexpr metre_thousands    {MY_NUM*si::metre};
     mp_units::quantity<si2019::speed_of_light_in_vacuum, double> constexpr light_speed_thousands {MY_NUM*si2019::speed_of_light_in_vacuum};
     #undef MY_NUM
-    cout << seconds_thousands
+    cout << second_thousands
          <<"; "
     << hz_thousands
          <<"; "
@@ -522,7 +582,7 @@ void test2() {
          <<"; "
     << light_speed_thousands
          <<"; " <<endl<<endl;
-    my_print("1000", seconds_thousands);
+    my_print("1000", second_thousands);
     my_print("1000", hz_thousands);
     my_print("1000", metre_thousands);
     my_print("1000", light_speed_thousands);
