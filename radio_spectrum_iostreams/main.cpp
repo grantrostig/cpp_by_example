@@ -68,7 +68,6 @@
 #include <string_view>
 #include <stacktrace>
 #include <vector>
-
 //#include <format>
 //#include <print>
 //import mp_units;
@@ -78,8 +77,6 @@ using namespace mp_units;
 using namespace mp_units::si;
 using namespace mp_units::si::unit_symbols; // mp_units::si::unit_symbols::
 using namespace mp_units::international::unit_symbols;
-
-
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
@@ -111,7 +108,6 @@ inline constexpr std::string    STRING_NULL{"NULL"};    // Value is unset/not-se
 #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
 
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-
 
 /** Requires that a type has insertion operator
     Concept definition - used by a template below.
@@ -331,7 +327,7 @@ struct Meter_band_row {
 // Period/Cycle in sec      sec AKA sec/cycle which is more proper in our view.
 // Frequency f in Hz        Hz 1/sec AKA cycles/sec  kHz or kC (cycles, now obsolete)
 // Wavelenght = Lambda in meters or cm or mm    AKA m/cycle */
-std::vector<Frequency_row> frequency_rows{
+std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data members in the struct, since we calculate the rest in another function.
     {"444 Band",  "CW"
       , 2*si::hertz,      5'600'000*si::hertz
       , FCC_HAM_class::General, "Normal, 1500W, 2.8kHz BW.", {2024y, std::chrono::September,19d}
