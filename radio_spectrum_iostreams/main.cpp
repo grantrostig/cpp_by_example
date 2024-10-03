@@ -535,7 +535,7 @@ void test2() {
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     Example1::test1 ();
-    Example1::test2 ();
+    //Example1::test2 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
