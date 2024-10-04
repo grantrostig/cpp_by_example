@@ -277,10 +277,12 @@ enum FCC_HAM_class {
 //enum class FCC_HAM_class {  // TODO??: Won't print via cout easily.
     Technician,  // Lowest
     General,     // Middle
-    Extra        // Best   NOTE: Older grandfathered in, but not provided in this program:  Novice, Expert
+    Extra,       // Best
+    Novice,       // NOTE: Older grandfathered in, but not provided in this program:  Novice, Advanced
+    Advanced    // NOTE: Older grandfathered in, but not provided in this program:  Novice, Advanced
 };
 //  RF: Covers all ranges below and more? TODO?:?
-enum FCC_IARU_HAM_frequency_range {  // 47.I.D CFR 97.3(b)(3) P.6/54 includes only ones not commented out, others from other references
+enum HAM_frequency_range {  // 47.I.D CFR 97.3(b)(3) P.6/54 includes only ones not commented out, others from other references
     EHF, //  30 -   300 GHz Includes Satellite phones
     SHF, //   3 -    30 GHz Includes           Cell phones & Satellite phones
     UHF, // 300 - 3,000 MHz Includes FM & TV & Cell phones
@@ -294,9 +296,21 @@ enum FCC_IARU_HAM_frequency_range {  // 47.I.D CFR 97.3(b)(3) P.6/54 includes on
  // ELF, //   3 -    30 Hz
 };
 
-enum FCC_IARU_band_plan_category {
+enum Band_plan_category {
     CW,
+    Phone,
+    Image,
+    RTTY_Data
 };
+
+enum Transmit_Power {
+    _1_W_EIRP,
+    _5_W_EIRP,
+    _1500_W_PEP,
+    _200_W_PEP,
+    // also geographical restrictions.
+};
+
 std::string constexpr fcc_ham_class{"General"};
 struct Frequency_row {
     std::string                         band_name{};
@@ -304,7 +318,9 @@ struct Frequency_row {
     mp_units::quantity<hertz, double>   frequency_begin{40*si::kilo<hertz>};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
     // mp_units::quantity<si::kilo<hertz>,double>
     mp_units::quantity<hertz, double>   frequency_end{42*si::hertz};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
-    FCC_HAM_class                       fcc_ham_class{};
+    std::vector<FCC_HAM_class>          fcc_ham_classes{};
+    std::vector<Band_plan_category>     band_plan_categories{};
+    Transmit_Power                      power{};
     std::string                         band_restictions{};
     std::chrono::year_month_day         fcc_revision_date{};  // TODO??: std::ostream operator<<() {};
     // Following are calculated before use.
@@ -328,14 +344,93 @@ struct Meter_band_row {
 // Frequency f in Hz        Hz 1/sec AKA cycles/sec  kHz or kC (cycles, now obsolete)
 // Wavelenght = Lambda in meters or cm or mm    AKA m/cycle */
 std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data members in the struct, since we calculate the rest in another function.
-    {"444 Band",  "CW"
-      , 2*si::hertz,      5'600'000*si::hertz
-      , FCC_HAM_class::General, "Normal, 1500W, 2.8kHz BW.", {2024y, std::chrono::September,19d}
+    {"2200 Meters Band",  ""
+        , 137.7 *si::kilo<si::hertz>,      137.8 *si::kilo<si::hertz>
+        , { FCC_HAM_class::General, FCC_HAM_class::Extra, FCC_HAM_class::Advanced }
+        , {CW, Phone, Image, RTTY_Data }
+        , Transmit_Power::_1_W_EIRP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
     },
-    {"444 Band2", "CW"
-      , 1*si::hertz,      5*si::kilo<hertz>
-      , FCC_HAM_class::General, "Normal, 100W, 500Hz", {2024y, std::chrono::September,19d}
+
+    {"630 Meters Band",  "except in Alaska within 496 miles of Russia where the power limit is 1 W EIRP. "
+        , 1.800 *si::kilo<si::hertz>,      2.000 *si::kilo<si::hertz>
+        , { FCC_HAM_class::General, FCC_HAM_class::Extra, FCC_HAM_class::Advanced }
+        , { CW, Phone, Image, RTTY_Data }
+        , Transmit_Power::_5_W_EIRP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+
+    {"160 Meters Band",  ""
+        , 1.800 *si::mega<si::hertz>,      2.000 *si::mega<si::hertz>
+        , { FCC_HAM_class::General, FCC_HAM_class::Extra, FCC_HAM_class::Advanced }
+        , { CW, Phone, Image, RTTY_Data }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+
+    {"80 Meters Band Part 1/4", ""
+        , 3.500 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
+        , { FCC_HAM_class::Extra }
+        , { CW, RTTY_Data }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+    {"80 Meters Band Part 2/4", ""
+        , 3.600 *si::mega<si::hertz>,      4.000 *si::mega<hertz>
+        , { FCC_HAM_class::Extra }
+        , { CW, Phone, Image }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+
+    {"80 Meters Band Part 1/4", ""
+        , 3.525 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
+        , { FCC_HAM_class::Advanced }
+        , { CW, RTTY_Data }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+    {"80 Meters Band Part 3/4", ""
+        , 3.700 *si::mega<si::hertz>,      4.000 *si::mega<hertz>
+        , { FCC_HAM_class::Advanced }
+        , { CW, Phone, Image }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+
+    {"80 Meters Band Part 1/4", ""
+        , 3.525 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
+        , { FCC_HAM_class::General }
+        , { CW, RTTY_Data }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+    {"80 Meters Band Part 4/4", ""
+        , 3.800 *si::mega<si::hertz>,      4.000 *si::mega<hertz>
+        , { FCC_HAM_class::General }
+        , { CW, Phone, Image }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+
+    {"80 Meters Band Part 1/4", ""
+        , 3.525 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
+        , { FCC_HAM_class::Technician }
+        , { CW }
+        , Transmit_Power::_200_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
     }
+
 };
 /*
     2200 meters:         kHz
@@ -463,6 +558,7 @@ void print_metre_thousands_scaled(mp_units::quantity<si::metre,double> const num
         throw std::logic_error("number is too large"s);  // TODO??: doesn't print
     return;
 }
+
 void print_second_thousands_scaled(mp_units::quantity<si::second,double> const num) {
     cout << std::setprecision(fcc_iaru_precision)
          << std::setw(10);
@@ -496,6 +592,7 @@ void my_print(char const * text, auto num) {
     << std::setw(24) << std::scientific   << num <<      " │\n";
   //<< "│ " << std::setw(8) << text <<      " │ hexfloat   │ " //<< std::setw(24) << std::hexfloat     << num <<      " │\n"
 }
+
 void calculate( Frequency_row & i ) {
     /* Testing a few ideas, not needed for production
         auto junk_sec                                   = 1 / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
@@ -507,8 +604,9 @@ void calculate( Frequency_row & i ) {
     i.time_period_per_cycle_begin   =  1. / i.frequency_begin;  // TODO??: why not?: i.time_period_per_cycle_end   = mp_units::inverse( i.frequency_end);  // TODO??: wants a dimension
     i.time_period_per_cycle_end     =  1. / i.frequency_end;
     i.wavelength_begin              = (1. / i.frequency_begin) * si2019::speed_of_light_in_vacuum ;
-    i.wavelength_end                = (1. / i.frequency_end) * si2019::speed_of_light_in_vacuum ;
+    i.wavelength_end                = (1. / i.frequency_end)   * si2019::speed_of_light_in_vacuum ;
 };
+
 void test1 () {
     cout << "START                Example1 test1. ++++++++++++++++++++++++"<<std::endl;
     cout << std::setprecision(fcc_iaru_precision);
@@ -518,6 +616,7 @@ void test1 () {
     cout << "locale:     " << loc.name() <<", "<< endl; // l.global() << endl;
     cout.imbue(loc);
     for (auto & i:frequency_rows) { calculate(i); };
+    cout << "To operate on 2200 or 630 meters, amateurs must first register with the Utilities Technology Council online at https://utc.org/plc-database-amateur-notification-process/. You need only register once for each band.\n";
     cout << "Within 50 Km of earth USA HAMs of "<< fcc_ham_class <<" class have permissions as follows:\n";
     for (auto const & i:frequency_rows) {
             cout
@@ -552,7 +651,7 @@ void test1 () {
                 << i.band_restictions <<"; "
                 << std::right                    // left align text
                 << std::setw(9)
-                << i.fcc_ham_class <<"; "
+                << i.fcc_ham_classes <<"; "
                 << i.fcc_revision_date <<"; "
                 << std::setw(14);
                                             //<< i.time_period_per_cycle_begin
