@@ -476,7 +476,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , {2024y, std::chrono::September,19d}
     },
     {"Mystic Freq ", ""
-        , 2.3 *si::tera<si::hertz>,     2.3 *si::tera<si::hertz> *si::giga<hertz>  // meaning and up to infinity?
+        , 2.3 *si::tera<si::hertz>,     2.3 *si::tera<si::hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
         , Transmit_Power::_1500_W_PEP
