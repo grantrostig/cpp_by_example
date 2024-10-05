@@ -411,7 +411,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"80m Band 4/4", ""
+    {"  80m Band 4/4", ""
         , 3.800 *si::mega<si::hertz>,      4.000 *si::mega<hertz>
         , { FCC_HAM_class::General }
         , { CW, Phone, Image }
@@ -419,7 +419,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"80m Band 1/4", ""
+    {"  80m Band 1/4", ""
         , 3.525 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
         , { FCC_HAM_class::Technician }
         , { CW }
@@ -427,7 +427,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"23cm Band 2/2", ""
+    {" 23cm Band 2/2", ""
         , 1240 *si::mega<si::hertz>,      1300 *si::mega<hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }  // not novice, they have 1/2
         , { CW, Phone, Image, MCW, RTTY_Data }
@@ -435,7 +435,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"Higher Freq Band 1/12", ""
+    {"Higher Freq Band  1/12", ""
         , 2300 *si::mega<si::hertz>,      2310 *si::mega<hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
@@ -476,7 +476,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , {2024y, std::chrono::September,19d}
     },
     {"Mystic Freq ", ""
-        , 2.3 *si::tera<si::hertz>,   std::numeric_limits<double>::infinity() *si::giga<hertz>  // meaning and up to infinity?
+        , 2.3 *si::tera<si::hertz>,     2.3 *si::tera<si::hertz> *si::giga<hertz>  // meaning and up to infinity?
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
         , Transmit_Power::_1500_W_PEP
@@ -596,7 +596,7 @@ void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const num
 
 void print_metre_thousands_scaled_up(mp_units::quantity<si::metre,double> const num) {
     cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(18);
+         << std::setw(16);
     if (num < 1'000.0 * si::metre) {
         cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
     } else if (num < 1'000'000 * si::metre) {
@@ -646,7 +646,7 @@ void print_metre_thousands_scaled_down(mp_units::quantity<si::metre,double> cons
 void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> const num) {
     cout <<">";
     cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(20);
+         << std::setw(15);
     if (       num < 0.000'000'000'001 * si::second) {
         quantity<si::femto<si::second>> n{num};
         cout << n;
@@ -718,31 +718,28 @@ void test1 () {
                 << i.band_name <<" - "
                 << std::setw(20)
                 << i.band_plan_name <<"; "
-                << std::right                    // left align text
-                << std::setw(10);
+                << std::right;                    // left align text
+                //<< std::setw(10);
             print_hz_thousands_scaled_up( i.frequency_begin );
             cout
-                <<" - "
-                << std::setw(15);
+                <<" - ";
+                //<< std::setw(15);
             print_hz_thousands_scaled_up( i.frequency_end );
             cout
-                <<"; "
-                << std::setw(15);
+                <<"; ";
+                //<< std::setw(15);
             print_metre_thousands_scaled_down( i.wavelength_end );
             cout
-                <<" - "
-                << std::setw(15);
+                <<" - ";
+                //<< std::setw(15);
             print_metre_thousands_scaled_down( i.wavelength_begin );
             cout
-                <<"; "
-                << std::setw(22)
-                << i.fcc_revision_date
-                <<"; "
-                << std::setw(15);
+                <<"; ";
+                //<< std::setw(15);
             print_second_thousands_scaled_down( i.time_period_per_cycle_end );
             cout
-                <<" - "
-                << std::setw(15);
+                <<" - ";
+                //<< std::setw(15);
             print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
             cout
                 << "; "
@@ -754,7 +751,9 @@ void test1 () {
                 << std::left                    // left align text
                 << i.band_restictions
                 <<"; "
-                << endl;
+                << std::setw(10)
+                << i.fcc_revision_date
+                <<";" << endl;
     }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
 }
