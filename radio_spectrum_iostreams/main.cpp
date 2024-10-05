@@ -355,12 +355,12 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {" 630m Band",  "except in Alaska within 496 miles of Russia where the power limit is 1 W EIRP. "
+    {" 630m Band",  ""
         , 1.800 *si::kilo<si::hertz>,      2.000 *si::kilo<si::hertz>
         , { FCC_HAM_class::General, FCC_HAM_class::Extra, FCC_HAM_class::Advanced }
         , { CW, Phone, Image, RTTY_Data }
         , Transmit_Power::_5_W_EIRP
-        , "NA"
+        , "Except in Alaska within 496 miles of Russia where the power limit is 1 W EIRP."
         , {2024y, std::chrono::September,19d}
     },
     {" 160m Band",  ""
@@ -619,7 +619,7 @@ void print_metre_thousands_scaled_up(mp_units::quantity<si::metre,double> const 
 }
 
 void print_metre_thousands_scaled_down(mp_units::quantity<si::metre,double> const num) {
-    TODO - this is reversed.
+    // TODO: - this is reversed.
     cout << std::setprecision(fcc_iaru_precision)
          << std::setw(18);
     if (num < 1'000.0 * si::metre) {
@@ -644,13 +644,13 @@ void print_metre_thousands_scaled_down(mp_units::quantity<si::metre,double> cons
 }
 
 void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> const num) {
+    cout <<">";
     cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(15);
-
+         << std::setw(20);
     if (       num < 0.000'000'000'001 * si::second) {
         quantity<si::femto<si::second>> n{num};
         cout << n;
-    } else if (  num < 0.000'000'001 * si::second) {
+    } else if (num < 0.000'000'001 * si::second) {
         quantity<si::pico<si::second>> n{num};
         cout << n;
     } else if (num < 0.000'001 * si::second) {
@@ -669,6 +669,7 @@ void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> co
     }
     //} else
         //throw std::logic_error("number is???"s);  // TODO??: doesn't print
+    cout <<"<";
     return;
 }
 
@@ -719,42 +720,41 @@ void test1 () {
                 << i.band_plan_name <<"; "
                 << std::right                    // left align text
                 << std::setw(10);
-                                  //<< i.frequency_begin
             print_hz_thousands_scaled_up( i.frequency_begin );
-            cout <<" - "
+            cout
+                <<" - "
                 << std::setw(15);
-                                  //<< i.frequency_end <<"; "
             print_hz_thousands_scaled_up( i.frequency_end );
             cout
                 <<"; "
                 << std::setw(15);
-                                    // << i.wavelength_end
             print_metre_thousands_scaled_down( i.wavelength_end );
             cout
                 <<" - "
                 << std::setw(15);
-                                    // << i.wavelength_begin
             print_metre_thousands_scaled_down( i.wavelength_begin );
             cout
                 <<"; "
-                << std::setw(15)
-                << std::left                    // left align text
-                << i.band_restictions <<"; "
-                << std::right                    // left align text
-                << std::setw(1)
-                << i.fcc_ham_classes <<"; "
                 << std::setw(22)
-                << i.fcc_revision_date <<"; "
+                << i.fcc_revision_date
+                <<"; "
                 << std::setw(15);
-                                      //<< i.time_period_per_cycle_end
             print_second_thousands_scaled_down( i.time_period_per_cycle_end );
             cout
                 <<" - "
                 << std::setw(15);
-                                      //<< i.time_period_per_cycle_begin
             print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
             cout
-            << endl;
+                << "; "
+                << std::right                    // left align text
+                << std::setw(2)
+                << i.fcc_ham_classes
+                <<"; "
+                << std::setw(15)
+                << std::left                    // left align text
+                << i.band_restictions
+                <<"; "
+                << endl;
     }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
 }
