@@ -271,7 +271,7 @@ auto crash_signals_register() -> void {
 
 auto const      default_precision{std::cout.precision()};  // https://en.cppreference.com/w/cpp/io/manip/setprecision
 auto constexpr  max_precision{std::numeric_limits<long double>::digits10 + 1};
-uint8_t constexpr fcc_iaru_precision{3};
+uint8_t constexpr fcc_iaru_precision{9};  // TODO: actually I think this is 3, but testing with 9.
 std::chrono::year_month_day constexpr fcc_revision_date_default{2024y, std::chrono::September, 18d};
 enum FCC_HAM_class {
 //enum class FCC_HAM_class {  // TODO??: Won't print via cout easily.
@@ -468,7 +468,15 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , {2024y, std::chrono::September,19d}
     },
     {"Higher Freq Band  4/12", ""
-        , 300 *si::giga<si::hertz>,      99999 *si::giga<hertz>  // meaning and up to infinity?
+        , 300 *si::giga<si::hertz>,   std::numeric_limits<double>::infinity() *si::giga<hertz>  // meaning and up to infinity?
+        , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
+        , { None_agreed }
+        , Transmit_Power::_1500_W_PEP
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+    {"Mystic Freq ", ""
+        , 2.3 *si::tera<si::hertz>,   std::numeric_limits<double>::infinity() *si::giga<hertz>  // meaning and up to infinity?
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
         , Transmit_Power::_1500_W_PEP
@@ -542,7 +550,7 @@ mp_units::quantity<> hz_thousands_scaled(auto num) {
 // TODO??: Rename below from hz to more generic once working as attempted below in comments.
 // TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
 //inline void print_hz_thousands_scaled(auto const num) {  // TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
-void print_hz_thousands_scaled(mp_units::quantity<si::hertz,double> const num) {
+void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const num) {
     cout << std::setprecision(fcc_iaru_precision)
          << std::setw(10);
     /*  si::unit_symbols::Hz,
@@ -575,54 +583,92 @@ void print_hz_thousands_scaled(mp_units::quantity<si::hertz,double> const num) {
         quantity<si::giga<si::hertz>> n{num};
         cout << n;
     } else if (num < 1'000'000'000'000'000 * si::hertz) {
+        quantity<si::tera<si::hertz>> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000'000'000 * si::hertz) {
         quantity<si::peta<si::hertz>> n{num};
         cout << n;
     } else
-        throw std::logic_error("number is too large"s);  // TODO??: doesn't print
+        cout << num;
+        //throw std::logic_error("number is too large"s);
     return;
 }
 
-void print_metre_thousands_scaled(mp_units::quantity<si::metre,double> const num) {
+void print_metre_thousands_scaled_up(mp_units::quantity<si::metre,double> const num) {
     cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(10);
+         << std::setw(18);
     if (num < 1'000.0 * si::metre) {
         cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
     } else if (num < 1'000'000 * si::metre) {
-        quantity<si::kilo<si::metre>> n{num};
+        quantity<si::kilo<si::metre>,double> n{num};
         cout << n;
     } else if (num < 1'000'000'000 * si::metre) {
-        quantity<si::mega<si::metre>> n{num};
+        quantity<si::mega<si::metre>,double> n{num};
         cout << n;
     } else if (num < 1'000'000'000'000 * si::metre) {
-        quantity<si::giga<si::metre>> n{num};
+        quantity<si::giga<si::metre>,double> n{num};
         cout << n;
     } else if (num < 1'000'000'000'000'000 * si::metre) {
-        quantity<si::peta<si::metre>> n{num};
+        quantity<si::peta<si::metre>,double> n{num};
         cout << n;
-    } else
-        throw std::logic_error("number is too large"s);  // TODO??: doesn't print
+    } else {
+        cout << num;
+        //throw std::logic_error("number is too large"s);
+    }
+    return;
+}
+
+void print_metre_thousands_scaled_down(mp_units::quantity<si::metre,double> const num) {
+    TODO - this is reversed.
+    cout << std::setprecision(fcc_iaru_precision)
+         << std::setw(18);
+    if (num < 1'000.0 * si::metre) {
+        cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
+    } else if (num < 1'000'000 * si::metre) {
+        quantity<si::kilo<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000 * si::metre) {
+        quantity<si::mega<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000 * si::metre) {
+        quantity<si::giga<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000'000 * si::metre) {
+        quantity<si::peta<si::metre>,double> n{num};
+        cout << n;
+    } else {
+        cout << num;
+        //throw std::logic_error("number is too large"s);
+    }
     return;
 }
 
 void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> const num) {
     cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(10);
-    if (       num <= 0.000'000'000'000'001 * si::second) {
+         << std::setw(15);
+
+    if (       num < 0.000'000'000'001 * si::second) {
+        quantity<si::femto<si::second>> n{num};
+        cout << n;
+    } else if (  num < 0.000'000'001 * si::second) {
         quantity<si::pico<si::second>> n{num};
         cout << n;
-    } else if (num <= 0.000'000'000'001 * si::second) {
+    } else if (num < 0.000'001 * si::second) {
         quantity<si::nano<si::second>> n{num};
         cout << n;
-    } else if (num <= 0.000'000'001 * si::second) {
+    } else if (num < 0.001 * si::second) {
         quantity<si::micro<si::second>> n{num};
         cout << n;
-    } else if (num <= 0.000'000'1 * si::second) {
+    } else if (num < 1.0 * si::second) {
         quantity<si::milli<si::second>> n{num};
         cout << n;
-    } else if (num <= 0.001 * si::second) {
+    }
+    //} else if (num < 0.99 * si::second) {
+    else {
         cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
-    } else
-        throw std::logic_error("number is too large"s);  // TODO??: doesn't print
+    }
+    //} else
+        //throw std::logic_error("number is???"s);  // TODO??: doesn't print
     return;
 }
 
@@ -674,21 +720,21 @@ void test1 () {
                 << std::right                    // left align text
                 << std::setw(10);
                                   //<< i.frequency_begin
-            print_hz_thousands_scaled( i.frequency_begin );
+            print_hz_thousands_scaled_up( i.frequency_begin );
             cout <<" - "
-                << std::setw(10);
+                << std::setw(15);
                                   //<< i.frequency_end <<"; "
-            print_hz_thousands_scaled( i.frequency_end );
+            print_hz_thousands_scaled_up( i.frequency_end );
             cout
                 <<"; "
-                << std::setw(10);
+                << std::setw(15);
                                     // << i.wavelength_end
-            print_metre_thousands_scaled( i.wavelength_end );
+            print_metre_thousands_scaled_down( i.wavelength_end );
             cout
                 <<" - "
-                << std::setw(10);
+                << std::setw(15);
                                     // << i.wavelength_begin
-            print_metre_thousands_scaled( i.wavelength_begin );
+            print_metre_thousands_scaled_down( i.wavelength_begin );
             cout
                 <<"; "
                 << std::setw(15)
@@ -699,11 +745,12 @@ void test1 () {
                 << i.fcc_ham_classes <<"; "
                 << std::setw(22)
                 << i.fcc_revision_date <<"; "
-                << std::setw(11);
+                << std::setw(15);
                                       //<< i.time_period_per_cycle_end
             print_second_thousands_scaled_down( i.time_period_per_cycle_end );
             cout
-                <<" - " << std::setw(10);
+                <<" - "
+                << std::setw(15);
                                       //<< i.time_period_per_cycle_begin
             print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
             cout
@@ -711,6 +758,7 @@ void test1 () {
     }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
 }
+
 void test2() {
     std::cout << "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
     #define MY_NUM .12345678901234567890/10000.0
@@ -733,10 +781,48 @@ void test2() {
     my_print("1000", light_speed_thousands);
     std::cout << "END                  Example1 test2. ++++++++++++++++++++++++"<<std::endl;
 }
+
+void test3 () {
+    cout << "START                Example1 test3. ++++++++++++++++++++++++"<<std::endl;
+    cout << std::setprecision(fcc_iaru_precision);
+    std::locale loc_orig{};                 // No commas at thousands.
+    cout << "locale_orig:" << loc_orig.name() <<", ";
+    std::locale loc{std::locale("en_US")};  // Has commas at thousands.
+    cout << "locale:     " << loc.name() <<", "<< endl; // l.global() << endl;
+    cout.imbue(loc);
+    for (auto & i:frequency_rows) { calculate(i); };
+    for (auto const & i:frequency_rows) {
+            cout
+                << std::left                    // left align text
+                << std::setprecision(fcc_iaru_precision)
+                << std::setw(23)
+                << i.band_name <<"; "
+
+                << std::setprecision(fcc_iaru_precision)
+                << std::setw(20)
+                << i.time_period_per_cycle_end
+                << " - "
+                << std::setprecision(fcc_iaru_precision)
+                << std::setw(20)
+                << i.time_period_per_cycle_begin
+                << "; ";
+
+            print_second_thousands_scaled_down( i.time_period_per_cycle_end );
+            cout
+                <<" - " << std::setw(10);
+                                      //<< i.time_period_per_cycle_begin
+            print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
+            cout
+            << endl;
+    }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
+    std::cout << "END                  Example1 test3. ++++++++++++++++++++++++"<<std::endl;
+}
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     Example1::test1 ();
-    //Example1::test2 ();
+    Example1::test2 ();
+    Example1::test3 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
