@@ -279,7 +279,8 @@ enum FCC_HAM_class {
     General,     // Middle
     Extra,       // Best
     Novice,      // NOTE: Older grandfathered in, but not provided in this program:  Novice, Advanced
-    Advanced     // NOTE: Older grandfathered in, but not provided in this program:  Novice, Advanced
+    Advanced,     // NOTE: Older grandfathered in, but not provided in this program:  Novice, Advanced
+    Not_specific
 };
 //  RF: Covers all ranges below and more? TODO?:?
 enum HAM_frequency_range {  // 47.I.D CFR 97.3(b)(3) P.6/54 includes only ones not commented out, others from other references
@@ -302,7 +303,8 @@ enum Band_plan_category {
     Image,
     MCW,
     RTTY_Data,
-    None_agreed
+    None_agreed,
+    NA
 };
 
 enum Transmit_Power {
@@ -311,6 +313,7 @@ enum Transmit_Power {
     _5_W_PEP,
     _200_W_PEP,
     _1500_W_PEP,
+    NA2
     // also geographical restrictions.
 };
 
@@ -318,19 +321,19 @@ std::string constexpr fcc_ham_class{"General"};
 struct Frequency_row {
     std::string                         band_name{};
     std::string                         band_plan_name{};
-    mp_units::quantity<hertz, double>   frequency_begin{40*si::kilo<hertz>};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
+    mp_units::quantity<hertz, double>   frequency_begin{};   // todo??: grostig thinks this is: cycles/second, but it might be just 1/second) //?? quantity<isq::frequency>  frequency{3*second};
     // mp_units::quantity<si::kilo<hertz>,double>
-    mp_units::quantity<hertz, double>   frequency_end{42*si::hertz};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
+    mp_units::quantity<hertz, double>   frequency_end{};       // todo??: grostig thinks this is: cycles/second)  //?? quantity<isq::frequency>  frequency{3*second};
     std::vector<FCC_HAM_class>          fcc_ham_classes{};
     std::vector<Band_plan_category>     band_plan_categories{};
     Transmit_Power                      power{};
     std::string                         band_restictions{};
     std::chrono::year_month_day         fcc_revision_date{};  // TODO??: std::ostream operator<<() {};
     // Following are calculated before use.
-    mp_units::quantity<metre, double>   wavelength_begin{0*cm};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
-    mp_units::quantity<metre, double>   wavelength_end{0*nm};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
-    mp_units::quantity<second, double>  time_period_per_cycle_begin{0*second};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 second
-    mp_units::quantity<second, double>  time_period_per_cycle_end{0*si::second};
+    mp_units::quantity<metre, double>   wavelength_begin{};                 // quantity<si::centi<m>>              wavelength_begin{0*cm};
+    mp_units::quantity<metre, double>   wavelength_end{};                   // quantity<si::nano<metre>>           wavelength_end{0*nm};
+    mp_units::quantity<second, double>  time_period_per_cycle_begin{};  // should be very small time unit //?? std::chrono::duration<int, std::kilo>   period_per_cycle{3}; // 3000 second
+    mp_units::quantity<second, double>  time_period_per_cycle_end{};
 };
 struct Meter_band_row {
     std::string                           bank_name{};
@@ -346,8 +349,16 @@ struct Meter_band_row {
 // Period/Cycle in sec      sec AKA sec/cycle which is more proper in our view.
 // Frequency f in Hz        Hz 1/sec AKA cycles/sec  kHz or kC (cycles, now obsolete)
 // Wavelenght = Lambda in meters or cm or mm    AKA m/cycle */
-std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data members in the struct, since we calculate the rest in another function.
-    {"2200m Band",  ""
+std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data members in the struct, since we calculate the rest in function.
+    {"Radio Frequencies",  "Ref:EB"
+        , 1.0 *si::hertz,      3 *si::giga<si::hertz>
+        , { FCC_HAM_class::Not_specific }
+        , { Band_plan_category::NA }
+        , Transmit_Power::NA2
+        , "NA"
+        , {2024y, std::chrono::September,19d}
+    },
+    {"+2200m Band",  ""
         , 137.7 *si::kilo<si::hertz>,      137.8 *si::kilo<si::hertz>
         , { FCC_HAM_class::General, FCC_HAM_class::Extra, FCC_HAM_class::Advanced }
         , {CW, Phone, Image, RTTY_Data }
@@ -355,7 +366,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {" 630m Band",  ""
+    {"+ 630m Band",  ""
         , 1.800 *si::kilo<si::hertz>,      2.000 *si::kilo<si::hertz>
         , { FCC_HAM_class::General, FCC_HAM_class::Extra, FCC_HAM_class::Advanced }
         , { CW, Phone, Image, RTTY_Data }
@@ -363,7 +374,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "Except in Alaska within 496 miles of Russia where the power limit is 1 W EIRP."
         , {2024y, std::chrono::September,19d}
     },
-    {" 160m Band",  ""
+    {"+ 160m Band",  ""
         , 1.800 *si::mega<si::hertz>,      2.000 *si::mega<si::hertz>
         , { FCC_HAM_class::General, FCC_HAM_class::Extra, FCC_HAM_class::Advanced }
         , { CW, Phone, Image, RTTY_Data }
@@ -371,7 +382,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"  80m Band 1/4", ""
+    {"+  80m Band 1/4", ""
         , 3.500 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
         , { FCC_HAM_class::Extra }
         , { CW, RTTY_Data }
@@ -379,7 +390,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"  80m Band 2/4", ""
+    {"+  80m Band 2/4", ""
         , 3.600 *si::mega<si::hertz>,      4.000 *si::mega<hertz>
         , { FCC_HAM_class::Extra }
         , { CW, Phone, Image }
@@ -387,7 +398,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"  80m Band 1/4", ""
+    {"+  80m Band 1/4", ""
         , 3.525 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
         , { FCC_HAM_class::Advanced }
         , { CW, RTTY_Data }
@@ -395,7 +406,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"  80m Band 3/4", ""
+    {"+  80m Band 3/4", ""
         , 3.700 *si::mega<si::hertz>,      4.000 *si::mega<hertz>
         , { FCC_HAM_class::Advanced }
         , { CW, Phone, Image }
@@ -403,7 +414,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"  80m Band 1/4", ""
+    {"+  80m Band 1/4", ""
         , 3.525 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
         , { FCC_HAM_class::General }
         , { CW, RTTY_Data }
@@ -411,7 +422,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"  80m Band 4/4", ""
+    {"+  80m Band 4/4", ""
         , 3.800 *si::mega<si::hertz>,      4.000 *si::mega<hertz>
         , { FCC_HAM_class::General }
         , { CW, Phone, Image }
@@ -419,7 +430,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"  80m Band 1/4", ""
+    {"+  80m Band 1/4", ""
         , 3.525 *si::mega<si::hertz>,      3.600 *si::mega<hertz>
         , { FCC_HAM_class::Technician }
         , { CW }
@@ -427,7 +438,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {" 23cm Band 2/2", ""
+    {"+ 23cm Band 2/2", ""
         , 1240 *si::mega<si::hertz>,      1300 *si::mega<hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }  // not novice, they have 1/2
         , { CW, Phone, Image, MCW, RTTY_Data }
@@ -435,7 +446,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"Higher Freq Band  1/12", ""
+    {"+Higher Freq Band  1/12", ""
         , 2300 *si::mega<si::hertz>,      2310 *si::mega<hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
@@ -443,7 +454,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"Higher Freq Band  2/12", ""
+    {"+Higher Freq Band  2/12", ""
         , 3300 *si::mega<si::hertz>,      3450 *si::mega<hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
@@ -451,7 +462,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"Higher Freq Band  3/12", ""
+    {"+Higher Freq Band  3/12", ""
         , 76 *si::giga<si::hertz>,      81 *si::giga<hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
@@ -459,7 +470,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "NA"
         , {2024y, std::chrono::September,19d}
     },
-    {"Higher Freq Band  3/12", "FCC SUSPENDED"
+    {"+Higher Freq Band  3/12", "FCC SUSPENDED"
         , 76 *si::giga<si::hertz>,      77 *si::giga<hertz>
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
@@ -467,7 +478,7 @@ std::vector<Frequency_row> frequency_rows{  // Note we don't initialize all data
         , "FCC SUSPENDED"
         , {2024y, std::chrono::September,19d}
     },
-    {"Higher Freq Band  4/12", ""
+    {"+Higher Freq Band  4/12", ""
         , 300 *si::giga<si::hertz>,   std::numeric_limits<double>::infinity() *si::giga<hertz>  // meaning and up to infinity?
         , { FCC_HAM_class::Technician, FCC_HAM_class::General, FCC_HAM_class::Extra,  FCC_HAM_class::Advanced }
         , { None_agreed }
@@ -550,7 +561,7 @@ mp_units::quantity<> hz_thousands_scaled(auto num) {
 // TODO??: Rename below from hz to more generic once working as attempted below in comments.
 // TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
 //inline void print_hz_thousands_scaled(auto const num) {  // TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
-void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const num) {
+void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const& num) {
     cout << std::setprecision(fcc_iaru_precision)
          << std::setw(10);
     /*  si::unit_symbols::Hz,
@@ -588,29 +599,9 @@ void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const num
     } else if (num < 1'000'000'000'000'000'000 * si::hertz) {
         quantity<si::peta<si::hertz>> n{num};
         cout << n;
-    } else
-        cout << num;
-        //throw std::logic_error("number is too large"s);
-    return;
-}
-
-void print_metre_thousands_scaled_up(mp_units::quantity<si::metre,double> const num) {
-    cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(16);
-    if (num < 1'000.0 * si::metre) {
-        cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
-    } else if (num < 1'000'000 * si::metre) {
-        quantity<si::kilo<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000 * si::metre) {
-        quantity<si::mega<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000'000 * si::metre) {
-        quantity<si::giga<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000'000'000 * si::metre) {
-        quantity<si::peta<si::metre>,double> n{num};
-        cout << n;
+    //} else if (num < 1'000'000'000'000'000'000'000 * si::hertz) { // Too large an integer type
+        //quantity<si::exa<si::hertz>> n{num};
+        //cout << n;
     } else {
         cout << num;
         //throw std::logic_error("number is too large"s);
@@ -618,12 +609,29 @@ void print_metre_thousands_scaled_up(mp_units::quantity<si::metre,double> const 
     return;
 }
 
-void print_metre_thousands_scaled_down(mp_units::quantity<si::metre,double> const num) {
-    // TODO: - this is reversed.
+void print_metre_thousands_scaled(mp_units::quantity<si::metre,double> const& num) {
     cout << std::setprecision(fcc_iaru_precision)
          << std::setw(18);
-    if (num < 1'000.0 * si::metre) {
-        cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
+    if (       num < 0.000'000'000'001 * si::metre) {
+        quantity<si::femto<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 0.000'000'001 * si::metre) {
+        quantity<si::pico<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 0.000'001 * si::metre) {
+        quantity<si::nano<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 0.001 * si::metre) {
+        quantity<si::micro<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 0.01 * si::metre) {
+        quantity<si::milli<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 0.1 * si::metre) {
+        quantity<si::centi<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 1'000.0 * si::metre) {  //  NO SCALING, just print it whatever it is, since we are using SI fundamental units, Hz and metres
+        cout << num;
     } else if (num < 1'000'000 * si::metre) {
         quantity<si::kilo<si::metre>,double> n{num};
         cout << n;
@@ -634,20 +642,26 @@ void print_metre_thousands_scaled_down(mp_units::quantity<si::metre,double> cons
         quantity<si::giga<si::metre>,double> n{num};
         cout << n;
     } else if (num < 1'000'000'000'000'000 * si::metre) {
+        quantity<si::tera<si::metre>,double> n{num};
+        cout << n;
+    } else if (num < 1'000'000'000'000'000'000 * si::metre) {
         quantity<si::peta<si::metre>,double> n{num};
         cout << n;
     } else {
         cout << num;
-        //throw std::logic_error("number is too large"s);
+        // throw std::logic_error("number is too large"s);
     }
     return;
 }
 
-void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> const num) {
+void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> const& num) {
     cout <<">";
     cout << std::setprecision(fcc_iaru_precision)
          << std::setw(15);
-    if (       num < 0.000'000'000'001 * si::second) {
+    if (       num < 0.000'000'000'000'001 * si::second) {
+        quantity<si::atto<si::second>> n{num};
+        cout << n;
+    } else if (       num < 0.000'000'000'001 * si::second) {
         quantity<si::femto<si::second>> n{num};
         cout << n;
     } else if (num < 0.000'000'001 * si::second) {
@@ -663,17 +677,15 @@ void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> co
         quantity<si::milli<si::second>> n{num};
         cout << n;
     }
-    //} else if (num < 0.99 * si::second) {
     else {
         cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
+        //throw std::logic_error("number is too large"s);
     }
-    //} else
-        //throw std::logic_error("number is???"s);  // TODO??: doesn't print
     cout <<"<";
     return;
 }
 
-void my_print(char const * text, auto num) {
+void my_print(char const * text, auto & num) {
     cout << std::setprecision(fcc_iaru_precision)
     << "│ " << std::setw(8) << text <<      " │defaultfloat| "
     << std::setw(24) << std::defaultfloat << num <<      " │ is actual default in none used.\n"
@@ -707,7 +719,8 @@ void test1 () {
     std::locale loc{std::locale("en_US")};  // Has commas at thousands.
     cout << "locale:     " << loc.name() <<", "<< endl; // l.global() << endl;
     cout.imbue(loc);
-    for (auto & i:frequency_rows) { calculate(i); };
+    for (auto & i:frequency_rows)
+        { calculate(i); };
     cout << "To operate on 2200 or 630 meters, amateurs must first register with the Utilities Technology Council online at https://utc.org/plc-database-amateur-notification-process/. You need only register once for each band.\n";
     cout << "Within 50 Km of earth USA HAMs of "<< fcc_ham_class <<" class have permissions as follows:\n";
     for (auto const & i:frequency_rows) {
@@ -728,19 +741,19 @@ void test1 () {
             cout
                 <<"; ";
                 //<< std::setw(15);
-            print_metre_thousands_scaled_down( i.wavelength_end );
+            print_metre_thousands_scaled( i.wavelength_begin );
             cout
                 <<" - ";
                 //<< std::setw(15);
-            print_metre_thousands_scaled_down( i.wavelength_begin );
+            print_metre_thousands_scaled( i.wavelength_end );
             cout
                 <<"; ";
                 //<< std::setw(15);
-            print_second_thousands_scaled_down( i.time_period_per_cycle_end );
+            print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
             cout
                 <<" - ";
                 //<< std::setw(15);
-            print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
+            print_second_thousands_scaled_down( i.time_period_per_cycle_end );
             cout
                 << "; "
                 << std::right                    // left align text
@@ -816,12 +829,43 @@ void test3 () {
     }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test3. ++++++++++++++++++++++++"<<std::endl;
 }
+
+void test4() {
+    for (mp_units::quantity<si::metre,double> i{0.000'000'000'000'001 *si::metre}; i <= 1'000'000'000'000'000 *si::metre; i = i * 1000.0 ) {
+        cout << i << ",";
+        print_metre_thousands_scaled(i);
+        cout << ";";
+    }
+    cout << "."<<endl;
+    cout << "Now for the small ones."<<endl;
+    mp_units::quantity<si::metre,double> j{ 0.0001 *si::metre};
+    cout << j << ",";
+    print_metre_thousands_scaled(j);
+    cout << ";";
+    j= 0.001 *si::metre;
+    cout << j << ",";
+    print_metre_thousands_scaled(j);
+    cout << ";";
+    j= 0.01 *si::metre;
+    cout << j << ",";
+    print_metre_thousands_scaled(j);
+    cout << ";";
+    j= 0.1 *si::metre;
+    cout << j << ",";
+    print_metre_thousands_scaled(j);
+    cout << ";";
+    j= 1 *si::metre;
+    cout << j << ",";
+    print_metre_thousands_scaled(j);
+    cout << "."<<endl;
+}
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     Example1::test1 ();
-    Example1::test2 ();
-    Example1::test3 ();
+    //Example1::test2 ();
+    //Example1::test3 ();
+    //Example1::test4 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
