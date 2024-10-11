@@ -610,8 +610,8 @@ void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const& nu
 }
 
 void print_metre_thousands_scaled(mp_units::quantity<si::metre,double> const& num) {
-    cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(18);
+    //cout << std::setprecision(fcc_iaru_precision)
+         //<< std::setw(18);
     if (       num < 0.000'000'000'001 * si::metre) {
         quantity<si::femto<si::metre>,double> n{num};
         cout << n;
@@ -830,42 +830,52 @@ void test3 () {
     std::cout << "END                  Example1 test3. ++++++++++++++++++++++++"<<std::endl;
 }
 
-void test4() {
-    for (mp_units::quantity<si::metre,double> i{0.000'000'000'000'001 *si::metre}; i <= 1'000'000'000'000'000 *si::metre; i = i * 1000.0 ) {
+void
+test4() {
+    for(mp_units::quantity<si::metre, double> i{ 0.000'000'000'000'001 * si::metre }; i <= 1'000'000'000'000'000 * si::metre;
+        i = i * 1000.0) {
         cout << i << ",";
         print_metre_thousands_scaled(i);
         cout << ";";
     }
-    cout << "."<<endl;
-    cout << "Now for the small ones."<<endl;
-    mp_units::quantity<si::metre,double> j{ 0.0001 *si::metre};
-    cout << j << ",";
-    print_metre_thousands_scaled(j);
-    cout << ";";
-    j= 0.001 *si::metre;
-    cout << j << ",";
-    print_metre_thousands_scaled(j);
-    cout << ";";
-    j= 0.01 *si::metre;
-    cout << j << ",";
-    print_metre_thousands_scaled(j);
-    cout << ";";
-    j= 0.1 *si::metre;
-    cout << j << ",";
-    print_metre_thousands_scaled(j);
-    cout << ";";
-    j= 1 *si::metre;
-    cout << j << ",";
-    print_metre_thousands_scaled(j);
-    cout << "."<<endl;
+    cout << ".\n" << "Now for the additional small ones in context." << endl;
+    mp_units::quantity<si::metre, double> j{ 0.0001 * si::metre };
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 0.00009 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 0.001 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 0.0009 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 0.01 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 0.009 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 0.1 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 0.09 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
+    j = 1 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << "." << endl;
+    j = 0.9 * si::metre;
+    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+
 }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
-    Example1::test1 ();
+    //Example1::test1 ();
     //Example1::test2 ();
     //Example1::test3 ();
-    //Example1::test4 ();
+    Example1::test4 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
