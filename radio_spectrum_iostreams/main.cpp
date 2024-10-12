@@ -558,23 +558,18 @@ mp_units::quantity<> hz_thousands_scaled(auto num) {
     return result;
 }*/
 
-// TODO??: Rename below from hz to more generic once working as attempted below in comments.
-// TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
-//inline void print_hz_thousands_scaled(auto const num) {  // TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
-void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const& num) {
-    cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(10);
     /*  si::unit_symbols::Hz,
         si::unit_symbols::kHz,
         si::unit_symbols::MHz,
         si::unit_symbols::GHz,
         si::unit_symbols::PHz,
     */
-    /* This works:
-        quantity<si::kilo<si::hertz>> n{num};
-        cout << n;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
-    */
-    //if (num * si::hertz < 1'000.0 * si::hertz) {
+// TODO??: Rename below from hz to more generic once working as attempted below in comments.
+// TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
+//inline void print_hz_thousands_scaled(auto const num) {  // TODO??: (Is inline relevant?) If/is copy ellision is likely? Do I really what copy, not ref?
+/* void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const& num) {
+    cout << std::setprecision(fcc_iaru_precision)
+         << std::setw(10);
     if (num < 1'000.0 * si::hertz) {
         //quantity<si::hertz> n{num};
         cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
@@ -607,82 +602,81 @@ void print_hz_thousands_scaled_up(mp_units::quantity<si::hertz,double> const& nu
         //throw std::logic_error("number is too large"s);
     }
     return;
-}
+} */
 
-void print_metre_thousands_scaled(mp_units::quantity<si::metre,double> const& num) {
-    //cout << std::setprecision(fcc_iaru_precision)
-         //<< std::setw(18);
-    if (       num < 0.00'000'000'000'1 * si::metre) {
-        quantity<si::femto<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 0.00'000'000'1 * si::metre) {
-        quantity<si::pico<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 0.00'000'1 * si::metre) {
-        quantity<si::nano<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 0.00'1 * si::metre) {
-        quantity<si::micro<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 0.01 * si::metre) {
-        quantity<si::milli<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 0.1 * si::metre) {
-        quantity<si::centi<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000.0 * si::metre) {  //  NO SCALING, just print it whatever it is, since we are using SI fundamental units, Hz and metres
-        cout << num;
-    } else if (num < 1'000'000 * si::metre) {
-        quantity<si::kilo<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000 * si::metre) {
-        quantity<si::mega<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000'000 * si::metre) {
-        quantity<si::giga<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000'000'000 * si::metre) {
-        quantity<si::tera<si::metre>,double> n{num};
-        cout << n;
-    } else if (num < 1'000'000'000'000'000'000 * si::metre) {
-        quantity<si::peta<si::metre>,double> n{num};
-        cout << n;
+template <Reference auto Unit, class T = double>
+                                                        // template<Reference auto R, RepresentationOf<get_quantity_spec(R).character> Rep = double>
+void
+// std::ostream &
+// TODO??: operator<< would be MUCH better:
+// operator<<(std::ostream &out, mp_units::quantity<Unit, T> const &num) {
+thousands_scaled(std::ostream &out, mp_units::quantity<Unit, T> const &num) {
+    /*  Value               Scaled value
+        1                   .1          0.01        0.00'1   0.00'000'1
+append to prior line:
+        m                   deca        hecto       kilo     mega
+
+===     1                   10          100         1'000    1'000'000      1E+9    1E+12
+append to prior line and those following:
+        m                   deci        centi       milli    micro          nano    pico
+        0.99                9.9         99          990      990'000
+        0.9                 9           90          900      900'000
+        0.1                 1           10          100      100'000
+        0.09                .9          9            90       90'000
+        0.01                .1          1            10       10'000
+        0.00'9              .09         .9            9        9'000
+        0.00'1              .01         .1            1        1'000
+        0.00'09             .009        .09          0.9         900
+        0.00'01             .001        .01          0.1         100
+        0.00'009            .0009       .009         0.09         90
+        0.00'001            .0001       .001         0.01         10
+        0.00'000'9          .00009      .0009        0.009         9
+        0.00'000'1          .00001      .0001        0.001         1
+    */
+
+    // assert(not( 1E-14*si::metre < num && num < 1E13*si::metre ));
+    cout << std::setprecision(fcc_iaru_precision)
+         << std::setw(18);
+    if(num < 0.00'000'000'000'1 * Unit) {
+        quantity<si::femto<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 0.00'000'000'1 * Unit) {
+        quantity<si::pico<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 0.00'000'1 * Unit) {
+        quantity<si::nano<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 0.00'1 * Unit) {
+        quantity<si::micro<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 0.01 * Unit) {
+        quantity<si::milli<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 0.1 * Unit) {
+        quantity<si::centi<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 1'000.0 * Unit) { //  NO SCALING, just print it whatever it is, since we are using SI fundamental units, Hz and metres
+        out << num;
+    } else if(num < 1'000'000 * Unit) {
+        quantity<si::kilo<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 1'000'000'000 * Unit) {
+        quantity<si::mega<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 1'000'000'000'000 * Unit) {
+        quantity<si::giga<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 1'000'000'000'000'000 * Unit) {
+        quantity<si::tera<Unit>, double> n{ num };
+        out << n;
+    } else if(num < 1'000'000'000'000'000'000 * Unit) {
+        quantity<si::peta<Unit>, double> n{ num };
+        out << n;
     } else {
-        cout << num;
+        out << num;
         // throw std::logic_error("number is too large"s);
     }
-    return;
-}
-
-void print_second_thousands_scaled_down(mp_units::quantity<si::second,double> const& num) {
-    cout <<">";
-    cout << std::setprecision(fcc_iaru_precision)
-         << std::setw(15);
-    if (       num < 0.000'000'000'000'001 * si::second) {
-        quantity<si::atto<si::second>> n{num};
-        cout << n;
-    } else if (       num < 0.000'000'000'001 * si::second) {
-        quantity<si::femto<si::second>> n{num};
-        cout << n;
-    } else if (num < 0.000'000'001 * si::second) {
-        quantity<si::pico<si::second>> n{num};
-        cout << n;
-    } else if (num < 0.000'001 * si::second) {
-        quantity<si::nano<si::second>> n{num};
-        cout << n;
-    } else if (num < 0.001 * si::second) {
-        quantity<si::micro<si::second>> n{num};
-        cout << n;
-    } else if (num < 1.0 * si::second) {
-        quantity<si::milli<si::second>> n{num};
-        cout << n;
-    }
-    else {
-        cout << num;  // just print it whatever it is, since we are using SI fundamental units, Hz and metres
-        //throw std::logic_error("number is too large"s);
-    }
-    cout <<"<";
-    return;
+    // return out;
 }
 
 void my_print(char const * text, auto & num) {
@@ -732,28 +726,23 @@ void test1 () {
                 << std::setw(20)
                 << i.band_plan_name <<"; "
                 << std::right;                    // left align text
-                //<< std::setw(10);
-            print_hz_thousands_scaled_up( i.frequency_begin );
+            thousands_scaled( cout, i.frequency_begin );
+            // TODO??: create operator<<() // cout << i.frequency_begin ;
             cout
                 <<" - ";
-                //<< std::setw(15);
-            print_hz_thousands_scaled_up( i.frequency_end );
+            thousands_scaled( cout, i.frequency_end );
             cout
                 <<"; ";
-                //<< std::setw(15);
-            print_metre_thousands_scaled( i.wavelength_begin );
+            thousands_scaled( cout, i.wavelength_begin );
             cout
                 <<" - ";
-                //<< std::setw(15);
-            print_metre_thousands_scaled( i.wavelength_end );
+            thousands_scaled( cout, i.wavelength_end );
             cout
                 <<"; ";
-                //<< std::setw(15);
-            print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
+            thousands_scaled( cout, i.time_period_per_cycle_begin );
             cout
-                <<" - ";
-                //<< std::setw(15);
-            print_second_thousands_scaled_down( i.time_period_per_cycle_end );
+                <<" - " ;
+            thousands_scaled( cout, i.time_period_per_cycle_end );
             cout
                 << "; "
                 << std::right                    // left align text
@@ -771,7 +760,7 @@ void test1 () {
     std::cout << "END                  Example1 test1. ++++++++++++++++++++++++"<<std::endl;
 }
 
-void test2() {
+/* void test2() {
     std::cout << "START                Example1 test2. ++++++++++++++++++++++++"<<std::endl;
     #define MY_NUM .12345678901234567890/10000.0
     mp_units::quantity<si::second, double> constexpr second_thousands  {MY_NUM*si::second};
@@ -819,63 +808,93 @@ void test3 () {
                 << i.time_period_per_cycle_begin
                 << "; ";
 
-            print_second_thousands_scaled_down( i.time_period_per_cycle_end );
+            thousands_scaled( cout, i.time_period_per_cycle_end );
             cout
                 <<" - " << std::setw(10);
                                       //<< i.time_period_per_cycle_begin
-            print_second_thousands_scaled_down( i.time_period_per_cycle_begin );
+            thousands_scaled( cout, i.time_period_per_cycle_end );
             cout
             << endl;
     }  // TODO??: better either of these: for (auto & i:frequency_rows) { cout << i << endl; } //cout << frequency_rows << endl; }
     std::cout << "END                  Example1 test3. ++++++++++++++++++++++++"<<std::endl;
 }
 
-void
-test4() {
+void test4() {
     for(mp_units::quantity<si::metre, double> i{ 0.00'000'000'000'000'1 * si::metre }; i <= 1'000'000'000'000'000 * si::metre;
         i = i * 1'000.0) {
         cout << i << ",";
-        print_metre_thousands_scaled(i);
+        thousands_scaled(cout,i);
         cout << ";";
     }
     cout << ".\n" << "Now for the additional small ones in context." << endl;
     mp_units::quantity<si::metre, double> j{ 0.00'01 * si::metre };
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 0.00'009 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 0.00'1 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 0.00'09 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 0.01 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 0.00'9 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 0.1 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 0.09 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+    j = 1 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << "." << endl;
+    j = 0.9 * si::metre;
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+}
+
+void test5() {
+    for(mp_units::quantity<si::metre, double> i{ 0.00'000'000'000'000'1 * si::metre }; i <= 1'000'000'000'000'000 * si::metre;
+        i = i * 1'000.0) {
+        cout << i << ",";
+        thousands_scaled(cout,i);
+        cout << ";";
+    }
+    cout << ".\n" << "Now for the additional small ones in context." << endl;
+    mp_units::quantity<si::metre, double> j{ 0.00'01 * si::metre };
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 0.00'009 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 0.00'1 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 0.00'09 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 0.01 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 0.00'9 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 0.1 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 0.09 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
 
     j = 1 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << "." << endl;
+    cout << j << ","; thousands_scaled(cout,j); cout << "." << endl;
     j = 0.9 * si::metre;
-    cout << j << ","; print_metre_thousands_scaled(j); cout << ";";
+    cout << j << ","; thousands_scaled(cout,j); cout << ";";
+} */
 
-}
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
-    //Example1::test1 ();
+    Example1::test1 ();
     //Example1::test2 ();
     //Example1::test3 ();
-    Example1::test4 ();
+    //Example1::test4 ();
+    //Example1::test5 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
