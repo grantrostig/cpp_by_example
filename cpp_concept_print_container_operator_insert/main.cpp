@@ -67,9 +67,11 @@ using std::cin; using std::cout; using std::cerr; using std::clog; using std::en
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
-static_assert(std::endian::native == std::endian::little, "Memory is little endian.");
-//static_assert(std::endian::native == std::endian::big,    "Memory is big endian.");
+//static_assert(std::endian::native != std::endian::little && std::endian::native != std::endian::big , "Memory is mixed endian.");
+static_assert(std::endian::native == std::endian::little, "Memory is big endian or mixed.");  // May or may not be relevant or required.
 #pragma message("$$ Memory is little endian.")
+//static_assert(std::endian::native == std::endian::big,  "Memory is little endian or mixed.");
+
 static_assert(CHAR_MIN < 0, "Char is signed.");
 //static_assert(CHAR_MIN == 0, "Char is unsigned.");
 #if CHAR_MIN < 0
@@ -95,7 +97,7 @@ inline constexpr std::string    STRING_NULL{"NULL"};    // Value is unset/not-se
 
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
-/** Requires that a type has insertion operator
+/* Requires that a type has insertion operator
     Concept definition - used by a template below.
     Some value needs to be incorporated with above text:
 ///  Concept using Function Explicit instantiations that are required to generate code for linker.
@@ -107,24 +109,10 @@ template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 //template std::ostream & operator<<( std::ostream & , std::deque<int>          const & );
 */
 
-template <typename T>
-concept Streamable = requires( std::ostream & out ) {
-    { out << T {} } -> std::convertible_to<std::ostream & >; // TODO?: Correct way to show instance of a template type.  // TODO:?? REMOVE OLD idea OR just $ { out << typename Container::value_type {} };
-};
-
-//template <typename T, typename U>
-//concept Streamable_pair =  Streamable<T> && Streamable<U>;
-
-template <typename Container>
-concept Streamable_container = requires( std::ostream & out ) {  // TODO:? was Inseratable ***!
-    requires not std::same_as<std::string, Container> and Streamable<typename Container::value_type>;  // TODO:?? don't need string check??
-    // { out << typename Container::value_type {} } -> std::convertible_to<std::ostream & >; // OR just $ { out << typename Container::value_type {} };
-};
-
-/** Prints contents of a container such as a vector of int's.
+/* Prints contents of a container such as a vector of int's.
     Insertable Concept used by Templated Function definition.
     Older version is here for the record:
-        template<typename T> std::ostream & operator<<(std::ostream & out, std::vector<T> const & v) { // utility f() to print vectors
+        template<class T> std::ostream & operator<<(std::ostream & out, std::vector<T> const & v) { // utility f() to print vectors
         if ( not v.empty() ) {
             out<<'['; std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", ")); out<<"\b\b]";
         }
@@ -132,7 +120,7 @@ concept Streamable_container = requires( std::ostream & out ) {  // TODO:? was I
         }
 */
 
-/* template<typename Container>                        //template<insertable Container>        // OR these 2 lines currently being used.
+/* template<class Container>                        //template<insertable Container>        // OR these 2 lines currently being used.
     requires Insertable<Container>
 std::ostream &
 operator<<( std::ostream & out, Container const & c) {
@@ -145,36 +133,66 @@ operator<<( std::ostream & out, Container const & c) {
     return out;
 } */
 
-template<Streamable_container SC>                        //template<insertable Container>        // OR these 2 lines currently being used.
+//template <class T, class U>
+//concept Streamable_pair =  Streamable<T> && Streamable<U>;
+
+// concept Streamable = requires( std::ostream & out ) {
+
+// *** We handle ostreams ***
+template <class T>
+concept Streamable
+    = requires( std::ostream & out_concept_parameter, int my_unused_int )
+{
+// bool concept_function definition()
+    {
+        out_concept_parameter << T {}
+    }
+        -> std::convertible_to<std::ostream &> ; // TODO?: Correct way to show instance of a template type.  // TODO:?? REMOVE OLD idea OR just $ { out << typename Container::value_type {} };
+};
+
+template <class Container>
+concept Streamable_container
+    = requires( std::ostream & out )
+{
+// bool concept_requires requirement()
+    requires not std::same_as<std::string, Container>;
+// bool concept_requires requirement()
+    requires     Streamable<typename Container::value_type>;
+    // OLD WORKING STUFF { out << typename Container::value_type {} } -> std::convertible_to<std::ostream & >; // OR just $ { out << typename Container::value_type {} };
+};
+
+template<Streamable_container SC>    // Function Template with Typename Concept Restricted. // Similar to Value template
 std::ostream &
 operator<<( std::ostream & out, SC const & sc) {
-    if ( not sc.empty()) {
+    if ( not sc.empty() ) {
         out << "[<";   //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
         std::copy(sc.begin(), sc.end(), std::ostream_iterator< typename SC::value_type >( out, ">,<" ));
         //out << "\b\b\b>]"; out.width(); out << std::setw(0);
         out << "\b\b\b>]" << " ";
-    } else out << "[CONTAINTER IS EMPTY]";
+    } else
+        out << "[CONTAINTER IS EMPTY]";
     return out;
 }
 
-template<typename First, typename Second>
+// *** We handle tuples ***
+template<class First, class Second>
 std::ostream &
 operator<<( std::ostream & out, std::pair<First,Second> const & my_pair) {
-    out << "PAIR_MEMBER<";
+    out << "PAIR_MEMBER[";
     out << my_pair.first  <<",";
     out << my_pair.second <<",";
                                   //std::copy(my_pair.begin(), my_pair.end(), std::ostream_iterator< typename Container::value_type >( out, ">,<" ));
                                   //out << "\b\b\b>]"; out.width(); out << std::setw(0);
-    out << "\b\b\b>]" << " ";
+    out << "]" << " ";            // TODO??:  out << "\b\b\b>]" << POP BACK IDEA << " ";
                               // TODO:? if ( not c.empty()) {
                               //} else out << "[CONTAINTER IS EMPTY]";
     return out;
 }
 
-template<typename First, typename Second, typename Third>
+template<class First, class Second, class Third>  // TODO??: make it variadic.
 std::ostream &
 operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple) {
-    out << "TUPLE_MEMBER<";
+    out << "TUPLE_MEMBER[";
     out << std::get<0>(my_tuple)  <<",";
     out << std::get<1>(my_tuple)  <<",";
     out << std::get<2>(my_tuple)  <<",";
@@ -186,11 +204,15 @@ operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple)
     return out;
 }
 
-
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
+    std::pair<int,float>              my_pair  {2, 3.3f};
+    std::tuple<int,float,std::string> my_tuple {2, 3.3f, "threethreethree"s};
+    //std::map<int, my_special_pair> my_map {};
 
-
-
+    cout << my_pair.first <<", " << my_pair.second << endl;
+    cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
+    cout << my_pair << endl;
+    cout << my_tuple << endl;
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }

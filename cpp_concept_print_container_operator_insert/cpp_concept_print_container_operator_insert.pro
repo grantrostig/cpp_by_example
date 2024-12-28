@@ -51,7 +51,7 @@ QMAKE_CXXFLAGS += \
 LIBS += \
         -lpthread               \
         -lrt                    \
-        -lstdc++_libbacktrace   \
+        #-lstdc++_libbacktrace   \
         #-lboost_system         \
         #-lboost_coroutine      \
         #-lssl                  \  #  missing this still: undefined reference to symbol 'd2i_PrivateKey_bio@@OPENSSL_1_1_0  related to: OPENSSL_API_COMPAT

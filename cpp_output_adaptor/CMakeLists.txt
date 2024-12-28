@@ -3,7 +3,8 @@ project(cpp_output_adaptor LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(cpp_output_adaptor main.cpp)
+add_executable(cpp_output_adaptor main.cpp
+    ostream_joiner_gr.hpp ostream_joiner_gr.cpp)
 
 include(GNUInstallDirs)
 install(TARGETS cpp_output_adaptor
