@@ -37,7 +37,7 @@ private:
 };
 
 namespace detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-enum struct direction { up, down };
+enum struct direction { up, down };  // TODO??: like enum class?
 consteval auto direction_mask(auto start_bit = 0, auto last_bit = 7)
     requires std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)> {
     if(last_bit > start_bit) return direction::up;
@@ -104,12 +104,12 @@ struct BitGetter {
     bool operator!=(BitGetter const &other) const { return !(*this == other); }
 private:
     static constexpr uintmax_t         start_mask_{ detail::mask_v(start_bit) };
-    static constexpr uintmax_t         last_mask_{ detail::mask_v(last_bit) };
-    static constexpr detail::direction direction_{ detail::direction_mask(start_bit, last_bit) };
+    static constexpr uintmax_t         last_mask_{  detail::mask_v(last_bit) };
+    static constexpr detail::direction direction_{  detail::direction_mask(start_bit, last_bit) };
     Container                         *container_;
     typename Container::const_iterator cont_iter_;
     uintmax_t                          current_mask_{ start_mask_ };
-    mutable bool                       current_value_{ false };
+    mutable bool                       current_value_{false};
 };
 
 template <auto start_bit = 0, auto last_bit = 7, detail::IntegralContainer Container = std::string>
@@ -125,12 +125,14 @@ auto end(Container &) {
 
 template <std::size_t bitset_size>
 decltype(auto) bitset_out(std::bitset<bitset_size> const &bs, std::ostream &os) {
+    std::cout << "Bitset is:";
     for(std::size_t i{ 0 }; i < bitset_size; ++i) {
         std::cout << bs[i] << ' ';
     }
     return os << '\n';
 }
 
+// TODO??: NOT used, Jon why is it here? Some test case?
 decltype(auto) vector_char_out(std::vector<char> const &v, std::ostream &os) {
     for(std::size_t i{ 0 }; i < v.size(); ++i) {
         std::cout << short(v[i]) << ' ';
@@ -139,12 +141,13 @@ decltype(auto) vector_char_out(std::vector<char> const &v, std::ostream &os) {
 }
 
 int main() {
-    std::bitset<8>    small_sink;
-    std::vector<bool> bsource{ true, true, false, false, true, true, false, false };
+    std::bitset<8>    small_sink{};
+    std::vector<bool> bsource{ true, true, false, false, true, true, false, false };  // size = 8
     std::copy(begin(bsource), end(bsource), biterator::bitset_output_iter<8>{ small_sink });
     bitset_out(small_sink, std::cout);
 
-    std::bitset<256> big_sink;
+    std::bitset<256> big_sink{};
+                             //012345678901234
     std::string      isource{ "testing testing" };
     std::copy(biterator::begin<6, 0>(isource), biterator::end<6, 0>(isource), biterator::bitset_output_iter<256>{ big_sink });
     bitset_out(big_sink, std::cout);
