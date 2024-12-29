@@ -90,12 +90,12 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     std::vector                         v_int                   {1,2,3};
     std::vector                         v_cstring               {"one","two","three"};
     std::vector                         v_string                {"one"s,"two"s,"three"s};
-    std::vector                         v_fpair                  {my_fundamental_pair,my_fundamental_pair,my_fundamental_pair};
-    std::vector                         v_tuple                  {my_tuple,my_tuple,my_tuple};
+    std::vector                         v_fpair                 {my_fundamental_pair,my_fundamental_pair,my_fundamental_pair};
+    std::vector                         v_tuple                 {my_tuple,my_tuple,my_tuple};
     std::map<int, std::tuple<int,float,std::string>>::value_type v_type;
-    std::vector v_value_type{v_type, v_type, v_type};
-    std::map<int, std::tuple<int,float,std::string>> my_map { {10,my_tuple} };
-    std::map<int, std::tuple<int,float,std::string>> my_map2{ {10,{11,12.0f,"1string"s}}, {20,{21,22.0f,"2string"s}} };
+    std::vector                         v_value_type            {v_type, v_type, v_type};
+    std::map<int, std::tuple<int,float,std::string>> my_map     { {10,my_tuple} };
+    std::map<int, std::tuple<int,float,std::string>> my_map2{   { 10,{11,12.0f,"1string"s}}, {20,{21,22.0f,"2string"s}} };
 
     cout << "$$My fundamental pair:"<< my_fundamental_pair << endl;        //cout << my_pair.first <<", " << my_pair.second << endl;
     cout << "$$My tuple:"           << my_tuple << endl;                             //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
