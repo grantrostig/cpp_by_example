@@ -38,6 +38,12 @@ inline void PRINT_ELEMENTS (const T& coll, string optcstr="") {
         }
 */
 
+template<typename First, typename Second, typename Third>
+std::ostream & operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple);
+
+template<typename First, typename Second>
+std::ostream & operator<<( std::ostream & out, std::pair<First,Second> const & my_pair);
+
 template <class T>
 concept Streamable
     = requires( std::ostream & out_concept_parameter ) {
