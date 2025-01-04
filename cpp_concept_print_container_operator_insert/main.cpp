@@ -17,8 +17,7 @@ using std::cin; using std::cout; using std::cerr; using std::clog; using std::en
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-
-/* OLDER STUFF
+/* OLDER simple STUFF
 // Another approach to print, from: Josuttis
 template <class T>
 inline void PRINT_ELEMENTS (const T& coll, string optcstr="") {
@@ -69,33 +68,27 @@ operator<<( std::ostream & out, SC const & sc) {
 template<class First, class Second>
 std::ostream &
 operator<<( std::ostream & out, std::pair<First,Second> const & my_pair) {
-    out << "PAIR_MEMBERS[";
-    out << my_pair.first  <<","<< my_pair.second;
-    out << "]";
-    return out;
-}
+    out << "PAIR_MEMBERS["; out << my_pair.first  <<","<< my_pair.second; out << "]"; return out; }
+
 template<class First, class Second, class Third>  // TODO??: make it variadic. TODO??: what about something like this: std::copy(my_pair.begin(), my_pair.end(), std::ostream_iterator< typename Container::value_type >( out, ">,<" ));
 std::ostream &
 operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple) {
-    out << "TUPLE_MEMBERS[";
-    out << std::get<0>(my_tuple) << "," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple);
-    out << "]";                                                                                   //out << "\b\b\b>]"; out.width(); out << std::setw(0);
-    return out;
-}
+    out << "TUPLE_MEMBERS["; out << std::get<0>(my_tuple) << "," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple); out << "]"; return out; }  //out << "\b\b\b>]"; out.width(); out << std::setw(0);
 
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
-    std::pair<int,float>                my_fundamental_pair     {2, 3.3f};
-    std::tuple<int,float,std::string>   my_tuple                {2, 3.3f, "threethreethree"s};
-    std::pair                           my_tuple_pair           {my_tuple,my_tuple};
-    std::vector                         v_int                   {1,2,3};
-    std::vector                         v_cstring               {"one","two","three"};
-    std::vector                         v_string                {"one"s,"two"s,"three"s};
-    std::vector                         v_fpair                 {my_fundamental_pair,my_fundamental_pair,my_fundamental_pair};
-    std::vector                         v_tuple                 {my_tuple,my_tuple,my_tuple};
-    std::map<int, std::tuple<int,float,std::string>>::value_type v_type;
-    std::vector                         v_value_type            {v_type, v_type, v_type};
-    std::map<int, std::tuple<int,float,std::string>> my_map     { {10,my_tuple} };
-    std::map<int, std::tuple<int,float,std::string>> my_map2{   { 10,{11,12.0f,"1string"s}}, {20,{21,22.0f,"2string"s}} };
+    using My_tuple = std::tuple<int,float,std::string>;
+    std::pair<int,float>                my_fundamental_pair {2, 3.3f};
+    My_tuple                            my_tuple            {2, 3.3f, "threethreethree"s};
+    std::pair                           my_tuple_pair       {my_tuple,my_tuple};
+    std::vector                         v_int               {1,2,3};
+    std::vector                         v_cstring           {"one","two","three"};
+    std::vector                         v_string            {"one"s,"two"s,"three"s};
+    std::vector                         v_fpair             {my_fundamental_pair,my_fundamental_pair,my_fundamental_pair};
+    std::vector                         v_tuple             {my_tuple,my_tuple,my_tuple};
+    std::map<int, My_tuple>::value_type m_v_type            {};
+    std::vector                         v_value_type        {m_v_type, m_v_type, m_v_type};
+    std::map<int, My_tuple>             my_map              { {10,my_tuple} };
+    std::map<int, My_tuple>             my_map2             { { 10,{11,12.0f,"1string"s}}, {20,{21,22.0f,"2string"s}} };
 
     cout << "$$My fundamental pair:"<< my_fundamental_pair << endl;        //cout << my_pair.first <<", " << my_pair.second << endl;
     cout << "$$My tuple:"           << my_tuple << endl;                             //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
@@ -105,7 +98,7 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     cout << "$$My v_string"         << v_string << endl;
     cout << "$$My vpair:"           << v_fpair << endl;  // ERROR
     cout << "$$My map:"             << my_map << endl;
-    cout << "$$My_value_type:"      << v_type << endl;
+    cout << "$$My_value_type:"      << m_v_type << endl;
     cout << "$$My v_value_type:"    << v_value_type << endl;
 
     cout << "###" << endl;
