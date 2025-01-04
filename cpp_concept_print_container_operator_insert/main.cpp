@@ -51,16 +51,16 @@ inline void PRINT_ELEMENTS (const T& coll, string optcstr="") {
 template<typename First, typename Second, typename Third>  // this forward declaration is definitely required to compile
 std::ostream & operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple);
 
-template<class First, class Second>
+template<class First, class Second>  // Must precede Streamable
 std::ostream &
 operator<<( std::ostream & out, std::pair<First,Second> const & my_pair) {
     out << "PAIR_MEMBERS["; out << my_pair.first  <<","<< my_pair.second; out << "]"; return out; }
 
-template<class First, class Second, class Third>  // TODO??: make it variadic. TODO??: what about something like this: std::copy(my_pair.begin(), my_pair.end(), std::ostream_iterator< typename Container::value_type >( out, ">,<" ));
+template<class First, class Second, class Third>   // Must precede Streamable
+    // TODO??: make it variadic. TODO??: what about something like this: std::copy(my_pair.begin(), my_pair.end(), std::ostream_iterator< typename Container::value_type >( out, ">,<" ));
 std::ostream &
 operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple) {
  out << "TUPLE_MEMBERS["; out << std::get<0>(my_tuple) << "," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple); out << "]"; return out; }  //out << "\b\b\b>]"; out.width(); out << std::setw(0);
-
 
 template <class T>
 concept Streamable
@@ -79,8 +79,7 @@ concept Streamable_container
 
 template<Streamable_container SC>    // Function Template with typename concept being restricted to SC in this case. Similar to Value template
 std::ostream &
-operator<<( std::ostream & out, SC const & sc) {
-    LOGGER_()
+operator<<( std::ostream & out, SC const & sc) { LOGGER_()
     if ( not sc.empty() ) {
         out << "[";                    //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
         // TODO??: why compile error on?: std::copy(sc.begin(), sc.end(), std::ostream_iterator< typename SC::value_type >( out, ">,<" ));
