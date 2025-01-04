@@ -8,11 +8,24 @@
    https://arnemertz.github.io/online-compilers/
     //[[maybe_unused]] int * my_new_var8 = ::new (22,int);
  */
-#include <bits/stdc++.h>
-//#include <iostream>
-//#include <csignal>
-//#include <stacktrace>
-//#include <source_location>
+
+//#include <bits/stdc++.h>
+#include <chrono>
+#include <csignal>
+#include <iostream>
+#include <map>
+#include <source_location>
+#include <stacktrace>
+#include <utility>
+
+using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
+template<typename First, typename Second, typename Third>
+std::ostream & operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple);
+template<typename First, typename Second>
+std::ostream & operator<<( std::ostream & out, std::pair<First,Second> const & my_pair);
+
+#include <iterator>
+
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
@@ -44,7 +57,6 @@ inline void PRINT_ELEMENTS (const T& coll, string optcstr="") {
 
 template<typename First, typename Second, typename Third>
 std::ostream & operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple);
-
 template<typename First, typename Second>
 std::ostream & operator<<( std::ostream & out, std::pair<First,Second> const & my_pair);
 
@@ -66,9 +78,13 @@ concept Streamable_container
 template<Streamable_container SC>    // Function Template with typename concept being restricted to SC in this case. Similar to Value template
 std::ostream &
 operator<<( std::ostream & out, SC const & sc) {
+    LOGGER_( "Streamable_container<>():")
     if ( not sc.empty() ) {
         out << "[<";                    //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
-        std::copy(sc.begin(), sc.end(), std::ostream_iterator< typename SC::value_type >( out, ">,<" ));
+        //std::copy(sc.begin(), sc.end(), std::ostream_iterator< typename SC::value_type >( out, ">,<" ));
+        for (auto &i:sc) {
+            out << i << ">,<";
+        }
         out << ">]" << " ";             // out.width(); out << std::setw(0);
     } else
         out << "[CONTAINTER IS EMPTY]";
@@ -106,10 +122,11 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     cout << "$$My v_int"            << v_int << endl;
     cout << "$$My v_cstring"        << v_cstring << endl;
     cout << "$$My v_string"         << v_string << endl;
-    //cout << "$$My vpair:"           << v_fpair << endl;  // ERROR
-    //cout << "$$My map:"             << my_map << endl;
-    //cout << "$$My_value_type:"      << m_v_type << endl;
-    //cout << "$$My v_value_type:"    << v_value_type << endl;
+    cout << "$$My v_fpair:"         << v_fpair << endl;  // ERROR
+    cout << "$$My map:"             << my_map << endl;
+    cout << "$$My map2:"            << my_map2 << endl;
+    cout << "$$My_value_type:"      << m_v_type << endl;
+    cout << "$$My v_value_type:"    << v_value_type << endl;
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
