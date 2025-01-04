@@ -83,14 +83,9 @@ operator<<( std::ostream & out, SC const & sc) { LOGGER_()
     if ( not sc.empty() ) {
         out << "[";                    //out.width(9);  // TODO??: neither work, only space out first element. //out << std::setw(9);  // TODO??: neither work, only space out first element.
         // TODO??: why compile error on?: std::copy(sc.begin(), sc.end(), std::ostream_iterator< typename SC::value_type >( out, ">,<" ));
-        bool first{ true };
-        for(auto &i : sc) { // this works, but why not std::copy?
-            if(first) {
-                first = false;
-                out << "<" << i;
-            } else {
-                out << ">,<" << i;
-            }
+        for( bool first{true}; auto const &i : sc) { // this works, but why not compile std::copy?
+            if(first) { out << "<" << i; first = false; }
+            else      { out << ">,<" << i; }
         }
         out << ">]" << " ";             // out.width(); out << std::setw(0);
     } else
