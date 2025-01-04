@@ -5,7 +5,7 @@ CONFIG += console
 
 CONFIG -= app_bundle
 CONFIG -= qt
-CONFIG += c++latest
+#CONFIG += c++latest
 #CONFIG += c++23
 #CONFIG += c++20
 CONFIG += warn_on
@@ -19,7 +19,7 @@ CONFIG += thread
 #CONFIG += static wrong? why?
 #QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += \
-        -std=gnu++23		    \
+        -std=c++23		    \
         -O0 		            \
         -g3 		            \
         #-ggdb 		            \

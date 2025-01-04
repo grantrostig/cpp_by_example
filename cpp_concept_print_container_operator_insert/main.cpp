@@ -37,6 +37,10 @@ inline void PRINT_ELEMENTS (const T& coll, string optcstr="") {
             return out;
         }
 */
+#define LOGGER_(  msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           "."    <<endl;cout.flush();cerr.flush();
+#define LOGGER_R( msg )  using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<           ".\r\n"<<endl;cout.flush();cerr.flush();
+#define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
+#define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
 
 template<typename First, typename Second, typename Third>
 std::ostream & operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple);
@@ -47,7 +51,7 @@ std::ostream & operator<<( std::ostream & out, std::pair<First,Second> const & m
 template <class T>
 concept Streamable
     = requires( std::ostream & out_concept_parameter ) {
-    requires not std::same_as<std::string, T>;
+//    requires not std::same_as<std::string, T>;
     { out_concept_parameter << T {} } -> std::convertible_to<std::ostream &>;   // bool concept_function definition()
 };
 
@@ -102,10 +106,10 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     cout << "$$My v_int"            << v_int << endl;
     cout << "$$My v_cstring"        << v_cstring << endl;
     cout << "$$My v_string"         << v_string << endl;
-    cout << "$$My vpair:"           << v_fpair << endl;  // ERROR
-    cout << "$$My map:"             << my_map << endl;
-    cout << "$$My_value_type:"      << m_v_type << endl;
-    cout << "$$My v_value_type:"    << v_value_type << endl;
+    //cout << "$$My vpair:"           << v_fpair << endl;  // ERROR
+    //cout << "$$My map:"             << my_map << endl;
+    //cout << "$$My_value_type:"      << m_v_type << endl;
+    //cout << "$$My v_value_type:"    << v_value_type << endl;
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
