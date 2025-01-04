@@ -5,9 +5,9 @@ CONFIG += console
 
 CONFIG -= app_bundle
 CONFIG -= qt
-#CONFIG += c++latest
-#CONFIG += c++23
-#CONFIG += c++20
+#CONFIG += c++latest    # 2a
+#CONFIG += c++23        # no effect?
+#CONFIG += c++20        # 2a
 CONFIG += warn_on
 CONFIG += thread
 #TARGET = eigen_playground
@@ -25,6 +25,7 @@ QMAKE_CXXFLAGS += \
         #-ggdb 		            \
         #-ggdb3 	            \
         -fconcepts              \
+        #-fmodules-ts            \
         #-pedantic              \
         #-pedantic-errors       \
         -Wall   		        \  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
