@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+// Code below is version 0.3 of project: cpp_output_adapter
 
 namespace Ostream_detail { /// C++20? transform_output_adapter() AND ostream_joiner()
 

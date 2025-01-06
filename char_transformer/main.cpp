@@ -1,5 +1,5 @@
+// Requirements, Design, and Edited by Grant Rostig
 // Code by Jon Kalb https://wandbox.org/permlink/R5tMMsppwL5oSTpy
-// Edited by Grant Rostig
 // boost 1.0 license
 #include <algorithm>
 #include <iterator>
@@ -10,8 +10,9 @@
 #include <vector>
 #include <unordered_map>
 
+// All code below is: version 0.3 of project: char_transformer
 std::map<char, std::tuple<int, std::vector<int>>> transform_map {
-   //   char, counter, replacement values
+   //   char, pair of: counter, vector of replacement values for the transformed key char
         {'a', {0, {1, 2, 3}}},
         {'b', {0, {4, 5, 6}}},
         {'c', {0, {7, 8}}},
@@ -24,7 +25,7 @@ auto main() -> int {
     std::string         text{" abcd. abcd."};
     std::vector<int>    output(size(text));
     auto transformer{ [tmap{transform_map}] (char c) mutable { // replace char with one of a vector of numbers, incrementing the index to find replacement value.
-                          auto& counter{get<0>(tmap[c])};  // TODO??: making this a ref somehow preserves the value similar to "static"?
+                          auto& counter{get<0>(tmap[c])};  // is incremented between invocations per key/data entry // TODO??: making this a ref somehow preserves the value similar to "static"?
                           auto  values{get<1>(tmap[c])};
                           auto  result{values[counter]};
                           ++counter;

@@ -7,6 +7,7 @@
 
 #include "ostream_joiner_gr.hpp"
 
+// Code below is version 0.3 of project: cpp_output_adapter
 auto main() -> int {
     std::ostream_iterator<char> sink_itr{std::cout};
     std::string const source{"source"};
