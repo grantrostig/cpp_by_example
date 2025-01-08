@@ -32,7 +32,7 @@ template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 #define LOGGERX(  msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<    "["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}."    <<endl;cout.flush();cerr.flush();
 #define LOGGERXR( msg, x)using loc = std::source_location;std::cout.flush();std::cerr.flush();std::cerr<<"\r\n["<<loc::current().file_name()<<':'<<std::setw(4)<<loc::current().line()<<','<<std::setw(3)<<loc::current().column()<<"]`"<<loc::current().function_name()<<"`:" <<#msg<<".:{"<<x<<"}.\r\n"<<endl;cout.flush();cerr.flush();
 
-// All code below is: version 0.5 of project: cpp_concept_print_container_operator_insert
+// All code below is: version 0.6 of project: cpp_concept_print_container_operator_insert
 /* OLDER simple STUFF
 // Another approach to print, from: Josuttis
 template <class T>
@@ -78,6 +78,7 @@ template <class Container>
 concept Streamable_container
     = requires( std::ostream & out ) {
     requires not std::same_as<std::string, Container>;                          // bool concept_requires requirement()
+    requires not std::same_as<std::string_view, Container>;
     requires     Streamable<typename Container::value_type>;
     // OLD WORKING STUFF { out << typename Container::value_type {} } -> std::convertible_to<std::ostream & >; // OR just $ { out << typename Container::value_type {} };
 };
