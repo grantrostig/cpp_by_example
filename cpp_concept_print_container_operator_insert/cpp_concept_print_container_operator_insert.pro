@@ -19,7 +19,8 @@ CONFIG += thread
 #CONFIG += static wrong? why?
 #QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += \
-        -std=c++23		    \
+        #-std=c++23		    \
+        -std=c++26		    \
         -O0 		            \
         -g3 		            \
         #-ggdb 		            \
