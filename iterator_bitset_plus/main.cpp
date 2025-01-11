@@ -10,30 +10,33 @@
 #include <type_traits>
 #include <vector>
 
+// allows manipulation of bits in a bitset, beyond what is supplied in std::  Could be useful in brainwallet project.
+
 namespace biterator {
-template <std::size_t bitset_size> struct bitset_output_iter {
+template <std::size_t bitset_size>  // value
+struct bitset_output_iter {
     using iterator_category = std::output_iterator_tag;
     using difference_type   = std::ptrdiff_t;
     using value_type        = bool;
-    bitset_output_iter(std::bitset<bitset_size> &bs, std::size_t initial_offset = 0) : bs{ &bs }, offset{ initial_offset } {}
+    bitset_output_iter(std::bitset<bitset_size> & bs, std::size_t initial_offset = 0) : bs_{ &bs }, offset_{ initial_offset } {}
     auto operator*() -> bitset_output_iter & {
         return *this;
     }
     auto operator++() -> bitset_output_iter & {
-        ++offset;
+        ++offset_;
         return *this;
     }
     auto operator++(int) -> bitset_output_iter {
-        ++offset;
+        ++offset_;
         return *this;
     }
     auto operator=(bool val) -> bitset_output_iter & { // this one does something
-        (*bs)[offset] = val;
+        (*bs_)[offset_] = val;  // operator precidence ()
         return *this;
     }
 private:
-    std::bitset<bitset_size> *bs;
-    std::size_t               offset;
+    std::bitset<bitset_size> *bs_;
+    std::size_t              offset_{0};
 };
 
 namespace detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
@@ -59,8 +62,9 @@ template <typename Container> concept IntegralContainer = std::integral<typename
 } // END detail Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 template <auto start_bit = 7, auto last_bit = 0, detail::IntegralContainer Container = std::string>
+    //requires std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)>  // TODO??: use concepts
     requires std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)>
-struct BitGetter {
+struct BitGetter {  // forward iterator mostly for reading as opposed to above.
     using iterator_category = std::forward_iterator_tag;
     using value_type        = bool;
     using difference_type   = std::ptrdiff_t;
@@ -139,16 +143,41 @@ decltype(auto) vector_char_out(std::vector<char> const &v, std::ostream &os) {
     }
     return os << '\n';
 }
+/* Scott's approach Book:Effective 3ed., Page:18  : delete RVALUE assignement and move constructors, ie LVALUE only.
+// const return value.
+struct Rational {
+    Rational() = default;
+    Rational(int ){};
+    //Rational & operator=(Rational const & ) & { return *this; };  // new in c++11
+    Rational & operator=(Rational const & ) { return *this; };
+};
+
+Rational const operator*(Rational const & lhs, Rational const & rhs ) {
+    auto result = lhs * rhs;
+    return result;
+}
+
+// In cpp03 c++ and beyond: !const allows: + modify a temp in place for subsequent use.
+// In modern c++          : defeats std::move and also (ie. otherwise moving).
+
+//modern way for Scott's approach Book:Effective V3, Page:?19?  : delete RVALUE assignement and move constructors, ie LVALUE only.
+*/
 
 int main() {
+    //int my_int{ (2+7) = 9 };
+    //Rational my_rational{ ( Rational{2} * Rational{7} ) = Rational{9} };
+
     std::bitset<8>    small_sink{};
     std::vector<bool> bsource{ true, true, false, false, true, true, false, false };  // size = 8
     std::copy(begin(bsource), end(bsource), biterator::bitset_output_iter<8>{ small_sink });
+
+    std::cout<< small_sink << std::endl;
     bitset_out(small_sink, std::cout);
 
     std::bitset<256> big_sink{};
                              //012345678901234
     std::string      isource{ "testing testing" };
     std::copy(biterator::begin<6, 0>(isource), biterator::end<6, 0>(isource), biterator::bitset_output_iter<256>{ big_sink });
+    std::cout<< big_sink << std::endl;
     bitset_out(big_sink, std::cout);
 }
