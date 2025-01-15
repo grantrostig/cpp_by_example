@@ -143,30 +143,8 @@ decltype(auto) vector_char_out(std::vector<char> const &v, std::ostream &os) {
     }
     return os << '\n';
 }
-/* Scott's approach Book:Effective 3ed., Page:18  : delete RVALUE assignement and move constructors, ie LVALUE only.
-// const return value.
-struct Rational {
-    Rational() = default;
-    Rational(int ){};
-    //Rational & operator=(Rational const & ) & { return *this; };  // new in c++11
-    Rational & operator=(Rational const & ) { return *this; };
-};
-
-Rational const operator*(Rational const & lhs, Rational const & rhs ) {
-    auto result = lhs * rhs;
-    return result;
-}
-
-// In cpp03 c++ and beyond: !const allows: + modify a temp in place for subsequent use.
-// In modern c++          : defeats std::move and also (ie. otherwise moving).
-
-//modern way for Scott's approach Book:Effective V3, Page:?19?  : delete RVALUE assignement and move constructors, ie LVALUE only.
-*/
 
 int main() {
-    //int my_int{ (2+7) = 9 };
-    //Rational my_rational{ ( Rational{2} * Rational{7} ) = Rational{9} };
-
     std::bitset<8>    small_sink{};
     std::vector<bool> bsource{ true, true, false, false, true, true, false, false };  // size = 8
     std::copy(begin(bsource), end(bsource), biterator::bitset_output_iter<8>{ small_sink });
