@@ -14,51 +14,54 @@
 
 namespace Bitset2 { // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-enum struct Direction { Up, Down };  // TODO??: like enum class?
+enum struct Direction { Up, Down /*, Neither*/ };
 // A mask is a binary pattern that can be applied to a set of bits to either select or alter specific portions of those bits.
 consteval auto direction(auto start_bit = 0, auto last_bit = 7)
-    // TODO??: also: requires bitset like thing?
-    requires std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)> {
+    requires std::is_same_v<decltype(start_bit),decltype(last_bit)> and
+    std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)> {
+    //if(last_bit == start_bit) return Direction::Neither;
     if(last_bit > start_bit) return Direction::Up;
     return Direction::Down;
 }
-consteval auto mask_v(auto bit)
-    requires std::is_integral_v<decltype(bit)> {
+consteval auto make_mask(auto bit_position)
+    requires std::is_integral_v<decltype(bit_position)> {
     uintmax_t mask_value{ 1 };
-    return mask_value << bit;
+    return mask_value << bit_position;
 }
 constexpr auto increment_mask(uintmax_t &mask, Direction d) {
-    if(d == Direction::Up) { mask <<= 1; } else { mask >>= 1; }
+    if(d == Direction::Up) { mask <<= 1; } else  { mask >>= 1; }
+    //if(d == Direction::Up) { mask <<= 1; } else if (d == Direction::Neither) { mask >>= 1; }
+    // Direction::neither is a no-op.
 }
 template <typename Container> concept Integral_container = std::integral<typename Container::value_type>;
 
 template <std::size_t bitset_size>
-decltype(auto) bitset_out(std::bitset<bitset_size> const &bs, std::ostream &os) {
+decltype(auto) bitset_out(std::bitset<bitset_size> const &bs, std::ostream &os) {  // preserve the "ref'ness" of result.
     std::cout << "$$ std::bitset output starting with bit_0:";
-    for(std::size_t i{ 0 }; i < bitset_size; ++i) {
-        std::cout << bs[i]; // << ' ';
+    for(std::size_t i{ bitset_size }; i ; --i) {                                                                                                                                    //for(std::size_t i{ bitset_size - 1 }; i >= 0; --i) {
+        std::cout << bs[i-1]; // << ' ';
     }
     return os << '\n';
 }
-decltype(auto) vector_char_out(std::vector<char> const &v, std::ostream &os) {  // TODO??: NOT used, Jon why is it here? Some test case?
+/*decltype(auto) vector_char_out(std::vector<char> const &v, std::ostream &os) {  // TODO??: NOT used, Jon why is it here? Some test case?
     for(std::size_t i{ 0 }; i < v.size(); ++i) {
         std::cout << short(v[i]) << ' ';
     }
     return os << '\n';
-}
+}*/
 
 } // END Detail Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 template <std::size_t bitset_size>  // value
-struct Bitset_output_itr {
+struct Bitset_output_iter {
     using iterator_category = std::output_iterator_tag;
     using difference_type   = std::ptrdiff_t;
     using value_type        = bool;
-    Bitset_output_itr(std::bitset<bitset_size> & bs, std::size_t initial_offset = 0) : bs_{ &bs }, offset_{ initial_offset } {}
-    auto operator*() -> Bitset_output_itr & { return *this; }
-    auto operator++()    -> Bitset_output_itr & { ++offset_; return *this; }
-    auto operator++(int) -> Bitset_output_itr   { ++offset_; return *this; }
-    auto operator=(bool val) -> Bitset_output_itr & { // TODO??: strange comment? "this one does something"
+    Bitset_output_iter(std::bitset<bitset_size> & bs, std::size_t initial_offset = 0) : bs_{ &bs }, offset_{ initial_offset } {}
+    auto operator*() -> Bitset_output_iter & { return *this; }
+    auto operator++()    -> Bitset_output_iter & { ++offset_; return *this; }
+    auto operator++(int) -> Bitset_output_iter   { ++offset_; return *this; }
+    auto operator=(bool val) -> Bitset_output_iter & { // TODO??: strange comment? "this one does something"
         (*bs_)[offset_] = val;  // operator precidence ()
         return *this;
     }
@@ -67,8 +70,8 @@ private:
     std::size_t              offset_{0};
 };
 
-
-template <auto start_bit = 7, auto last_bit = 0, Detail::Integral_container Container = std::string>  // TODO??: why is 7 start rather than 0?
+//template <auto start_bit = 7, auto last_bit = 0, Detail::Integral_container Container = std::string>  // TODO??: why is 7 start rather than 0?
+template <auto start_bit, auto last_bit, Detail::Integral_container Container = std::string>  // TODO??: why is 7 start rather than 0?
     //requires std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)>  // TODO??: use concepts
     requires std::is_integral_v<decltype(start_bit)> and std::is_integral_v<decltype(last_bit)>
 struct Bitset_forward_iter {  // forward iterator mostly for reading as opposed to above.
@@ -111,8 +114,8 @@ struct Bitset_forward_iter {  // forward iterator mostly for reading as opposed 
     }
     bool operator!=(Bitset_forward_iter const &other) const { return !(*this == other); }
 private:
-    static constexpr uintmax_t         start_mask_  { Detail::mask_v(start_bit) };
-    static constexpr uintmax_t         last_mask_   { Detail::mask_v(last_bit) };
+    static constexpr uintmax_t         start_mask_  { Detail::make_mask(start_bit) };
+    static constexpr uintmax_t         last_mask_   { Detail::make_mask(last_bit) };
     static constexpr Detail::Direction direction_   { Detail::direction(start_bit, last_bit) };
     Container                         *container_;
     typename Container::const_iterator cont_iter_;
@@ -129,16 +132,20 @@ auto end(Container &)    { return Bitset_forward_iter<start_bit, last_bit, Conta
 } // End biterator namespace NNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main() {
-    std::vector<bool> binary_source{ true, true, false, false, true, true, false, false };  // size = 8
+    std::vector<bool> binary_source{ true, true, false, false, true, true, false, false, true };  // size = 9
     std::string       string_source{ "testing testing" }; //012345678901234
-    std::bitset<8>    small_sink{};
-    std::bitset<256>  big_sink{};
+    std::bitset<9>    small_sink{};
+    std::bitset<18>   big_sink{};
 
-    std::copy(begin(binary_source), end(binary_source), Bitset2::Bitset_output_itr<8>{ small_sink });
+    std::copy(begin(binary_source), end(binary_source), Bitset2::Bitset_output_iter{ small_sink });
     std::cout<< "$$ small_sink:"<< small_sink << std::endl;
     Bitset2::Detail::bitset_out(small_sink, std::cout);
 
-    std::copy(Bitset2::begin<6, 0>(string_source), Bitset2::end<6, 0>(string_source), Bitset2::Bitset_output_itr<256>{ big_sink });
+    std::copy(Bitset2::begin<0, 3>(string_source), Bitset2::end<0, 3>(string_source), Bitset2::Bitset_output_iter{ big_sink });
+
+    std::copy(Bitset2::begin<5, 0>(string_source), Bitset2::end<5, 0>(string_source), Bitset2::Bitset_output_iter{ big_sink });
     std::cout<< "\n$$ big_sink:"<< big_sink << std::endl;
     Bitset2::Detail::bitset_out(big_sink, std::cout);
+
+    std::cout<< "\n###" << std::endl;
 }
