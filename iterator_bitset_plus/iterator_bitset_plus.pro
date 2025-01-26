@@ -115,9 +115,11 @@ HEADERS += \
 #    KitchenSink.h           \
 #    math_grostig.h          \
 #    random_toolkit.h        \
-#    $$PWD/..h               \ # probably wrong
+ \#    $$PWD/..h               \ # probably wrong
+    biterator.hpp
 
 SOURCES += \
+    biterator.cpp \
     main.cpp \
 #    iostreams.cpp \
 #    global_entities.cpp \

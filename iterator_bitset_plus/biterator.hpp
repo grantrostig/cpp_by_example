@@ -2,6 +2,7 @@
 // Inspired by Jon Kalb's code
 // Allows manipulation of bits in a bitset, beyond what is supplied in std::  Could be useful in brainwallet project.
 
+#include <bitset>
 #include <cassert>
 #include <iostream>
 
