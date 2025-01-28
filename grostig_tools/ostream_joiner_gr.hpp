@@ -1,3 +1,5 @@
+/* Copyright (c) 2017 Grant Rostig. All rights reserved.
+   License: Boost v1.0 */
 #pragma once
 #include <string>
 namespace Ostream_detail {

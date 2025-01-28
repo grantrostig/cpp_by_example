@@ -1,3 +1,5 @@
+# Copyright (c) UNKNOW, but otherwise: 2017 Grant Rostig. All rights reserved. License: Boost v1.0 
+   
 # THIS gives us the path/filename to this makefile. it is used to trigger full rebuilds if the makefile itself has changed.
 THIS := $(realpath $(firstword $(MAKEFILE_LIST)))
 

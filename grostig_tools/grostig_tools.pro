@@ -65,10 +65,10 @@ QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2
     #-DBOOST_SYSTEM_NO_DEPRECATED \	# not sure what it does.
 
 LIBS += \                               #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Link-Options.html
+    -lstdc++exp                 \
    #-lssl                       \       # Requires:     -lcrypto
    #-lcrypto                    \       # Needed with:  -lssl
-    -lcryptopp                  \
-    -lstdc++exp                 \
+   #-lcryptopp                  \
    #-lpthread                   \
    #-lstdc++_libbacktrace       \       # allowed stack_trace to work in gcc 13, not 14, there needed -lstdc++exp
    #-lbson                      \
@@ -126,7 +126,6 @@ HEADERS += \
 #    $$PWD/..h               \ # probably wrong
 
 SOURCES += \
-    catch_amalgamated.cpp \
     main.cpp \
     global_entities.cpp \
     iostreams.cpp \
@@ -246,6 +245,7 @@ SOURCES += \
 #}
 
 DISTFILES += \
+    catch_amalgamated.cpp.txt \
     CMakeLists.cmake \
     Makefile \
 #    Qt/icons/gallery/index.theme \

@@ -1,3 +1,5 @@
+/* Copyright (c) 2017 Grant Rostig. All rights reserved.
+   License: Boost v1.0 */
 #include "global_entities.hpp"
 #include <cassert>
 #include <iostream>

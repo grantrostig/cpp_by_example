@@ -1,5 +1,6 @@
 /** NOT PRODUCTION QUALITY CODE, just shows learning/teaching example, not real programming, don't copy this style, just playing around
-   Copyright (c) 2021 Grant Rostig. All rights reserved. Use by written permission only, evidenced with blue ink on paper or a verifyable (pgp) email interaction with Grant Rostig.
+   Copyright (c) 2021 Grant Rostig. All rights reserved.
+   License: Boost v1.0
    >> Permission is granted to use these files during and in support of CppMSG meetup group events and projects. This is done in the name of: Eckankar, The Path of Spritual Freedom.
 
 // Copyright Grant Rostig 2015 - 2021. Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)

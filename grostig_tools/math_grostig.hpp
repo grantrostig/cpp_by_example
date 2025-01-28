@@ -1,16 +1,11 @@
-/* math_grostig.h - Provides some math functions not yet found in production
-   libraries
+/* math_grostig.h - Provides some math functions not yet found in production libraries
 
-   Copyright (c) 2017 Grant Rostig. All rights reserved. Use by written
-   permission only, evidenced with blue ink on paper or a verifyable (pgp) email
-   interaction with Grant Rostig.
-   Permission is granted to use these files during and in support of CppMSG
-   meetup group events and projects.
+   Copyright (c) 2017 Grant Rostig. All rights reserved.
+   License: Boost v1.0
+   Permission is granted to use these files during and in support of CppMSG meetup group events and projects.
 
    Inspired by:
-
    Shows how to:
-   -
 */
 
 #include "cpp_headers.hpp"
