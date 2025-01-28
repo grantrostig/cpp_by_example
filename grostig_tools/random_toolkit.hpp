@@ -1,7 +1,7 @@
-// (c) Grant Rostig, grantrostig.com, Boost 1.0 license
+// Copyright 2025 (c) Grant Rostig, grantrostig.com, Boost 1.0 license
 #ifndef RANDOM_TOOLKIT_H
 #define RANDOM_TOOLKIT_H
-#include "../grostig_tools/cpp_headers.h"
+#include "../grostig_tools/cpp_headers.hpp"
 
 /*
 Copyright [yyyy] [name of copyright owner]

@@ -1,7 +1,7 @@
 /** Copyright (c) Grant Rostig, grantrostig.com, Boost 1.0 license
     Snippet
 */
-#include "global_entities.h"
+#include "global_entities.hpp"
 //#include <bits/stdc++.h>
 #include <gsl/gsl>      // $ sudo dnf install guidelines-support-library-devel
 #include <cassert>

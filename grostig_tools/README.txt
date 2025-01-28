@@ -1,9 +1,10 @@
-grostig_tools
+Readme for directory of: grostig_tools
+Copyright 2025 Grant Rostig
+License: Boost v1.0
 
-headers common to grostig projects
+Headers, Source files, and others usefull to Modern C++ development projects
 
-~ Searchable Symbols in the Source Code ~
-
+*** Searchable Symbols in the Source Code ***
 This code is open to code-review, please note that:
 SYMBOL     MEANING
  TODO:	   the principal programmer needs to: add, or do, or fix by him/herself.

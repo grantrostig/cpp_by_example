@@ -1,3 +1,4 @@
+// Copyright 2025 (c) Grant Rostig, grantrostig.com, Boost 1.0 license
 /* Copyright [yyyy] [name of copyright owner]
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +50,7 @@ However, this design means the function is poorly suited for use with most stand
 tend to expect niladic function objects as arguments.
 */
 
-#include "random_toolkit.h"
+#include "random_toolkit.hpp"
 namespace grostig {
 
 std::mt19937_64 & global_urbg() {

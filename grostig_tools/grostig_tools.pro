@@ -112,21 +112,27 @@ LIBS += \                               #https://gcc.gnu.org/onlinedocs/gcc-13.2
 #}
 
 HEADERS += \
-    ut.hpp
-#    boost_headers.h         \
-#    cpp_headers.h           \
-#    global_entities.h       \
-#    gnuplot-iostream.h      \
+    boost_headers.hpp \
+    catch_amalgamated.hpp \
+    cpp_headers.hpp \
+    global_entities.hpp \
+    gnuplot-iostream.hpp \
+    math_grostig.hpp \
+    ostream_joiner_gr.hpp \
+    random_toolkit.hpp \
+    ut.hpp                  \
+    README.txt              \
 #    KitchenSink.h           \
-#    math_grostig.h          \
-#    random_toolkit.h        \
 #    $$PWD/..h               \ # probably wrong
 
 SOURCES += \
+    catch_amalgamated.cpp \
     main.cpp \
-#    iostreams.cpp \
-#    global_entities.cpp \
-#    random_toolkit.cpp \
+    global_entities.cpp \
+    iostreams.cpp \
+    ostream_joiner_gr.cpp \
+    random_toolkit.cpp \
+
 ####################################################
 
 # // Boost specific defines.
@@ -239,10 +245,9 @@ SOURCES += \
 #    LIBS += -L$$BOOST_PATH/stage/lib
 #}
 
-#DISTFILES += \
-#    ../../bin/mk_src.sh \
-#    CMakeLists.cmake \
-#    Makefile \
+DISTFILES += \
+    CMakeLists.cmake \
+    Makefile \
 #    Qt/icons/gallery/index.theme \
 #    Qt/icons/gallery/20x20/back.png \
 #    Qt/icons/gallery/20x20/drawer.png \
@@ -323,3 +328,7 @@ SOURCES += \
 #    CPP11FLAG = -std=c++0x
 #    CPP14FLAG = -std=c++14
 #}
+
+DISTFILES += \
+    CMakeLists.cmake \
+    Makefile

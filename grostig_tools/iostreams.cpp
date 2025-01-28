@@ -1,4 +1,4 @@
-#include "global_entities.h"
+#include "global_entities.hpp"
 #include <cassert>
 #include <iostream>
 /** There are two semantic EOFs:
