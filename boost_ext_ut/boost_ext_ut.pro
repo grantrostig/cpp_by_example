@@ -1,7 +1,8 @@
 # Copyright (c) Grant Rostig, grantrostig.com, Boost 1.0 license
 # Snippet
-#CONFIG += c++latest
-#CONFIG += c++20
+#CONFIG += c++latest    # 2a
+#CONFIG += c++23        # no effect?
+#CONFIG += c++20        # 2a
 #CONFIG += c++11
 
 TEMPLATE = app
@@ -30,19 +31,21 @@ QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2
         #-fconcepts             \
         #-funsigned-char         \
         \
-        -std=c++23		    \
+        -std=c++26		    \
+        #-std=c++23		    \
         #-std=gnu++23		    \
         -O0 		            \
         -g3 		            \
         #-ggdb 		            \
         #-ggdb3 	            \
+        #-fmodules-ts
         -fconcepts              \
         #-pedantic              \
         #-pedantic-errors       \
         #-fsanitize=undefined #60K link errors possible   \
         -Wall   		        \  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
         -Wextra   		        \
-        -Weffc++                \
+        #-Weffc++                \
         -Wconversion            \
         -Wsign-conversion       \
         -Wdeprecated-declarations\
@@ -62,8 +65,8 @@ QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2
         #-DBOOST_SYSTEM_NO_DEPRECATED \  	# not sure what it does.
 
 LIBS += \                               #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Link-Options.html
-    -lpthread               \
-    -lstdc++exp
+   #-lpthread               \
+   #-lstdc++exp
    #-lstdc++_libbacktrace   \       # allowed stack_trace to work in gcc 13, not 14, there needed -lstdc++exp
    #-lbson                  \
    #-lmongoc                \
@@ -115,11 +118,11 @@ HEADERS += \
 #    KitchenSink.h           \
 #    math_grostig.h          \
 #    random_toolkit.h        \
-#    $$PWD/..h               \ # probably wrong
+ \#    $$PWD/..h               \ # probably wrong
+    ut.hpp
 
 SOURCES += \
     main.cpp \
 #    iostreams.cpp \
 #    global_entities.cpp \
 #    random_toolkit.cpp \
-####################################################
