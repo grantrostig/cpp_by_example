@@ -14,7 +14,12 @@ using std::cin; using std::cout; using std::cerr; using std::clog; using std::en
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
+namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 /** gives a source location for printing.  Used for debugging. */
+std::string source_loc();           // 3 forward declaration, needed?
+extern void stacktrace_register();
+void crash_signals_register();
+
 std::string
 source_loc() {
     using loc = std::source_location;
@@ -71,3 +76,4 @@ auto crash_signals_register() -> void {
     std::signal( SIGABRT, crash_tracer_SIGABRT );
     std::signal( SIGSEGV, crash_tracer );
 }
+} // End Namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN

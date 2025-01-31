@@ -1,8 +1,11 @@
-/* Copyright (c) 2017 Grant Rostig. All rights reserved.
-   License: Boost v1.0 */
+/* Copyright (c) 2017 Grant Rostig. All rights reserved. License: Boost v1.0 */
 #include "global_entities.hpp"
 #include <cassert>
 #include <iostream>
+using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
+using namespace std::string_literals;
+using namespace std::chrono_literals;
+
 /** There are two semantic EOFs:
  *  1) eof_Key_char_singular is a "We probably don't handle eof well."); // todo: more eof handling needed
             file_status = File_status::eof_file_desc logical eof intended by the user by typing in a CTL-D,
