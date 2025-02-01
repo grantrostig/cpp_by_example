@@ -54,7 +54,7 @@ private:
 };
 
 /*
-    Bitsource_forward_iter is an forward iterator that reads bits from source container of integral values (an Integral_container).
+    Bitsource_forward_iter is an forward iterator that reads bits from a source container of integral values (an Integral_container).
     The caller specifies a range of bits of each source value.
 */
 
