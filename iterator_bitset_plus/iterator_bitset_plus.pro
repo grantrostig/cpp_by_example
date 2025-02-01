@@ -120,8 +120,9 @@ HEADERS += \
 
 SOURCES += \
     biterator.cpp \
-    main.cpp \
+#   main.cpp \
+    main.t.cpp
 #    iostreams.cpp \
 #    global_entities.cpp \
 #    random_toolkit.cpp \
-####################################################
+ \####################################################
