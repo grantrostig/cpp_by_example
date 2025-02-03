@@ -1,22 +1,27 @@
 # Copyright (c) Grant Rostig, grantrostig.com, Boost 1.0 license
-# Snippet
+
+# Either these three or the next 2, for app or lib, respectively.
+ SOURCES  = main.cpp           # we add SOURCES others below.
+ TEMPLATE = app                 # comment out these 3,
+ CONFIG +=  console
+#TEMPLATE = lib                 # OR comment out these 2.
+#CONFIG +=  staticlib
+
 #CONFIG += c++latest    # 2a
 #CONFIG += c++23        # no effect?
 #CONFIG += c++20        # 2a
 #CONFIG += c++11
 
-TEMPLATE = app
- CONFIG += cmdline
-#CONFIG += console  # windowsonly
-#TEMPLATE = lib
-#CONFIG += staticlib
  CONFIG -= app_bundle
- CONFIG -= qt
- CONFIG += warn_on
-#CONFIG += warn_off
- CONFIG += thread
- CONFIG += exceptions
+#CONFIG += cmdline
+#CONFIG += console  # windowsonly
+#CONFIG += exceptions
 #CONFIG += exceptions_off
+ CONFIG -= qt
+#CONFIG += staticlib
+#CONFIG += thread
+#CONFIG += warn_on
+#CONFIG += warn_off
 
 #TARGET = eigen_playground
 # ??CONFIG += QMAKE_CFLAGS_WARN_ON
@@ -28,48 +33,50 @@ TEMPLATE = app
 #QMAKE_CXX = clang++
 
 QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/
-    #-fconcepts             \
-    #-funsigned-char        \
-                            \
-    -std=c++26		        \
-    #-std=c++23		        \
-    #-std=gnu++23		    \
-    -O0 		            \
-    -g3 		            \
-    #-ggdb 		            \
-    #-ggdb3 	            \
-    #-fmodules-ts           \
-    -fconcepts              \
-    #-pedantic              \
-    #-pedantic-errors       \
-    #-fsanitize=undefined   \       # 60K link errors possible \
-    -Wall   		        \       # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html \
-    -Wextra   		        \
-    -Weffc++                \
-    -Wconversion            \
-    -Wsign-conversion       \
-    -Wdeprecated-declarations\
-    #-Wno-comment 		    \
-    #-Wno-uninitialized 	\
-    #-Wno-reorder 		    \
-    #-Wno-unused-parameter 	\
-    #-Wno-unused-variable   \
-    #-Wno-unused-const-variable \
-    #-std=c++17             \       #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Link-Options.html
-    #-std=gnu++17           \
-    #-std=gnu++1z           \
-    #-std=c++20             \
-    #-std=gnu++20           \
-    #-std=c++2a             \
-    #-DBOOST_LOG_DYN_LINK   \  		# on compile line not link line.
-    #-DBOOST_SYSTEM_NO_DEPRECATED \	# not sure what it does.
+   #-fconcepts                  \
+   #-funsigned-char             \
+   #-fmodules-ts                \
+   #-fsanitize=undefined        \       # 60K link errors possible \
+                                \
+   #-std=c++26		            \
+    -std=c++23		            \
+   #-std=gnu++23		        \
+    -g3 		                \
+    -O0 		                \
+   #-ggdb 		                \
+   #-ggdb3 	                    \
+   #-pedantic                   \
+   #-pedantic-errors            \
+    -Wall   		            \       # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html \
+   #-Wconversion                \
+   #-Wdeprecated-declarations   \
+   #-Weffc++                    \
+    -Wextra   		            \
+   #-Wsign-conversion           \
+   #-Wno-comment 		        \
+   #-Wno-reorder 		        \
+   #-Wno-uninitialized 	        \
+   #-Wno-unused-parameter 	    \
+   #-Wno-unused-variable        \
+   #-Wno-unused-const-variable  \
+   #-std=c++17                  \       #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Link-Options.html
+   #-std=gnu++17                \
+   #-std=gnu++1z                \
+   #-std=c++20                  \
+   #-std=gnu++20                \
+   #-std=c++2a                  \
+   #-std=c++2b                  \
+   #-DBOOST_LOG_DYN_LINK        \  		# on compile line not link line.
+   #-DBOOST_SYSTEM_NO_DEPRECATED \	    # not sure what it does.
 
-LIBS += \                               #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Link-Options.html
-    -lstdc++exp                 \
-   #-lssl                       \       # Requires:     -lcrypto
+LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Link-Options.html
    #-lcrypto                    \       # Needed with:  -lssl
    #-lcryptopp                  \
+    -lpthread                   \
+   #-lssl                       \       # Requires:     -lcrypto
    #-lpthread                   \
+    -lrt                        \
+    -lstdc++exp                 \
    #-lstdc++_libbacktrace       \       # allowed stack_trace to work in gcc 13, not 14, there needed -lstdc++exp
    #-lbson                      \
    #-lmongoc                    \
@@ -86,7 +93,7 @@ LIBS += \                               #https://gcc.gnu.org/onlinedocs/gcc-13.2
    #-L/usr/lib64                \
    #--verbose                   \
                                 \
-#gcc libstdc++ Table 3.1. C++ Command Options
+# DOCUMENTATION: gcc libstdc++ Table 3.1. C++ Command Options
    #-std=c++98 or -std=c++03 	Use the 1998 ISO C++ standard plus amendments.
    #-std=gnu++98 or -std=gnu++03 	As directly above, with GNU extensions.
    #-std=c++11	Use the 2011 ISO C++ standard.
@@ -111,27 +118,25 @@ LIBS += \                               #https://gcc.gnu.org/onlinedocs/gcc-13.2
 #	error("Failed to open config.txt")
 #}
 
-HEADERS += \
-    boost_headers.hpp \
-    catch_amalgamated.hpp \
-    cpp_headers.hpp \
-    global_entities.hpp \
-    gnuplot-iostream.hpp \
-    math_grostig.hpp \
-    ostream_joiner_gr.hpp \
-    random_toolkit.hpp \
-    ut.hpp                  \
-    README.txt              \
-#    KitchenSink.h           \
-#    $$PWD/..h               \ # probably wrong
+HEADERS +=                      \
+    boost_headers.hpp           \
+    catch_amalgamated.hpp       \
+    cpp_headers.hpp             \
+    global_entities.hpp         \
+    gnuplot-iostream.hpp        \
+    math_grostig.hpp            \
+    ostream_joiner_gr.hpp       \
+    random_toolkit.hpp          \
+    ut.hpp                      \
+   #$$PWD/..h                   \   # probably wrong
 
-SOURCES += \
-    main.cpp \
-    global_entities.cpp \
-    iostreams.cpp \
-    math_grostig.cpp \
-    ostream_joiner_gr.cpp \
-    random_toolkit.cpp \
+SOURCES +=                      \
+    #NOT HERE main.cpp          \   # declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
+    global_entities.cpp         \
+    iostreams.cpp               \
+    math_grostig.cpp            \
+    ostream_joiner_gr.cpp       \
+    random_toolkit.cpp          \
 
 ####################################################
 
@@ -245,10 +250,11 @@ SOURCES += \
 #    LIBS += -L$$BOOST_PATH/stage/lib
 #}
 
-DISTFILES += \
-    catch_amalgamated.cpp.txt \
-    CMakeLists.cmake \
-    Makefile \
+#DISTFILES += \
+    #Makefile.txt                            \
+    #README.txt                              \
+    #catch_amalgamated.cpp.txt               \
+    #CMakeLists.cmake                        \
 #    Qt/icons/gallery/index.theme \
 #    Qt/icons/gallery/20x20/back.png \
 #    Qt/icons/gallery/20x20/drawer.png \
@@ -329,7 +335,3 @@ DISTFILES += \
 #    CPP11FLAG = -std=c++0x
 #    CPP14FLAG = -std=c++14
 #}
-
-DISTFILES += \
-    CMakeLists.cmake \
-    Makefile
