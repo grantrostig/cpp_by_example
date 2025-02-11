@@ -5,6 +5,7 @@
 #CONFIG +=  console
  TEMPLATE = lib                 # OR comment out these 2.
  CONFIG +=  staticlib
+
  CONFIG -= app_bundle
  CONFIG -= qt
  CONFIG += c++23

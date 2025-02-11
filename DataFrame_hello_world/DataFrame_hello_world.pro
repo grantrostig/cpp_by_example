@@ -72,11 +72,12 @@ QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2
 LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Link-Options.html
    #-lcrypto                    \       # Needed with:  -lssl
    #-lcryptopp                  \
-    -lpthread                   \
+    -lDataFrame                \
+   #-lpthread                   \
    #-lssl                       \       # Requires:     -lcrypto
    #-lpthread                   \
-    -lrt                        \
-    -lstdc++exp                 \
+   #-lrt                        \
+   #-lstdc++exp                 \
    #-lstdc++_libbacktrace       \       # allowed stack_trace to work in gcc 13, not 14, there needed -lstdc++exp
    #-lbson                      \
    #-lmongoc                    \
@@ -119,24 +120,24 @@ LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.
 #}
 
 HEADERS +=                      \
-    boost_headers.hpp           \
-    catch_amalgamated.hpp       \
-    cpp_headers.hpp             \
-    global_entities.hpp         \
-    gnuplot-iostream.hpp        \
-    math_grostig.hpp            \
-    ostream_joiner_gr.hpp       \
-    random_toolkit.hpp          \
-    ut.hpp                      \
+   #boost_headers.hpp           \
+   #catch_amalgamated.hpp       \
+   #cpp_headers.hpp             \
+   #global_entities.hpp         \
+   #gnuplot-iostream.hpp        \
+   #math_grostig.hpp            \
+   #ostream_joiner_gr.hpp       \
+   #random_toolkit.hpp          \
+   #ut.hpp                      \
    #$$PWD/..h                   \   # probably wrong
 
 SOURCES +=                      \
     #NOT HERE main.cpp          \   # declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
-    global_entities.cpp         \
-    iostreams.cpp               \
-    math_grostig.cpp            \
-    ostream_joiner_gr.cpp       \
-    random_toolkit.cpp          \
+   #global_entities.cpp         \
+   #iostreams.cpp               \
+   #math_grostig.cpp            \
+   #ostream_joiner_gr.cpp       \
+   #random_toolkit.cpp          \
 
 ####################################################
 
