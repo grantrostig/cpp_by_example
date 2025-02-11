@@ -53,33 +53,31 @@ int main(int, char *[])  {
     std::vector<std::string>    cool_col = { "Azadi", "Hello", " World", "!", "Hype", "cubic spline", "Shawshank", "Silverado", "Arash", "Pardis" };
     std::vector<double>         dbl_col2 = { 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0 };
 
-    ULDataFrame                 ul_df2;             // Also, you can load data into a DataFrame all at once. In this case again the data is moved to the DataFrame.
+    ULDataFrame ul_df2;             // Also, you can load data into a DataFrame all at once. In this case again the data is moved to the DataFrame.
     ul_df2.load_data(std::move(idx_col2),
                      std::make_pair("string col",  str_col),
                      std::make_pair("Cool Column", cool_col),
                      std::make_pair("numbers",     dbl_col2));
 
-    StrDataFrame    ibm_df; // Also, you can load data into a DataFrame from a file, supporting a few different formats.
+    const auto &cool_col_ref = ul_df2.get_column<std::string>("Cool Column");  // get_column(): involves 1 or sometimes 2 hash-table lookups. So, you should not call it repeatedly in a loop. Instead get a reference to it and use the reference.
+    const auto &str_col_ref =  ul_df2.get_column<std::string>("string col");
+    std::cout << "$$ cool_col_ref[1] , cool_col_ref[2] , cool_col_ref[3] = "; std::cout << cool_col_ref[1] << cool_col_ref[2] << cool_col_ref[3] << std::endl;
+    std::cout << "$$ Str Column = "; for (const auto &str : str_col_ref) std::cout << str << ", "; std::cout << std::endl;
+
+    std::cout << "$$ ul_df2.write<std::ostream, std::string, double>(std::cout, io_format::csv2) :\n$$";  // You can write the data to a file or stdout in a few formats. You must specify all the column types, but only once.
+    ul_df2.write<std::ostream, std::string, double>(std::cout, io_format::csv2); std::cout<<" :\n$$";    // You can write the data to a file or stdout in a few formats. You must specify all the column types, but only once.
+
+    StrDataFrame ibm_df; // Also, you can load data into a DataFrame from a file, supporting a few different formats.
     ibm_df.read("IBM.csv", io_format::csv2);
            // To access a column, you must know its name (or index) and its type. In case of a "standard" DataFrame (not a view),
            // the columns are returned as a reference to a std::vector of type of that column.
-
-    const auto  &cool_col_ref = ul_df2.get_column<std::string>("Cool Column");  // get_column(): involves 1 or sometimes 2 hash-table lookups. So, you should not call it repeatedly in a loop. Instead get a reference to it and use the reference.
-    const auto  &str_col_ref =  ul_df2.get_column<std::string>("string col");
-    std::cout << "cool_col_ref[1] , cool_col_ref[2] , cool_col_ref[3] = "; std::cout << cool_col_ref[1] << cool_col_ref[2] << cool_col_ref[3] << std::endl;
-    std::cout << "Str Column = "; for (const auto &str : str_col_ref) std::cout << str << ", "; std::cout << std::endl;
-
-    std::cout << "There are " << ibm_df.get_column<double>("IBM_Close").size() << " IBM close prices." << std::endl;
-    std::cout << "There are " << ibm_df.get_index().size() << " IBM indices." << std::endl;
-
-    std::cout <<
- "$$ul_df2.write<std::ostream, std::string, double>(std::cout, io_format::csv2) :\n$$";  // You can write the data to a file or stdout in a few formats. You must specify all the column types, but only once.
-    ul_df2.write<std::ostream, std::string, double>(std::cout, io_format::csv2); std::cout<<" :\n$$";  // You can write the data to a file or stdout in a few formats. You must specify all the column types, but only once.
+    std::cout << "$$ There are " << ibm_df.get_column<double>("IBM_Close").size() << " IBM close prices." << std::endl;
+    std::cout << "$$ There are " << ibm_df.get_index().size() << " IBM indices." << std::endl;
 
     ibm_df.write<double, long>("/tmp/test.json", io_format::json);
  // One can serialize and deserialize the DataFrame both in string and binary formats. This could be used to transmit a DataFrame from one node to another or store a DataFrame in databases, caches, ...
-    const std::string  ibm_df_serialized = ibm_df.serialize<double, long>();
-    StrDataFrame       ibm_df_2;
+    const std::string ibm_df_serialized = ibm_df.serialize<double, long>();
+    StrDataFrame ibm_df_2;
     ibm_df_2.deserialize(ibm_df_serialized);
 
     using ul_idx_t = ULDataFrame::IndexType;  // unsigned long.
@@ -87,57 +85,43 @@ int main(int, char *[])  {
            // Sort first by the index column in ascending order then by "string col" column in descending order.
     ul_df2.sort<ul_idx_t, std::string, double, std::string>(DF_INDEX_COL_NAME, sort_spec::ascen, "string col", sort_spec::desce);
 
-           // Get another DataFrame by selecting on one or multiple columns. One must specify all the column types, but only once.
     auto    above_150_fn = [](const std::string &, const double &val)-> bool { return (val > 150.0); };
-    auto    above_150_df = ibm_df.get_data_by_sel<double, decltype(above_150_fn), double, long>("IBM_Close", above_150_fn);
+    auto    above_150_df = ibm_df.get_data_by_sel<double, decltype(above_150_fn), double, long>("IBM_Close", above_150_fn); // Get DataFrame by selecting on one or multiple columns. One must specify all the column types, but only once.
+    auto    above_150_view = ibm_df.get_view_by_sel<double, decltype(above_150_fn), double, long>("IBM_Close", above_150_fn); // Or, a view.
 
-           // Or, you could choose to get a view. See docs for views.
-    auto    above_150_view = ibm_df.get_view_by_sel<double, decltype(above_150_fn), double, long>("IBM_Close", above_150_fn);
-
- // You can get another DataFrame by group-bying on one or multiple columns. You must specify only the type(s) of column(s) you are group-bying.
- //   Group-by column dbl_col, and specifying how to summarize the index column and each of the other columns.
+ // Get another DataFrame by group-bying on one or multiple columns. You must specify only the type(s) of column(s) you are group-bying.
+ //   Group-by column: dbl_col, and specifying how to summarize the index column and each of the other columns.
     auto    gb_df = ul_df1.groupby1<double>("dbl_col",
-                                         LastVisitor<ul_idx_t, ul_idx_t>(),
-                                         std::make_tuple("integers",    "sum_int",      SumVisitor<int>()),
-                                         std::make_tuple("my_data_col", "last_my_data", LastVisitor<MyData>()));
+                                             LastVisitor<ul_idx_t, ul_idx_t>(),
+                                             std::make_tuple("integers",    "sum_int",      SumVisitor<int>()),
+                                             std::make_tuple("my_data_col", "last_my_data", LastVisitor<MyData>()));
 
- // You can run statistical, financial, ML,+ algorithms on one or multiple columns by using visitors. You must specify the column(s) type(s).
- // TODO??: what?: The visitor's data column is of type double and its index column is of type std::string.
+ // Run statistical, financial, ML,+ algorithms on one or multiple columns by using visitors. You must specify the column(s) type(s).
+ // TODO??: what does this mean?: The visitor's data column is of type double and its index column is of type std::string.
     StdVisitor<double, std::string> stdev_v;
-
     ibm_df.visit<double>("IBM_Close", stdev_v);
-    std::cout << "Standard deviation of IBM close prices: " << stdev_v.get_result() << std::endl;
+    std::cout << "$$ Standard deviation of IBM close prices: " << stdev_v.get_result() << std::endl;
 
-    DTDataFrame ibm_dt_df;  // Two DataFrames with index type of DateTime which is a handy object for date/time manipulations.
+    DTDataFrame ibm_dt_df;  // DataFrames with index type of DateTime which is a handy object for date/time manipulations.
+    ibm_dt_df.read( "DT_IBM.csv",  io_format::csv2);  // Read the AAPL and IBM market data. Data for these two stocks start and end at different dates. But there is overlapping data between them.
+    ibm_dt_df.fill_missing<double>({ "IBM_Close", "IBM_Open", "IBM_High", "IBM_Low" }, fill_policy::linear_interpolate); // First let’s make sure if there are missing data in our important columns, we fill them up.
     DTDataFrame aapl_dt_df;
-
- // Read the AAPL and IBM market data. Data for these two stocks start and end at different dates. But there is overlapping data between them.
-    ibm_dt_df.read( "DT_IBM.csv",  io_format::csv2);
     aapl_dt_df.read("DT_AAPL.csv", io_format::csv2);
-
- // First let’s make sure if there are missing data in our important columns, we fill them up.
-    ibm_dt_df.fill_missing<double>({ "IBM_Close", "IBM_Open", "IBM_High", "IBM_Low" }, fill_policy::linear_interpolate);
-
- // Now we join the AAPL and IBM DataFrames using their indices and applying inner-join policy.
-    DTDataFrame aapl_ibm = ibm_dt_df.join_by_index<DTDataFrame, double, long>(aapl_dt_df, join_policy::inner_join);
-
+                                    // TODO??: Do this for aapl too?: ibm_dt_df.fill_missing<double>({ "IBM_Close", "IBM_Open", "IBM_High", "IBM_Low" }, fill_policy::linear_interpolate); // First let’s make sure if there are missing data in our important columns, we fill them up.
+    DTDataFrame aapl_ibm = ibm_dt_df.join_by_index<DTDataFrame, double, long>(aapl_dt_df, join_policy::inner_join); // Now we join the AAPL and IBM DataFrames using their indices and applying inner-join policy.
  // Now we calculate the Pearson correlation coefficient between AAPL and IBM close prices. The visitor's data columns are of type double and its index column is of type DateTime.
     CorrVisitor<double, DateTime> corrl_v;
-
-    std::cout << "Correlation between AAPL and IBM close prices: "
+    std::cout << "$$ Correlation between AAPL and IBM close prices: "
               << aapl_ibm.visit<double, double>("AAPL_Close", "IBM_Close", corrl_v).get_result() << std::endl;
 
  // Now let’s do something more sophisticated and calculate rolling exponentially weighted correlations between IBM and Apple close prices.
  //   Since this is a rolling, moving, analysis, the result is a vector of exponentially weighted correlations for each date in the data stream.
     ewm_corr_v<double> ewmcorr { exponential_decay_spec::span, 3 };
     const auto        &ewmcorr_result = aapl_ibm.single_act_visit<double, double>("AAPL_Close", "IBM_Close", ewmcorr).get_result();
-
-    std::cout << "The last exponentailly weighted correlation between AAPL and IBM close prices: " << ewmcorr_result.back() << std::endl;
+    std::cout << "$$ The last exponentailly weighted correlation between AAPL and IBM close prices: " << ewmcorr_result.back() << std::endl;
 
     using dt_idx_t = DTDataFrame::IndexType;  // This is just DateTime.
-
- // Apple data is daily. Let’s create 10-day OHLC (plus a bunch of other stats) for close prices.
-    DTDataFrame aapl_ohlc =
+    DTDataFrame aapl_ohlc =                   // Apple data is daily. Let’s create 10-day OHLC (plus a bunch of other stats) for close prices.
         aapl_dt_df.bucketize(
             bucket_type::by_count,
             10,
@@ -158,33 +142,27 @@ int main(int, char *[])  {
                                         // "Return Vector" column is a column of std::vector<double>'s
             std::make_tuple("AAPL_Close",  "Return Vector", ReturnVisitor<double, dt_idx_t>(return_policy::log)),
             std::make_tuple("AAPL_Volume", "Volume",        SumVisitor<long, dt_idx_t>()));
+    std::cout <<"$$ aapl_ohlc.write<std::ostream, double, long, std::vector<double>>(std::cout, io_format::csv2);\n$$Warning: large amount of output."<<std::endl;
+    aapl_ohlc.write<std::ostream, double, long, std::vector<double>>(std::cout, io_format::csv2); std::cout<<std::endl; // Warning: large amount of output
+    auto    random_view = aapl_dt_df.get_view_by_rand<double, long>(random_policy::frac_rows_no_seed, 0.35); // Get a view of a random sample of appel data. We randomly sample 35% of the data.
 
-    std::cout <<"$$aapl_ohlc.write<std::ostream, double, long, std::vector<double>>(std::cout, io_format::csv2);\n$$Warning: large amount of output."<<std::endl;
-    aapl_ohlc.write<std::ostream, double, long, std::vector<double>>(std::cout, io_format::csv2); // Warning: large amount of output
-
- // Get a view of a random sample of appel data. We randomly sample 35% of the data.
-    auto    random_view = aapl_dt_df.get_view_by_rand<double, long>(random_policy::frac_rows_no_seed, 0.35);
-
- // ---------------------------------------------------
  // Now let’s do some stuff that are a little more involved (multi steps). There are a lot of theories,
  // math, and procedures that I am skipping to explain here. See docs for more details.
  // NOTE: I am applying the following analysis to financial data but it equally applies to other scientific fields.
  // Let’s calculate IBM daily returns and then try to find clusters of similar patterns in those returns.
  // We will use k-means clustering to do that.
     ReturnVisitor<double>   return_v { return_policy::log };
-
  // Calculate the returns and load them as a column.
     ibm_dt_df.load_result_as_column<double>("IBM_Close", std::move(return_v), "IBM_Return");
     ibm_dt_df.get_column<double>("IBM_Return")[0] = 0;                      // Remove the NaN. It messes things up.
 
- // Let's try to find 4 clusters.
+ // Try to find 4 clusters.
     KMeansVisitor<4, double, DateTime> kmeans_v { 1000 };  // Iterate at most 1000 times.
-
     ibm_dt_df.single_act_visit<double>("IBM_Return", kmeans_v);
 
     const auto &cluster_means = kmeans_v.get_result();
-    std::cout << "$$Means of clusters are: "; for (const auto &mean : cluster_means) std::cout << mean << ", "; std::cout << std::endl;
-    std::cout << "\n$$Clusters are: ";                     // Warning: This produces a very large output.
+    std::cout << "$$ Means of clusters are: "; for (const auto &mean : cluster_means) std::cout << mean << ", "; std::cout << std::endl;
+    std::cout << "\n$$ Clusters are: ";                     // Warning: This produces a very large output.
     for (const auto &mean1 : kmeans_v.get_clusters()) {
         for (const auto &mean2 : mean1)
             std::cout << mean2 << ", ";
