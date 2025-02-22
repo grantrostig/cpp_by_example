@@ -73,8 +73,8 @@ int main(int argc, char const * arv[]) {
     cin.exceptions( std::istream::failbit);
     Detail::crash_signals_register();
 
-    LOGGER_("testing LOGGER_");
-    LOGGERX("testing LOGGER_",42);
+    //LOGGER_("testing LOGGER_");
+    //LOGGERX("testing LOGGER_",42);
     //Example1::test1 ();
 
     cout << "###" << endl;
