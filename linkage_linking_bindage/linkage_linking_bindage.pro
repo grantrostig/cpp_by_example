@@ -20,10 +20,18 @@ LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.
    #-L$$PWD/../grostig_tools/.  -llibgrostig_tools.a \     # be sure we built it as a library, not as a test program with main.cpp
     -lstdc++exp                 \
 
-HEADERS +=                      \
-    global_entities.hpp         \
-   #ut.hpp                      \
-   #$$PWD/..h                   \   # probably wrong
+HEADERS +=                          \
+    global_entities.hpp             \
+    dual_bindage_component.hpp      \
+    external_linkage_component.hpp  \
+   #ut.hpp                          \
+   #$$PWD/..h                       \   # probably wrong
+    internal_linkage_component.hpp  \
+    no_linkage_component.hpp        \
 
-SOURCES +=                      \
-    main.cpp                    \ # we add SOURCES others below.
+SOURCES +=                          \
+    dual_bindage_component.cpp      \
+    external_linkage_component.cpp  \
+    internal_linkage_component.cpp  \
+    no_linkage_component.cpp        \
+    main.cpp                        \  # we add SOURCES others below.

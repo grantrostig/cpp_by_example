@@ -37,6 +37,12 @@
     #ifdef GR_DEBUG
     #endif GR_DEBUG
  */
+
+#include "dual_bindage_component.hpp"
+#include "external_linkage_component.hpp"
+#include "internal_linkage_component.hpp"   // For Internal Linkage - Typically should be compiled separately
+#include "no_linkage_component.hpp"         // For No Linkage - Usually header for namespaces, but for single file demo OK
+
 #include "global_entities.hpp"
 #include "boost_headers.hpp"
 #include "cpp_headers.hpp"
@@ -60,23 +66,51 @@
 #include <string>
 #include <stacktrace>
 #include <vector>
-
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
+using namespace ExternalComponent;
+using namespace DualBindage;
+using namespace NoLinkageExample;
+using namespace InternalComponent;
 
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-int main(int argc, char const * arv[]) {
-    string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
-    cin.exceptions( std::istream::failbit);
-    Detail::crash_signals_register();
-
-    //LOGGER_("testing LOGGER_");
-    //LOGGERX("testing LOGGER_",42);
+int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     //Example1::test1 ();
 
+    cout << "\nERROR --- Internal Linkage and Internal Bindage ---" << endl;
+    //InternalComponent::callInternalStuff(); // Calling externally linked function within InternalComponent that uses internal stuff
+    // Attempting to access internalFunction() directly from main would cause a compile error - Internal Linkage
+    // Attempting to access internalVariable directly from main would also cause a compile error - Internal Linkage
+    // InternalType internalTypeInstance; // Creating instance of InternalType would be possible if you include the cpp, but conceptually not how internal linkage is used. Best if usage is contained.
+
+    cout << "\nERROR --- No Linkage ---" << endl;
+    //NoLinkageExample::demonstrateNoLinkage();
+
+    cout << "\n--- External Linkage and External Bindage ---" << endl;
+    externalFunction(); // Calling external function (External Linkage)
+    cout << "Accessing external variable from main: " << externalVariable << endl; // Accessing external variable (External Linkage)
+    ExternalType externalTypeInstance; // Creating instance of ExternalType (External Bindage)
+    externalTypeInstance.doExternalWork();
+
+    cout << "\n--- Dual Bindage ---" << endl;
+    std::unique_ptr<Shape> circle = createShape("circle");
+    if (circle) {
+        cout << circle->draw() << endl; // Runtime polymorphism - Dual Bindage in action: Interface is fixed (Shape), implementation is chosen at runtime.
+    }
+    std::unique_ptr<Shape> square = createShape("square");
+    if (square) {
+        cout << square->draw() << endl; // Runtime polymorphism again
+    }
+
+    cout << "\n--- Summary ---" << endl;
+    cout << "Linkage controls the visibility of names across compilation units (External, Internal, No)." << endl;
+    cout << "Bindage (as interpreted here in Lakos context) relates to how types and their implementations are bound or determined:" << endl;
+    cout << "  - External Bindage: Types defined in headers, representation known at compile time across units." << endl;
+    cout << "  - Internal Bindage: Types whose detailed implementation might be hidden or more tightly bound within a compilation unit (illustrated here conceptually with types defined in .cpp)." << endl;
+    cout << "  - Dual Bindage:  Types involving interfaces and implementations where the interface is fixed (external bindage), but the concrete implementation is chosen or resolved at runtime (e.g., via polymorphism)." << endl;
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
