@@ -1,4 +1,1 @@
 #pragma once
-
-namespace NoLinkageComponent {
-}

@@ -2,7 +2,6 @@
 #include "global_entities.hpp"
 #include <iostream>
 
-//namespace InternalComponent {
 void function1() { // No linkage: local variable, visible only within this function's scope
     int localVar = 1;
     std::cout << "Component1: localVar = " << localVar << std::endl;
@@ -25,4 +24,3 @@ extern int externalVar2; // Declaration of externalVar2 from component2.cpp
 void useComponent2() {
     std::cout << "Component1: using externalVar2 = " << externalVar2 << std::endl;
 }
-//} // namespace InternalComponent
