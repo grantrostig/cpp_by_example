@@ -38,7 +38,7 @@
     #endif GR_DEBUG
  */
 
-#include "internal_linkage_component.hpp" // #include "linkage_bindage_demo.h"
+#include "linkage_bindage.hpp" // #include "linkage_bindage_demo.h"
 
 #include "global_entities.hpp"
 #include "boost_headers.hpp"

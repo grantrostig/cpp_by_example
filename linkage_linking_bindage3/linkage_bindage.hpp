@@ -1,29 +1,9 @@
+// File: linkage_bindage_demo.h
 #pragma once
 #include <iostream>
 #include <string>
 
-//namespace InternalComponent {
-//}// File: linkage_bindage_demo.h
-
-// No Linkage Examples
-void demonstrate_no_linkage() {
-    // Local variables have no linkage - only visible within this function
-    int local_var = 42;                 // No linkage
-
-    // Block-scoped entities
-    {
-        int block_scoped = 100;         // No linkage
-        std::cout << "Block-scoped variable (no linkage): " << block_scoped << std::endl;
-    }
-
-    // Function parameters have no linkage
-    auto lambda = [](int param) {       // param has no linkage
-        std::cout << "Function parameter (no linkage): " << param << std::endl;
-    };
-
-    lambda(local_var);
-    std::cout << "Local variable (no linkage): " << local_var << std::endl;
-}
+void demonstrate_no_linkage();  // Definition moved to .cpp
 
 // Internal Linkage Examples
 namespace {
