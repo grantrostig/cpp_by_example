@@ -1,36 +1,28 @@
 #include "internal_linkage_component.hpp"
 #include "global_entities.hpp"
+#include <iostream>
 
-// --- internal_linkage_component.cpp --- (Illustrates Internal Linkage and Internal Bindage)
-namespace InternalComponent {
-// Internal Linkage Function (only visible within this compilation unit)
-static void internalFunction() {
-    std::cout << "Internal Function called (Internal Linkage).\n";
+//namespace InternalComponent {
+void function1() { // No linkage: local variable, visible only within this function's scope
+    int localVar = 1;
+    std::cout << "Component1: localVar = " << localVar << std::endl;
 }
 
-static int internalVariable = 42; // Internal Linkage Variable (only visible within this compilation unit)
+static int internalVar1 = 10; // Internal linkage: static global variable, visible only within this translation unit
 
-// Internal Bindage Type (Type definition scope is limited, but bindage is more about representation)
-// While 'static' for classes isn't common at namespace level like for variables/functions,
-// we can consider types defined *within* a cpp file (not in a header) as having a form of
-// "internal bindage" because their definition and usage are often more tightly coupled
-// within this compilation unit.  However, for clarity, typical classes have external bindage.
-// To truly show *internal* bindage in type context, consider implementation hiding techniques.
-// For now, we'll illustrate with a simple class in the .cpp file.
-
-class InternalType {  // Defined in .cpp -  Illustrative of potentially more "internal" bindage in context.
-public:
-    void doInternalWork() const {
-        std::cout << "InternalType doing internal work.\n";
-        internalFunction(); // Can call internalFunction as it has internal linkage in this unit
-        std::cout << "Using internal variable: " << internalVariable << std::endl; // Can use internalVariable
-    }
-};
-
-void callInternalStuff() { // External Linkage Function to demonstrate usage of internal stuff
-    internalFunction(); // OK, within the same compilation unit
-    std::cout << "Accessing internal variable from external linked function within same unit: " << internalVariable << std::endl;
-    InternalType internalTypeInstance;
-    internalTypeInstance.doInternalWork();
+static void internalFunction1() { // Internal linkage: static function, visible only within this translation unit
+    std::cout << "Component1: internalFunction1" << std::endl;
 }
-} // namespace InternalComponent
+
+int externalVar1 = 20; // External linkage: non-static global variable, accessible from other translation units
+
+void externalFunction1() { // External linkage: non-static function, callable from other translation units
+    std::cout << "Component1: externalFunction1" << std::endl;
+}
+
+// External linkage function demonstrating dual bindage by using component2's external variable
+extern int externalVar2; // Declaration of externalVar2 from component2.cpp
+void useComponent2() {
+    std::cout << "Component1: using externalVar2 = " << externalVar2 << std::endl;
+}
+//} // namespace InternalComponent

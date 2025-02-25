@@ -38,10 +38,8 @@
     #endif GR_DEBUG
  */
 
-#include "external_linkage_component.hpp" // For External Linkage
-#include "dual_bindage_component.hpp"             // For Dual Bindage
-#include "no_linkage_component.cpp"    // For No Linkage - Usually header for namespaces, but for single file demo OK
-#include "internal_linkage_component.cpp" // For Internal Linkage - Typically should be compiled separately
+#include "external_linkage_component.hpp"
+#include "dual_bindage_component.hpp"
 
 #include "global_entities.hpp"
 #include "boost_headers.hpp"
@@ -67,65 +65,88 @@
 #include <string>
 #include <stacktrace>
 #include <vector>
-
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
-using namespace ExternalComponent;
-using namespace DualBindage;
-using namespace NoLinkageExample;
-using namespace InternalComponent;
-
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
-
-
-
-
-
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-int main(int argc, char const * arv[]) {
-    string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
-    cin.exceptions( std::istream::failbit);
-    Detail::crash_signals_register();
+// Declarations of entities with external linkage from component1.cpp and component2.cpp
+extern int externalVar1;
+extern int externalVar2;
+extern void function1();
+extern void function2();
+extern void externalFunction1();
+extern void externalFunction2();
+extern void useComponent2(); // From component1.cpp
+extern void useComponent1(); // From component2.cpp
 
-    //LOGGER_("testing LOGGER_");
-    //LOGGERX("testing LOGGER_",42);
-    //Example1::test1 ();
+int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
+    // Example1::test1 ();
 
-    cout << "\n--- External Linkage and External Bindage ---" << endl;
-    externalFunction(); // Calling external function (External Linkage)
-    cout << "Accessing external variable from main: " << externalVariable << endl; // Accessing external variable (External Linkage)
-    ExternalType externalTypeInstance; // Creating instance of ExternalType (External Bindage)
-    externalTypeInstance.doExternalWork();
+    // Demonstrate no linkage: local variables within functions
+    std::cout << "=== No Linkage ===\n";
+    function1(); // Calls function1, accessing its localVar
+    function2(); // Calls function2, accessing its localVar
 
-    cout << "\n--- Internal Linkage and Internal Bindage ---" << endl;
-    callInternalStuff(); // Calling externally linked function within InternalComponent that uses internal stuff
-    // Attempting to access internalFunction() directly from main would cause a compile error - Internal Linkage
-    // Attempting to access internalVariable directly from main would also cause a compile error - Internal Linkage
-    // InternalType internalTypeInstance; // Creating instance of InternalType would be possible if you include the cpp, but conceptually not how internal linkage is used. Best if usage is contained.
+    // Demonstrate external linkage: accessing variables and calling functions across translation units
+    std::cout << "\n=== External Linkage ===\n";
+    std::cout << "Main: externalVar1 = " << externalVar1 << std::endl;
+    std::cout << "Main: externalVar2 = " << externalVar2 << std::endl;
+    externalFunction1();
+    externalFunction2();
 
-    cout << "\n--- No Linkage ---" << endl;
-    demonstrateNoLinkage();
+    // Demonstrate dual bindage: mutual dependencies between components
+    std::cout << "\n=== Dual Bindage ===\n";
+    useComponent2(); // Component1 uses component2's externalVar2
+    useComponent1(); // Component2 uses component1's externalVar1
 
-
-    cout << "\n--- Dual Bindage ---" << endl;
-    std::unique_ptr<Shape> circle = createShape("circle");
-    if (circle) {
-        cout << circle->draw() << endl; // Runtime polymorphism - Dual Bindage in action: Interface is fixed (Shape), implementation is chosen at runtime.
-    }
-    std::unique_ptr<Shape> square = createShape("square");
-    if (square) {
-        cout << square->draw() << endl; // Runtime polymorphism again
-    }
-
-    cout << "Linkage controls the visibility of names across compilation units (External, Internal, No)." << endl;
-    cout << "Bindage (as interpreted here in Lakos context) relates to how types and their implementations are bound or determined:" << endl;
-    cout << "  - External Bindage: Types defined in headers, representation known at compile time across units." << endl;
-    cout << "  - Internal Bindage: Types whose detailed implementation might be hidden or more tightly bound within a compilation unit (illustrated here conceptually with types defined in .cpp)." << endl;
-    cout << "  - Dual Bindage:  Types involving interfaces and implementations where the interface is fixed (external bindage), but the concrete implementation is chosen or resolved at runtime (e.g., via polymorphism)." << endl;
+    // Note: internalVar1, internalVar2, internalFunction1, and internalFunction2
+    // have internal linkage and are not accessible here. Attempting to access them
+    // (e.g., 'extern int internalVar1;') would result in a linker error.
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
+/*
+   Explanation of Concepts:
+*** Linkage
+
+No Linkage:
+    Represented by local variables like localVar in function1() and function2().
+    These variables are confined to their function’s scope and invisible outside, demonstrating no linkage across any boundaries.
+Internal Linkage:
+    Represented by static entities such as internalVar1 and internalFunction1() in component1.cpp, and internalVar2 and
+    internalFunction2() in component2.cpp. These are visible only within their respective translation units, preventing access from
+    main.cpp or the other component.
+External Linkage: Represented by non-static global variables (externalVar1, externalVar2) and
+    functions (externalFunction1(), externalFunction2(), useComponent2(), useComponent1()). These are accessible across translation units
+    when declared with extern, enabling interaction between main.cpp, component1.cpp, and component2.cpp.
+
+*** Bindage (Physical Linkage)
+Internal Bindage:
+    Illustrated by the use of internal linkage (static variables and functions) within each component.
+    For example, internalVar1 and internalFunction1() in component1.cpp are confined to that file, meaning the component’s
+    implementation is self-contained with no external physical dependencies for these entities. This aligns with Lakos’s emphasis on
+    minimizing dependencies outside a physical unit.
+External Bindage: Illustrated by entities with external linkage (externalVar1,
+    externalVar2, etc.). These components expose interfaces that other translation units (main.cpp or the other component) can link
+    against, creating physical dependencies. For instance, main.cpp depends on both component1.cpp and component2.cpp to resolve
+    externalVar1 and externalVar2.
+Dual Bindage: Illustrated by the mutual dependency between component1.cpp and component2.cpp. In
+    component1.cpp, useComponent2() accesses externalVar2 from component2.cpp. Conversely, in component2.cpp, useComponent1() accesses
+    externalVar1 from component1.cpp. This creates a cyclic physical dependency, where each component requires the other to be linked,
+    exemplifying dual bindage. In Lakos’s terms, such cycles are often discouraged in large-scale design, but here they serve to
+    demonstrate the concept.
+
+*** Relating Linkage to Bindage
+
+    No Linkage and Internal Bindage: Entities with no linkage (local variables) inherently contribute to internal bindage by keeping
+dependencies within their immediate scope, though they operate at a finer granularity than translation units. Internal Linkage and
+Internal Bindage: Using static confines symbols to a single translation unit, supporting internal bindage by limiting physical
+dependencies to within the component. External Linkage and External/Dual Bindage: External linkage enables external bindage by
+exposing symbols for other units to use, and when mutual (as with useComponent1() and useComponent2()), it leads to dual bindage due
+to cyclic dependencies.
+https://grok.com/chat/c12413b8-9d7b-4e01-8904-d808f94ed336
+
+*/

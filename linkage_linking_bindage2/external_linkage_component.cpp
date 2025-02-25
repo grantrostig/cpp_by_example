@@ -1,18 +1,27 @@
 #include "external_linkage_component.hpp"
-// --- external_linkage_component.cpp --- (Implementation of External Linkage Component)
+#include <iostream>
 
-namespace ExternalComponent {
-// Definition of externalVariable (must be in *one* .cpp file if declared 'extern')
-int externalVariable = 100;
-
-void externalFunction() {
-    std::cout << "External Function called (External Linkage).\n";
-    std::cout << "Accessing external variable: " << externalVariable << std::endl;
+//namespace ExternalComponent {
+void function2() { // No linkage: local variable, visible only within this function's scope
+    int localVar = 2;
+    std::cout << "Component2: localVar = " << localVar << std::endl;
 }
 
-void ExternalType::doExternalWork() const {
-    std::cout << "ExternalType doing external work.\n";
-    externalFunction(); // Can call externalFunction as it has external linkage
-    std::cout << "Using external variable in member function: " << externalVariable << std::endl;
+static int internalVar2 = 30; // Internal linkage: static global variable, visible only within this translation unit
+
+static void internalFunction2() { // Internal linkage: static function, visible only within this translation unit
+    std::cout << "Component2: internalFunction2" << std::endl;
 }
-} // namespace ExternalComponent
+
+int externalVar2 = 40; // External linkage: non-static global variable, accessible from other translation units
+
+void externalFunction2() { // External linkage: non-static function, callable from other translation units
+    std::cout << "Component2: externalFunction2" << std::endl;
+}
+
+// External linkage function demonstrating dual bindage by using component1's external variable
+extern int externalVar1; // Declaration of externalVar1 from component1.cpp
+void useComponent1() {
+    std::cout << "Component2: using externalVar1 = " << externalVar1 << std::endl;
+}
+//} // namespace ExternalComponent

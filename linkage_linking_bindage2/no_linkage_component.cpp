@@ -2,7 +2,7 @@
 // --- no_linkage_example.cpp --- (Illustrates No Linkage)
 #include <iostream>
 
-namespace NoLinkageExample {
+namespace NoLinkageComponent {
 void demonstrateNoLinkage() {
     int noLinkageVariable = 5;  // No Linkage Variable (only visible within this function scope)
     std::cout << "No Linkage Variable inside a function: " << noLinkageVariable << std::endl;
@@ -30,4 +30,4 @@ void demonstrateNoLinkage() {
     instance.showMember();
     std::cout << "Accessing class member directly: " << instance.memberVariable << std::endl; // Access is via instance, not linkage concept directly.
 }
-} // namespace NoLinkageExample
+} // namespace NoLinkageComponent

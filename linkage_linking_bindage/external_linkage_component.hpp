@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 // --- external_linkage_component.h --- (Illustrates External Linkage and External Bindage)
 
 namespace ExternalComponent {

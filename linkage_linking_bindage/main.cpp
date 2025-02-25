@@ -36,6 +36,8 @@
     #define GR_DEBUG
     #ifdef GR_DEBUG
     #endif GR_DEBUG
+
+https://gemini.google.com/app/4a09e4a21151ad27
  */
 
 #include "dual_bindage_component.hpp"
@@ -80,6 +82,7 @@ namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     //Example1::test1 ();
 
+    // https://gemini.google.com/app/4a09e4a21151ad27
     cout << "\nERROR --- Internal Linkage and Internal Bindage ---" << endl;
     //InternalComponent::callInternalStuff(); // Calling externally linked function within InternalComponent that uses internal stuff
     // Attempting to access internalFunction() directly from main would cause a compile error - Internal Linkage
