@@ -3,58 +3,46 @@
 #include <iostream>
 #include <string>
 
-void demonstrate_no_linkage();  // Definition moved to .cpp
+void demonstrate_no_linkage();  // Definition moved to .cpp from .hpp
 
-// Internal Linkage Examples
-namespace {
-// Unnamed namespace - everything here has internal linkage
-int unnamed_namespace_var = 1;      // Internal linkage
-
-void unnamed_namespace_function() { // Internal linkage
+// *** Internal Linkage Examples
+namespace {  // unnamed namespace - all have internal linkage
+int unnamed_namespace_var = 1;                      // Internal linkage
+void unnamed_namespace_function() {                 // Internal linkage
     std::cout << "Function in unnamed namespace (internal linkage)" << std::endl;
-}
-}
+}} // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-// Static entities at namespace scope have internal linkage
-static int static_global_var = 2;       // Internal linkage
+static int global_static_var_IntLinkXX_IntBind = 2;   // Static entities at namespace scope have internal linkage
 
-// Internal linkage with Internal Bindage
-static constexpr int internal_bindage_const = 3;   // Internal linkage, internal bindage
+static constexpr int global_static_constexpr_var_XX_IntBind = 3;   // internal linkage, internal bindage
 
-// External Linkage Examples
+// *** External Linkage Examples
 // Regular namespace-scope declarations have external linkage
-extern int external_var;                // External linkage
+extern int global_extern_var_ExtLink_ExtBindXX;
+       int global_var_ExtLink_XX;
 
-// Function declaration with external linkage
-void external_function();               // External linkage
+void global_fn_ExtLink();               // External linkage
 
-// Class definition - has external linkage
-class LinkageExample {
+class ClassDefn_ExtLink_IntBindXX {            // Class definition - has external linkage
 public:
-    // Static member with external linkage
-    static int static_member;           // External linkage
-
-    // Class methods have external linkage
-    void method() const {
-        std::cout << "Class method (external linkage)" << std::endl;
+    static int static_data_member_ExtLink_XX;           // Static member with external linkage
+    void fn_ExtLink_XX() const {
+        std::cout << "member fn (external linkage)" << std::endl;
     }
 };
 
-// Inline function - external linkage but typically internal bindage
-inline void inline_function() {         // External linkage, internal bindage
-    std::cout << "Inline function (external linkage, internal bindage)" << std::endl;
+inline void global_inline_fn_ExtLink_IntBindXX() {
+    std::cout << "Inline function (external linkage, typically? internal bindage)" << std::endl;
 }
 
-// External linkage with External Bindage
-extern const int external_bindage_const;  // External linkage, external bindage
+extern const int global_const_bindage_ExtLink_ExtBind;  // External linkage, external bindage
 
 // External linkage with Dual Bindage (header-only design)
-inline constexpr int dual_bindage_const = 5;  // External linkage, dual bindage
+inline constexpr int global_inline_constexpr_var_ExtLink_DualBind = 5;  // External linkage, dual bindage
 
-// Template - has external linkage but typically internal bindage
 template<typename T>
-void template_function(T value) {       // External linkage, internal bindage
-    std::cout << "Template function with value: " << value << std::endl;
+void global_template_fn_ExtLink_IntBindXX(T value) {        //
+    std::cout << "Template - has external linkage but typically internal bindage Template function with value: " << value << std::endl;
 }
 
 

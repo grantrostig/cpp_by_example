@@ -72,39 +72,46 @@ namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit); Detail::crash_signals_register();
     // Example1::test1 ();
+    // https://claude.ai/chat/d05396ba-05a2-44ab-8bda-0d8df3455558
 
-// https://claude.ai/chat/d05396ba-05a2-44ab-8bda-0d8df3455558
-    std::cout << "\n=== NO LINKAGE EXAMPLES ===\n" << std::endl;
+    std::cout <<
+"\n=== NO LINKAGE EXAMPLES ===" << std::endl;
     demonstrate_no_linkage();
 
-    std::cout << "\n=== INTERNAL LINKAGE EXAMPLES ===\n" << std::endl;
+    std::cout <<
+"\n=== INTERNAL LINKAGE/bindage? EXAMPLES ===" << std::endl;
+
     std::cout << "Variable in unnamed namespace (internal linkage): "
               << unnamed_namespace_var << std::endl;
+
     unnamed_namespace_function();
+
     std::cout << "Static global variable (internal linkage): "
-              << static_global_var << std::endl;
+              << global_static_var_IntLinkXX_IntBind << std::endl;
+
     std::cout << "Constexpr with internal linkage and bindage: "
-              << internal_bindage_const << std::endl;
+              << global_static_constexpr_var_XX_IntBind << std::endl;
 
-    std::cout << "\n=== EXTERNAL LINKAGE EXAMPLES ===\n" << std::endl;
+    std::cout <<
+"\n=== EXTERNAL LINKAGE/bindage? EXAMPLES ===" << std::endl;
     std::cout << "External variable (external linkage, external bindage): "
-              << external_var << std::endl;
-    external_function();
+              << global_extern_var_ExtLink_ExtBindXX << std::endl;
+    global_fn_ExtLink();
 
-    LinkageExample example;
-    example.method();
+    ClassDefn_ExtLink_IntBindXX example;
+    example.fn_ExtLink_XX();
     std::cout << "Static class member (external linkage): "
-              << LinkageExample::static_member << std::endl;
+              << ClassDefn_ExtLink_IntBindXX::static_data_member_ExtLink_XX << std::endl;
 
-    inline_function();
+    global_inline_fn_ExtLink_IntBindXX();
 
     std::cout << "External const (external linkage, external bindage): "
-              << external_bindage_const << std::endl;
+              << global_const_bindage_ExtLink_ExtBind << std::endl;
 
     std::cout << "Constexpr with external linkage, dual bindage: "
-              << dual_bindage_const << std::endl;
+              << global_inline_constexpr_var_ExtLink_DualBind << std::endl;
 
-    template_function<int>(42);
+    global_template_fn_ExtLink_IntBindXX<int>(42);
 
     cout << "###" << endl;
     return EXIT_SUCCESS;

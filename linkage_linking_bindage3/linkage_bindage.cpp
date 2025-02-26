@@ -22,16 +22,16 @@ void demonstrate_no_linkage() {
 }
 /* */
 
-// Definition for external_var declared in header
-int external_var = 4;                   // External linkage, external bindage
+// Definition for global_extern_var_ExtLink declared in header
+int global_extern_var_ExtLink = 4;                   // External linkage, external bindage
 
-// Definition for external_bindage_const declared in header
-extern const int external_bindage_const = 10;  // External linkage, external bindage
+// Definition for global_const_bindage_ExtLink_ExtBind declared in header
+extern const int global_const_bindage_ExtLink_ExtBind = 10;  // External linkage, external bindage
 
 // Definition for static class member
-int LinkageExample::static_member = 6;  // External linkage, external bindage
+int ClassDefn_ExtLink_IntBindXX::static_data_member_ExtLink_XX = 6;  // External linkage, external bindage
 
-// Implementation for external_function
-void external_function() {              // External linkage, external bindage
+// Implementation for global_fn_ExtLink
+void global_fn_ExtLink() {              // External linkage, external bindage
     std::cout << "External function (external linkage, external bindage)" << std::endl;
 }
