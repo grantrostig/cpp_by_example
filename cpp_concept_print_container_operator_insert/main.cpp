@@ -95,11 +95,11 @@ std::ostream& operator<<(std::ostream& os, const std::tuple<ElementTypes...>& tu
     if constexpr (sizeof...(ElementTypes)) {
         os << "[";
         tuple_comma_insertion_stream_helper(os, tup, std::make_index_sequence<sizeof...(ElementTypes) - 1>());
-        os << std::get<sizeof...(ElementTypes) - 1>(tup) << "]";
+        os << std::get<sizeof...(ElementTypes) - 1>(tup);
+        os << "]";
     } else { os << "Empty Tuple!"; }
     return os;
 }
-
 
 template <class T>
 concept Streamable
@@ -131,7 +131,6 @@ operator<<( std::ostream & out, SC const & sc) { //LOGGER_()
         out << "[CONTAINTER IS EMPTY]";
     return out;
 }
-
 
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
     using My_tuple3 = std::tuple<int,float,std::string>;
