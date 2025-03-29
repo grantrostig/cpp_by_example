@@ -139,6 +139,7 @@ std::ostream& operator<<(std::ostream& os, Weak_ordering_spaceship const& s) {
 void print_three_way_comparison(const auto& p, const auto& q) {
     const std::strong_ordering cmp{p <=> q};
     auto junk {cmp.equal};
+    auto junk3{cmp.equal};
     auto junk2{cmp};
     if( cmp == std::strong_ordering::equivalent) {junk;};
     if( cmp.equal == std::strong_ordering::equivalent) {junk2;};
