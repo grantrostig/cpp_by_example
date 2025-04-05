@@ -38,13 +38,9 @@
     #endif GR_DEBUG
  */
 #include "global_entities.hpp"
-#include "boost_headers.hpp"
 #include "cpp_headers.hpp"
-#include "math_grostig.hpp"
-#include "ostream_joiner_gr.hpp"
-#include "random_toolkit.hpp"
-#include <boost/dynamic_bitset.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
+//#include "ostream_joiner_gr.hpp"
+//#include <boost/multiprecision/cpp_int.hpp>
 //#include<dlib/numeric_constants.h>
 //#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
 //#include <bits/stdc++.h>
@@ -70,7 +66,7 @@ using namespace std::chrono_literals;
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example1 {
+namespace Strong_ordering_1example {
 
 class Strong_ordering_spaceship {
     int x_{}, y_{};
@@ -113,9 +109,9 @@ void test1(){
     print_two_way_comparison(  p2, p3);
     print_three_way_comparison(p3, p2);
     print_two_way_comparison(  p3, p2);
-}}
+}}  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Example2 {
+namespace Weak_ordering_2example {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 class Weak_ordering_spaceship {
     int x_{}, y_{};
     friend constexpr std::strong_ordering operator<=>(Weak_ordering_spaceship const& lhs, Weak_ordering_spaceship const& rhs);
@@ -165,14 +161,22 @@ void test1(){
     print_three_way_comparison(p3, p2);
     print_two_way_comparison(  p3, p2);
 }}
-int main(int argc, char const * arv[]) {
-    string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
-    cin.exceptions( std::istream::failbit);
+
+namespace Partial_ordering_3example {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+void test1(){
+}}
+
+namespace No_ordering_4example {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+void test1(){
+}}
+
+int main(int argc, char const * arv[]) { string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl; cin.exceptions( std::istream::failbit);
     //Detail::crash_signals_register();
 
-    Example1::test1();
-    Example2::test1();
-
+    Strong_ordering_1example::test1();
+    Weak_ordering_2example::test1();
+    Partial_ordering_3example::test1();
+    No_ordering_4example::test1();
 
     cout << "###" << endl;
     return EXIT_SUCCESS;

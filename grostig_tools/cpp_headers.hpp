@@ -14,7 +14,8 @@
  */
 
 #pragma once
-#include <bits/stdc++.h>
+#include <iostream>
+//#include <bits/stdc++.h>
 using std::cin; using std::cerr; using std::cout; using std::endl; using std::clog; // using namespace std;
 
 
