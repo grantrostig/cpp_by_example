@@ -78,6 +78,31 @@ operator<<( std::ostream & out, std::tuple<First,Second,Third> const & my_tuple)
     //return os;
 //}
 
+/* TODO??: need compile-time reflection, 26??
+template <typename ...ElementTypes, std::size_t ...Indexs>  // ...ElementTypes is a parameter pack
+void struct_comma_insertion_stream_helper(std::ostream& os, const std::tuple<ElementTypes...>& tup, const std::index_sequence<Indexs...>&) {
+    (
+        ( os << std::get<Indexs>(tup) << ',' )
+        , ...
+        );  // a compile time "right" fold expression ++17  // TODO??: is it unary or binary?
+}
+
+//namespace junk {
+   template <typename StructElementTypes>
+std::ostream& operator<<(std::ostream& os, const StructElementTypes& strct) {  // ElementTypes... is a parameter-pack-expansion
+    //const std::index_sequence<1,2,sizeof...(Ts)> is{std::make_index_sequence<sizeof...(Ts)>()};
+    //tuple_streamer_helper(os, tup, is);
+    //tuple_comma_insertion_stream_helper(os, tup, std::make_index_sequence<sizeof...(Ts)>());
+    if constexpr (sizeof...(ElementTypes)) {  // int operatorsizeof...(); // non-overloadable.
+        os << "[";
+        tuple_comma_insertion_stream_helper(os, tup, std::make_index_sequence<sizeof...(ElementTypes) - 1>());  // all but the last element
+        os << std::get<sizeof...(ElementTypes) - 1>(tup);  // last element
+        os << "]";
+    } else { os << "Empty Tuple!"; }
+    return os;
+}
+ */
+
 template <typename ...ElementTypes, std::size_t ...Indexs>  // ...ElementTypes is a parameter pack
 void tuple_comma_insertion_stream_helper(std::ostream& os, const std::tuple<ElementTypes...>& tup, const std::index_sequence<Indexs...>&) {
     (
@@ -132,14 +157,14 @@ operator<<( std::ostream & out, SC const & sc) { //LOGGER_()
     return out;
 }
 
-class Class_with_elements {
+class Class_with_elements {  // C++26?? see above
 public:
     int my_int{};
     std::string my_string{};  // TODO??: {} do what here, visavis class initialization?
 };
 
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
-    /* using My_tuple3 = std::tuple<int,float,std::string>;
+    using My_tuple3 = std::tuple<int,float,std::string>;
     using My_tuple4 = std::tuple<int,float,std::string,std::string>;
     std::pair<int,float>                my_fundamental_pair {2, 3.3f};
     My_tuple3                           my_tuple3           {2, 3.3f, "threethreethree"s};
@@ -191,10 +216,9 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     std::cout << std::make_tuple(33.33, "def", 333) << std::endl;
     std::cout << std::make_tuple("four", 4.4, "ghi", 444) << std::endl;
     std::cout << "$$empty:" << std::make_tuple() << std::endl;
-*/
 
-    Class_with_elements class_with_elements{60,std::string{"second"}};
-    cout << class_with_elements;
+    //Class_with_elements class_with_elements{60,std::string{"second"}};
+    //cout << class_with_elements;
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
