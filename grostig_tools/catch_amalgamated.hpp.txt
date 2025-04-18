@@ -11,8 +11,8 @@
 //  This file is an amalgamation of multiple different files.
 //  You probably shouldn't edit it directly.
 //  ----------------------------------------------------------
-#ifndef CATCH_AMALGAMATED_HPP_INCLUDED
-#define CATCH_AMALGAMATED_HPP_INCLUDED
+#ifndef CATCH_AMALGAMATED_H
+#define CATCH_AMALGAMATED_H
 
 
 /** \file
@@ -13140,4 +13140,4 @@ namespace Catch {
 #endif // CATCH_REPORTERS_ALL_HPP_INCLUDED
 
 #endif // CATCH_ALL_HPP_INCLUDED
-#endif // CATCH_AMALGAMATED_HPP_INCLUDED
+#endif // CATCH_AMALGAMATED_H

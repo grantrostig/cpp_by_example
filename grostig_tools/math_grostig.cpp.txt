@@ -7,7 +7,7 @@
    Shows how to:
 */
 
-#include "cpp_headers.hpp"
+#include "cpp_headers.hpp.txt"
 static const double grostig_pi = 3.141592653589793;
 
 double n_Choose_k(unsigned long const n, unsigned long k) // copy of k is mutated.
