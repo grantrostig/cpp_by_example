@@ -27,67 +27,15 @@ SOURCES += \
     #NOT HERE main.cpp          \   # Declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
     global_entities.cpp         \
 
-DISTFILES += \
-    README.txt                  \
-    Makefile.txt                \
-    CMakeLists.cmake.txt        \
-    README.txt                  \
-    GR_qt_clang-format.xml \
-    grostig_tools_LONG.pro.txt \
-    grostig_tools_LONG.pro.txt
 
 DISTFILES += \
-    boost_headers.hpp.txt       \
-    catch_amalgamated.hpp.txt   \
-    cpp_headers.hpp.txt         \
-    gnuplot-iostream.hpp.txt \
-    math_grostig.hpp.txt \
-    ostream_joiner_gr.hpp.txt \
-    random_toolkit.hpp.txt \
-    ut.hpp                      \
-
-DISTFILES += \
-    catch_amalgamated.cpp.txt   \
-    iostreams.cpp.txt \
-    math_grostig.cpp.txt \
-    ostream_joiner_gr.cpp.txt \
-    random_toolkit.cpp.txt
-
-
-DISTFILES += \
-    README.txt                  \
-    Makefile.txt                \
-    CMakeLists.cmake.txt        \
-    README.txt                  \
-    GR_qt_clang-format.xml      \
+    example.pro.txt             \
+    clang-format_grostig_qt.xml \
+    CMakeLists.grostig.txt      \
     grostig_tools_LONG.pro.txt  \
     grostig_tools_BRIEF.pro.txt \
-
-DISTFILES += \
-    boost_headers.hpp.txt       \
-    catch_amalgamated.hpp.txt   \
-    cpp_headers.hpp.txt         \
-    gnuplot-iostream.hpp.txt \
-    math_grostig.hpp.txt \
-    ostream_joiner_gr.hpp.txt \
-    random_toolkit.hpp.txt \
-    ut.hpp                      \
-
-DISTFILES += \
-    catch_amalgamated.cpp.txt   \
-    iostreams.cpp.txt \
-    math_grostig.cpp.txt \
-    ostream_joiner_gr.cpp.txt \
-    random_toolkit.cpp.txt
-
-
-DISTFILES += \
-    README.txt                  \
     Makefile.txt                \
-    CMakeLists.cmake.txt        \
     README.txt                  \
-    GR_qt_clang-format.xml \
-    grostig_tools_LONG.pro.txt
 
 DISTFILES += \
     boost_headers.hpp.txt       \
@@ -106,28 +54,4 @@ DISTFILES += \
     ostream_joiner_gr.cpp.txt \
     random_toolkit.cpp.txt
 
-
-DISTFILES += \
-    README.txt                  \
-    Makefile.txt                \
-    CMakeLists.cmake.txt        \
-    README.txt                  \
-    GR_qt_clang-format.xml \
-    grostig_tools_LONG.pro.txt
-
-DISTFILES += \
-    boost_headers.hpp.txt       \
-    catch_amalgamated.hpp.txt   \
-    cpp_headers.hpp.txt         \
-    gnuplot-iostream.hpp.txt \
-    math_grostig.hpp.txt \
-    ostream_joiner_gr.hpp.txt \
-    random_toolkit.hpp.txt \
-    ut.hpp                      \
-
-DISTFILES += \
-    catch_amalgamated.cpp.txt   \
-    iostreams.cpp.txt \
-    math_grostig.cpp.txt \
-    ostream_joiner_gr.cpp.txt \
-    random_toolkit.cpp.txt
+####################################################

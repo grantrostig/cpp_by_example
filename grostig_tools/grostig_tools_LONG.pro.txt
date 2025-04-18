@@ -127,13 +127,13 @@ SOURCES +=                      \
     global_entities.cpp         \
 
 DISTFILES += \
-    README.txt                  \
     example.pro.txt             \
+    clang-format_grostig_qt.xml \
+    CMakeLists.grostig.txt      \
+    grostig_tools_LONG.pro.txt  \
+    grostig_tools_BRIEF.pro.txt \
     Makefile.txt                \
-    example.pro.txt             \
-    CMakeLists.cmake.txt        \
     README.txt                  \
-    GR_qt_clang-format.xml      \
 
 DISTFILES += \
     boost_headers.hpp.txt       \
