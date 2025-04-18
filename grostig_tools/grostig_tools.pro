@@ -26,9 +26,7 @@ HEADERS += \
 
 SOURCES += \
     #NOT HERE main.cpp          \   # Declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
-    cpp_headers.cpp.txt \
     global_entities.cpp         \
-
 
 DISTFILES += \
     boost_headers.cpp.txt \

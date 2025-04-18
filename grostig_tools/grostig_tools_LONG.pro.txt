@@ -127,13 +127,13 @@ SOURCES +=                      \
     global_entities.cpp         \
 
 DISTFILES += \
-    example.pro.txt             \
-    clang-format_grostig_qt.xml \
     CMakeLists.grostig.txt      \
-    grostig_tools_LONG.pro.txt  \
-    grostig_tools_BRIEF.pro.txt \
     Makefile.txt                \
     README.txt                  \
+    example.pro.txt             \
+    clang-format_grostig_qt.xml \
+    grostig_tools_LONG.pro.txt  \
+    grostig_tools_BRIEF.pro.txt \
 
 DISTFILES += \
     boost_headers.hpp.txt       \
@@ -144,6 +144,8 @@ DISTFILES += \
     cpp_headers.cpp.txt         \
     gnuplot-iostream.hpp.txt    \
     gnuplot-iostream.cpp.txt    \
+    iostreams.hpp.txt           \
+    iostreams.cpp.txt           \
     math_grostig.hpp.txt        \
     math_grostig.cpp.txt        \
     ostream_joiner_gr.hpp.txt   \

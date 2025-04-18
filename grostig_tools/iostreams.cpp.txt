@@ -1,5 +1,6 @@
 /* Copyright (c) 2017 Grant Rostig. All rights reserved. License: Boost v1.0 */
 #include "global_entities.hpp"
+#include "iostreams.hpp"
 #include <cassert>
 #include <iostream>
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
