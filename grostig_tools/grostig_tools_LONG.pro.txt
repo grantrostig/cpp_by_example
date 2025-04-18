@@ -137,20 +137,24 @@ DISTFILES += \
 
 DISTFILES += \
     boost_headers.hpp.txt       \
+    boost_headers.cpp.txt       \
     catch_amalgamated.hpp.txt   \
+    catch_amalgamated.cpp.txt   \
     cpp_headers.hpp.txt         \
-    gnuplot-iostream.hpp.txt \
-    math_grostig.hpp.txt \
-    ostream_joiner_gr.hpp.txt \
-    random_toolkit.hpp.txt \
+    cpp_headers.cpp.txt         \
+    gnuplot-iostream.hpp.txt    \
+    gnuplot-iostream.cpp.txt    \
+    math_grostig.hpp.txt        \
+    math_grostig.cpp.txt        \
+    ostream_joiner_gr.hpp.txt   \
+    ostream_joiner_gr.cpp.txt   \
+    random_toolkit.hpp.txt      \
+    random_toolkit.cpp.txt      \
     ut.hpp                      \
+    ut.cpp                      \
 
 DISTFILES += \
-    catch_amalgamated.cpp.txt   \
     iostreams.cpp.txt \
-    math_grostig.cpp.txt \
-    ostream_joiner_gr.cpp.txt \
-    random_toolkit.cpp.txt
 
 ####################################################
 

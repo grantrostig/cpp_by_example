@@ -22,16 +22,21 @@ LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.
 
 HEADERS += \
     global_entities.hpp         \
+   #$$PWD/..h                   \   # probably wrong
 
 SOURCES += \
     #NOT HERE main.cpp          \   # Declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
+    cpp_headers.cpp.txt \
     global_entities.cpp         \
 
 
 DISTFILES += \
+    boost_headers.cpp.txt \
+    cpp_headers.cpp.txt \
     example.pro.txt             \
     clang-format_grostig_qt.xml \
     CMakeLists.grostig.txt      \
+    gnuplot-iostream.cpp.txt \
     grostig_tools_LONG.pro.txt  \
     grostig_tools_BRIEF.pro.txt \
     Makefile.txt                \
