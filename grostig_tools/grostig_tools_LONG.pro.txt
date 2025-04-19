@@ -155,9 +155,6 @@ DISTFILES += \
     ut.hpp                      \
     ut.cpp                      \
 
-DISTFILES += \
-    iostreams.cpp.txt \
-
 ####################################################
 
 # // Boost specific defines.

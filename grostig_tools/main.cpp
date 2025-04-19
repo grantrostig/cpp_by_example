@@ -38,16 +38,17 @@
     #endif GR_DEBUG
  */
 #include "global_entities.hpp"
-#include "boost_headers.hpp"
-#include "cpp_headers.hpp"
-#include "math_grostig.hpp"
-#include "ostream_joiner_gr.hpp"
-#include "random_toolkit.hpp"
-#include <boost/dynamic_bitset.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
+//#include "boost_headers.hpp"
+//#include "cpp_headers.hpp"
+//#include "math_grostig.hpp"
+//#include "ostream_joiner_gr.hpp"
+//#include "random_toolkit.hpp"
+//#include <boost/dynamic_bitset.hpp>
+//#include <boost/multiprecision/cpp_int.hpp>
 //#include<dlib/numeric_constants.h>
 //#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
 //#include <bits/stdc++.h>
+
 #include <bit>
 #include <bitset>
 #include <cassert>
@@ -62,7 +63,7 @@
 #include <stacktrace>
 #include <vector>
 
-using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
+using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; // using namespace std;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 
@@ -79,8 +80,10 @@ int main(int argc, char const * arv[]) {
 
     LOGGER_("testing LOGGER_");
     LOGGERX("testing LOGGER_",QQQ);
-    //Example1::test1 ();
-
+    cout << QQQ << endl;
+    cout << STRING_QQQ << endl;
     cout << "###" << endl;
+
+    //Example1::test1 ();
     return EXIT_SUCCESS;
 }

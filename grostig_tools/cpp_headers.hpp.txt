@@ -392,6 +392,8 @@ The headers #include <ciso646>, <cstdalign>, and <cstdbool> are meaningless in C
 #endif
 
 using std::cin; using std::cerr; using std::cout; using std::endl; using std::clog; // using namespace std;
+using namespace std::string_literals;
+using namespace std::chrono_literals;
 
 template<typename Ratio>
 constexpr double math_constant_pi() // pi pie archimedes ' constant.  https://stackoverflow.com/a/51609207/4484362

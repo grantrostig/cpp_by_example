@@ -12,10 +12,12 @@
 //#include <bits/stdc++.h>
 #include <chrono>
 #include <csignal>
+#include <format>
 #include <iostream>
 #include <iterator>
 #include <map>
 #include <ostream>
+#include <print>
 #include <source_location>
 #include <stacktrace>
 #include <tuple>
@@ -103,6 +105,9 @@ std::ostream& operator<<(std::ostream& os, const StructElementTypes& strct) {  /
 }
  */
 
+
+// *********************** Tuples  ***************************
+
 template <typename ...ElementTypes, std::size_t ...Indexs>  // ...ElementTypes is a parameter pack
 void tuple_comma_insertion_stream_helper(std::ostream& os, const std::tuple<ElementTypes...>& tup, const std::index_sequence<Indexs...>&) {
     (
@@ -111,7 +116,7 @@ void tuple_comma_insertion_stream_helper(std::ostream& os, const std::tuple<Elem
         );  // a compile time "right" fold expression ++17  // TODO??: is it unary or binary?
 }
 
-//namespace junk {
+namespace junk {
 template <typename ...ElementTypes>
 std::ostream& operator<<(std::ostream& os, const std::tuple<ElementTypes...>& tup) {  // ElementTypes... is a parameter-pack-expansion
     //const std::index_sequence<1,2,sizeof...(Ts)> is{std::make_index_sequence<sizeof...(Ts)>()};
@@ -125,7 +130,9 @@ std::ostream& operator<<(std::ostream& os, const std::tuple<ElementTypes...>& tu
     } else { os << "Empty Tuple!"; }
     return os;
 }
+}
 
+// *********************** Containters  ***************************
 template <class T>
 concept Streamable
     = requires( std::ostream & out_concept_parameter ) {
@@ -156,48 +163,67 @@ operator<<( std::ostream & out, SC const & sc) { //LOGGER_()
         out << "[CONTAINTER IS EMPTY]";
     return out;
 }
+// *********************** END Containters  ***************************
 
+namespace junk2 {
 class Class_with_elements {  // C++26?? see above
 public:
-    int my_int{};
-    std::string my_string{};  // TODO??: {} do what here, visavis class initialization?
+    int my_int{0};
+    //std::string my_string{};  // TODO??: {} do what here, visavis class initialization?
+    //Class_with_elements const operator+( Class_with_elements const & arg) const {
+    Class_with_elements operator+( Class_with_elements const & arg) const {
+        Class_with_elements temp{};
+        temp.my_int = this->my_int + arg.my_int;
+        return temp ;
+    };
 };
+}
+//Class_with_elements operator+(Class_with_elements lhs, Class_with_elements rhs) {};
 
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
     using My_tuple3 = std::tuple<int,float,std::string>;
     using My_tuple4 = std::tuple<int,float,std::string,std::string>;
-    std::pair<int,float>                my_fundamental_pair {2, 3.3f};
-    My_tuple3                           my_tuple3           {2, 3.3f, "threethreethree"s};
-    My_tuple4                           my_tuple4           {2, 3.3f, "threethreethree"s, "four"s};
-    std::map<int, My_tuple3>::value_type my_value_type       {};
-    std::pair                           my_tuple_pair       {my_tuple3,my_tuple3};
     std::vector                         v_int               {1,2,3};
     std::vector                         v_cstring           {"one","two","three"};
     std::vector                         v_string            {"one"s,"two"s,"three"s};
+    std::string                         my_string           {"my_chars_string"};
+    std::pair<int,float>                my_fundamental_pair {2, 3.3f};
+    My_tuple3                           my_tuple3           {2, 3.3f, "threethreethree"s};
+    My_tuple4                           my_tuple4           {2, 3.3f, "threethreethree"s, "four"s};
+    std::map<int, My_tuple3>::value_type my_value_type      {};
+    std::pair                           my_tuple_pair       {my_tuple3,my_tuple3};
     std::vector                         v_fund_pair         {my_fundamental_pair,my_fundamental_pair,my_fundamental_pair};
     std::vector                         v_tuple             {my_tuple3,my_tuple3,my_tuple3};
     std::vector                         v_value_type        {my_value_type, my_value_type, my_value_type};
-    std::map<int, My_tuple3>             my_map             { {10,my_tuple3} };
-    std::map<int, My_tuple3>             my_map2            { { 10,{11,12.0f,"1st string"s}}, {20,{21,22.0f,"2nd string"s}} };
+    std::map<int, My_tuple3>            my_map              { {10,my_tuple3} };
+    std::map<int, My_tuple3>            my_map2             { { 10,{11,12.0f,"1st string"s}}, {20,{21,22.0f,"2nd string"s}} };
 
     //cout << "$$My value_type      :"<< my_value_type << endl;
     //cout << "$$My v_value_type    :"<< v_value_type << endl;
     //cout << "$$My fundamental pair:"<< my_fundamental_pair << endl;        //cout << my_pair.first <<", " << my_pair.second << endl;
-    cout << "$$My tuple3          :"<< my_tuple3 << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
 
-    //cout << "$$My tuple4          :" << my_tuple4 << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
-    //cout << "$$My tuple4          :" << my_tuple4 << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
+// +++++++++++++++++++++++
+    junk2::Class_with_elements c{},d{},e{};
+    junk2::Class_with_elements const f{};
+    e=c junk2::Class_with_elements::operator+ d;
+    //f=c+d;
 
-    cout << "$$My tuple4          :" << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
+    //using namespace junk;
+    //using junk::operator<<;
+    //cout << "$$My tuple4          :"<< my_tuple4 << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
+
+    cout << "\n$$My tuple4          :";
     //junk::operator<<(cout, my_tuple4);
-    // operator<<( cout, my_tuple4);
-    operator<<( operator<<(cout, my_tuple4 ), "gggggg\n");
+    cout << "\n$$My tuple4          :";
+    junk::operator<<( cout, my_tuple4);  // binary operator, lhs, rhs
+    cout << "\n$$My tuple4 + ggggg:";
 
-    cout << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
+    operator<<( junk::operator<<(cout, my_tuple4 ), "gggggg\n");
 
+// +++++++++++++++++++++++
+    //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
     //cout << "$$My tuple           :" << junk::operator<<(cout, my_tuple4) << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
     //cout << "$$My tuple           :" << operator<<(cout, my_tuple4) << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
-
     //cout << "$$My tuple pair      :"<< my_tuple_pair << endl;
     //cout << "$$My v_int           :"<< v_int << endl;
     //cout << "$$My v_cstring       :"<< v_cstring << endl;
@@ -209,16 +235,21 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     // *** Marc's tuple solution ***
     //std::index_sequence<4> junk {};  // compile time is: template args, see cppref index_sequence
     //cout << std::index_sequence<4>{} << endl;  // see cppref index_sequence
-    std::tuple<int, string, int> junk{};
 
-    std::cout << std::make_tuple(111) << std::endl;
-    std::cout << std::make_tuple("abc", 2222) << std::endl;
-    std::cout << std::make_tuple(33.33, "def", 333) << std::endl;
-    std::cout << std::make_tuple("four", 4.4, "ghi", 444) << std::endl;
-    std::cout << "$$empty:" << std::make_tuple() << std::endl;
+    //std::cout << std::make_tuple(111) << std::endl;
+    //std::cout << std::make_tuple("abc", 2222) << std::endl;
+    //std::cout << std::make_tuple(33.33, "def", 333) << std::endl;
+    //std::cout << std::make_tuple("four", 4.4, "ghi", 444) << std::endl;
+    //std::cout << "$$empty:" << std::make_tuple() << std::endl;
+
+    //std::print("v_int:{}. \n", my_string);
+    //std::print("v_int:{}.\n", v_int);                          // runs on gcc "truck"
+    //std::print("my_tuple3:{}.\n", my_tuple3);      // runs on gcc "truck"
+    //std::print("my_map:{}.\n", my_map);                        // ??runs on gcc "truck"
+
 
     //Class_with_elements class_with_elements{60,std::string{"second"}};
-    //cout << class_with_elements;
+    //cout << class_with_elements;  // TODO??: requires reflection??
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
