@@ -10,6 +10,8 @@
  */
 
 //#include <bits/stdc++.h>
+#include "class_with_elements.hpp"
+
 #include <chrono>
 #include <csignal>
 #include <format>
@@ -166,18 +168,19 @@ operator<<( std::ostream & out, SC const & sc) { //LOGGER_()
 // *********************** END Containters  ***************************
 
 namespace junk2 {
-class Class_with_elements {  // C++26?? see above
-public:
-    int my_int{0};
-    //std::string my_string{};  // TODO??: {} do what here, visavis class initialization?
-    //Class_with_elements const operator+( Class_with_elements const & arg) const {
-    Class_with_elements operator+( Class_with_elements const & arg) const {
-        Class_with_elements temp{};
-        temp.my_int = this->my_int + arg.my_int;
-        return temp ;
-    };
+
+
+;
+
+;
+
+// a = b = c;       // chaining
+// a.add(b).add(c); // chaining
+// a.operator+=(b).add(c); // chaining
+
 };
-}
+
+
 //Class_with_elements operator+(Class_with_elements lhs, Class_with_elements rhs) {};
 
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
@@ -205,7 +208,7 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
 // +++++++++++++++++++++++
     junk2::Class_with_elements c{},d{},e{};
     junk2::Class_with_elements const f{};
-    e=c junk2::Class_with_elements::operator+ d;
+    //e=c junk2::Class_with_elements::operator+ d;
     //f=c+d;
 
     //using namespace junk;
