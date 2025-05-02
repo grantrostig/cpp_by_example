@@ -109,7 +109,6 @@ std::ostream& operator<<(std::ostream& os, const StructElementTypes& strct) {  /
 
 
 // *********************** Tuples  ***************************
-
 template <typename ...ElementTypes, std::size_t ...Indexs>  // ...ElementTypes is a parameter pack
 void tuple_comma_insertion_stream_helper(std::ostream& os, const std::tuple<ElementTypes...>& tup, const std::index_sequence<Indexs...>&) {
     (
@@ -167,12 +166,6 @@ operator<<( std::ostream & out, SC const & sc) { //LOGGER_()
 }
 // *********************** END Containters  ***************************
 
-namespace junk2 {
-// a = b = c;       // chaining
-// a.add(b).add(c); // chaining
-// a.operator+=(b).add(c); // chaining
-};
-
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
     using My_tuple3 = std::tuple<int,float,std::string>;
     using My_tuple4 = std::tuple<int,float,std::string,std::string>;
@@ -225,20 +218,24 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     //junk::operator<<(cout, my_tuple4);
     cout << "\n$$My tuple4          :";
     junk::operator<<( cout, my_tuple4);  // binary operator, lhs, rhs
-    cout << "\n$$My tuple4 + ggggg:";
-    operator<<( junk::operator<<(cout, my_tuple4 ), "gggggg\n");
+    cout << "\n$$My tuple4 + STUFF:";
+    operator<<( junk::operator<<(cout, my_tuple4 ), "STUFF\n");
 
     // +++++++++++++++++++++++
     //Class_with_elements class_with_elements{60,std::string{"second"}};
     // cout << class_with_elements;  // TODO??: requires reflection??
 
     // *** Experiment with operators
-    junk2::Class_with_elements c_e1{},c_e2{},c_e3{};
-    junk2::Class_with_elements const c_e_const1{};
-    c_e1        = c_e1 junk2::Class_with_elements::operator+ c_e3;
-    c_e_const1  = c_e1 + c_e1;
+    // a = b = c;                   // Chaining
+    // a.add(b).add(c);             // Chaining
+    // a.operator+=(b).add(c);      // TODO??: Does this work? why not? //Chaining
 
-    // *** std::print
+    junk::Class_with_elements c_e1{},c_e2{},c_e3{};
+    junk::Class_with_elements const c_e_const1{};
+  //c_e1        = c_e1 junk::Class_with_elements::operator+ c_e3;
+  //c_e_const1  = c_e1 + c_e1;
+
+    // *** std::print handles printing of containers
     //std::print("v_int:{}. \n", my_string);
     //std::print("v_int:{}.\n", v_int);                          // runs on gcc "truck"
     //std::print("my_tuple3:{}.\n", my_tuple3);      // runs on gcc "truck"
