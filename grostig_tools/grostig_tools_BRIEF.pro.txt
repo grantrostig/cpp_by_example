@@ -1,10 +1,11 @@
 # Copyright (c) Grant Rostig, grantrostig.com, Boost 1.0 license
+# BRIEF version versus LONG
 # Either these three or the next 2, for app or lib, respectively.
-#TEMPLATE = app                 # comment out these 3,
-#SOURCES  = main.cpp            # we add other SOURCES below.
-#CONFIG +=  console
- TEMPLATE = lib                 # OR comment out these 2.
- CONFIG +=  staticlib
+ TEMPLATE = app                 # comment out these 3,
+ SOURCES  = main.cpp            # we add other SOURCES below.
+ CONFIG +=  console
+#TEMPLATE = lib                 # OR comment out these 2.
+#CONFIG +=  staticlib
 
  CONFIG -= app_bundle
  CONFIG -= qt

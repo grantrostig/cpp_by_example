@@ -1,5 +1,5 @@
 # Copyright (c) Grant Rostig, grantrostig.com, Boost 1.0 license
-
+# LONG version versus BRIEF
 # Either these three or the next 2, for app or lib, respectively.
  TEMPLATE = app                 # comment out these 3,
  SOURCES  = main.cpp           # we add SOURCES others below.
@@ -152,8 +152,28 @@ DISTFILES += \
     ostream_joiner_gr.cpp.txt   \
     random_toolkit.hpp.txt      \
     random_toolkit.cpp.txt      \
-    ut.hpp                      \
-    ut.cpp                      \
+    ut.hpp.txt                  \
+    ut.cpp.txt                  \
+
+DISTFILES += \
+    boost_headers.hpp\
+    boost_headers.cpp\
+    catch_amalgamated.hpp\
+    catch_amalgamated.cpp\
+    cpp_headers.hpp\
+    cpp_headers.cpp\
+    gnuplot-iostream.hpp\
+    gnuplot-iostream.cpp\
+    iostreams.hpp\
+    iostreams.cpp\
+    math_grostig.hpp\
+    math_grostig.cpp\
+    ostream_joiner_gr.hpp\
+    ostream_joiner_gr.cpp\
+    random_toolkit.hpp\
+    random_toolkit.cpp\
+    ut.hpp\
+    ut.cpp\
 
 ####################################################
 
