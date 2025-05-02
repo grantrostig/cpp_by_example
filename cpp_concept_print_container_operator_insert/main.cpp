@@ -168,20 +168,10 @@ operator<<( std::ostream & out, SC const & sc) { //LOGGER_()
 // *********************** END Containters  ***************************
 
 namespace junk2 {
-
-
-;
-
-;
-
 // a = b = c;       // chaining
 // a.add(b).add(c); // chaining
 // a.operator+=(b).add(c); // chaining
-
 };
-
-
-//Class_with_elements operator+(Class_with_elements lhs, Class_with_elements rhs) {};
 
 int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
     using My_tuple3 = std::tuple<int,float,std::string>;
@@ -204,34 +194,17 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     //cout << "$$My value_type      :"<< my_value_type << endl;
     //cout << "$$My v_value_type    :"<< v_value_type << endl;
     //cout << "$$My fundamental pair:"<< my_fundamental_pair << endl;        //cout << my_pair.first <<", " << my_pair.second << endl;
-
-// +++++++++++++++++++++++
-    junk2::Class_with_elements c{},d{},e{};
-    junk2::Class_with_elements const f{};
-    //e=c junk2::Class_with_elements::operator+ d;
-    //f=c+d;
-
-    //using namespace junk;
-    //using junk::operator<<;
-    //cout << "$$My tuple4          :"<< my_tuple4 << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
-
-    cout << "\n$$My tuple4          :";
-    //junk::operator<<(cout, my_tuple4);
-    cout << "\n$$My tuple4          :";
-    junk::operator<<( cout, my_tuple4);  // binary operator, lhs, rhs
-    cout << "\n$$My tuple4 + ggggg:";
-
-    operator<<( junk::operator<<(cout, my_tuple4 ), "gggggg\n");
-
 // +++++++++++++++++++++++
     //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
     //cout << "$$My tuple           :" << junk::operator<<(cout, my_tuple4) << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
     //cout << "$$My tuple           :" << operator<<(cout, my_tuple4) << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
     //cout << "$$My tuple pair      :"<< my_tuple_pair << endl;
+// +++++++++++++++++++++++
     //cout << "$$My v_int           :"<< v_int << endl;
     //cout << "$$My v_cstring       :"<< v_cstring << endl;
     //cout << "$$My v_string        :"<< v_string << endl;
     //cout << "$$My v_fund_pair     :"<< v_fund_pair << endl;  // ERROR
+// +++++++++++++++++++++++
     //cout << "$$My map2            :"<< my_map2 << endl;
     //cout << "$$My map             :"<< my_map << endl;
 
@@ -245,14 +218,31 @@ int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,ar
     //std::cout << std::make_tuple("four", 4.4, "ghi", 444) << std::endl;
     //std::cout << "$$empty:" << std::make_tuple() << std::endl;
 
+    //using namespace junk;
+    //using junk::operator<<;
+    //cout << "$$My tuple4          :"<< my_tuple4 << endl;                  //cout << std::get<0>(my_tuple) <<"," << std::get<1>(my_tuple) << "," << std::get<2>(my_tuple) << endl;
+    cout << "\n$$My tuple4          :";
+    //junk::operator<<(cout, my_tuple4);
+    cout << "\n$$My tuple4          :";
+    junk::operator<<( cout, my_tuple4);  // binary operator, lhs, rhs
+    cout << "\n$$My tuple4 + ggggg:";
+    operator<<( junk::operator<<(cout, my_tuple4 ), "gggggg\n");
+
+    // +++++++++++++++++++++++
+    //Class_with_elements class_with_elements{60,std::string{"second"}};
+    // cout << class_with_elements;  // TODO??: requires reflection??
+
+    // *** Experiment with operators
+    junk2::Class_with_elements c_e1{},c_e2{},c_e3{};
+    junk2::Class_with_elements const c_e_const1{};
+    c_e1        = c_e1 junk2::Class_with_elements::operator+ c_e3;
+    c_e_const1  = c_e1 + c_e1;
+
+    // *** std::print
     //std::print("v_int:{}. \n", my_string);
     //std::print("v_int:{}.\n", v_int);                          // runs on gcc "truck"
     //std::print("my_tuple3:{}.\n", my_tuple3);      // runs on gcc "truck"
     //std::print("my_map:{}.\n", my_map);                        // ??runs on gcc "truck"
-
-
-    //Class_with_elements class_with_elements{60,std::string{"second"}};
-    //cout << class_with_elements;  // TODO??: requires reflection??
 
     cout << "###" << endl;
     return EXIT_SUCCESS;
