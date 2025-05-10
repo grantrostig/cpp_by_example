@@ -126,6 +126,26 @@ SOURCES +=                      \
     #NOT HERE main.cpp          \   # declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
     global_entities.cpp         \
 
+SOURCES += \
+   #boost_headers.hpp\
+   #boost_headers.cpp\
+   #catch_amalgamated.hpp\
+   #catch_amalgamated.cpp\
+   #cpp_headers.hpp\
+   #cpp_headers.cpp\
+   #gnuplot-iostream.hpp\
+   #gnuplot-iostream.cpp\
+   #iostreams.hpp\
+   #iostreams.cpp\
+   #math_grostig.hpp\
+   #math_grostig.cpp\
+   #ostream_joiner_gr.hpp\
+   #ostream_joiner_gr.cpp\
+   #random_toolkit.hpp\
+   #random_toolkit.cpp\
+    ut.hpp\
+    ut.cpp\
+
 DISTFILES += \
     CMakeLists.grostig.txt      \
     Makefile.txt                \
@@ -155,25 +175,6 @@ DISTFILES += \
     ut.hpp.txt                  \
     ut.cpp.txt                  \
 
-DISTFILES += \
-    boost_headers.hpp\
-    boost_headers.cpp\
-    catch_amalgamated.hpp\
-    catch_amalgamated.cpp\
-    cpp_headers.hpp\
-    cpp_headers.cpp\
-    gnuplot-iostream.hpp\
-    gnuplot-iostream.cpp\
-    iostreams.hpp\
-    iostreams.cpp\
-    math_grostig.hpp\
-    math_grostig.cpp\
-    ostream_joiner_gr.hpp\
-    ostream_joiner_gr.cpp\
-    random_toolkit.hpp\
-    random_toolkit.cpp\
-    ut.hpp\
-    ut.cpp\
 
 ####################################################
 

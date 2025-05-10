@@ -1,5 +1,5 @@
 # Copyright (c) Grant Rostig, grantrostig.com, Boost 1.0 license
-
+# LONG version versus BRIEF
 # Either these three or the next 2, for app or lib, respectively.
  TEMPLATE = app                 # comment out these 3,
  SOURCES  = main.cpp           # we add SOURCES others below.
@@ -33,13 +33,13 @@
 #QMAKE_CXX = clang++
 
 QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/
-   #-fconcepts                  \
+    -fconcepts                  \
    #-funsigned-char             \
    #-fmodules-ts                \
    #-fsanitize=undefined        \       # 60K link errors possible \
                                 \
-   #-std=c++26		            \
-    -std=c++23		            \
+    -std=c++26		            \
+   #-std=c++23		            \
    #-std=gnu++23		        \
     -g3 		                \
     -O0 		                \
@@ -120,11 +120,31 @@ LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.
 
 HEADERS +=                      \
     global_entities.hpp         \
+    ut.hpp\
    #$$PWD/..h                   \   # probably wrong
 
 SOURCES +=                      \
     #NOT HERE main.cpp          \   # declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
     global_entities.cpp         \
+
+SOURCES += \
+   #boost_headers.hpp\
+   #boost_headers.cpp\
+   #catch_amalgamated.hpp\
+   #catch_amalgamated.cpp\
+   #cpp_headers.hpp\
+   #cpp_headers.cpp\
+   #gnuplot-iostream.hpp\
+   #gnuplot-iostream.cpp\
+   #iostreams.hpp\
+   #iostreams.cpp\
+   #math_grostig.hpp\
+   #math_grostig.cpp\
+   #ostream_joiner_gr.hpp\
+   #ostream_joiner_gr.cpp\
+   #random_toolkit.hpp\
+   #random_toolkit.cpp\
+   #ut.cppm\
 
 DISTFILES += \
     CMakeLists.grostig.txt      \
@@ -152,8 +172,9 @@ DISTFILES += \
     ostream_joiner_gr.cpp.txt   \
     random_toolkit.hpp.txt      \
     random_toolkit.cpp.txt      \
-    ut.hpp                      \
-    ut.cpp                      \
+    ut.hpp.txt                  \
+    ut.cppm.txt                  \
+
 
 ####################################################
 
