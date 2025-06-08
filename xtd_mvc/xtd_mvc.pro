@@ -119,7 +119,10 @@ LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.
 #}
 
 HEADERS +=                      \
+    controller.hpp \
     global_entities.hpp         \
+    main_form.hpp \
+    model.hpp \
     ut.hpp                      \
    #$$PWD/..h                   \   # probably wrong
 

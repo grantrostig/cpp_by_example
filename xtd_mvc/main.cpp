@@ -37,6 +37,7 @@
     #ifdef GR_DEBUG
     #endif GR_DEBUG
  */
+#include "main_form.hpp"
 #include "global_entities.hpp"
 //#include "boost_headers.hpp"
 //#include "cpp_headers.hpp"
@@ -48,6 +49,7 @@
 //#include <boost/multiprecision/cpp_int.hpp>
 //#include <dlib/numeric_constants.h>
 //#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
+#include <xtd/forms/application>
 #include <bit>
 #include <bitset>
 #include <cassert>
@@ -71,41 +73,19 @@ namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace Example1 {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-    void f1 () {
-        std::vector my_vec{1,2,3};  // If the index is unchecked, it may not get SIGSEGV at(3), or even much higher.
-        for (unsigned int i=0; i<(std::numeric_limits<size_t>::max()-1); ++i) { // TODO??: Why does this give compile warning and all below don't.
-        //auto near_max{std::numeric_limits<size_t>::max()-1}; for (unsigned int i=0; i<near_max; ++i) {
-        //for (unsigned int i=0; i<(std::numeric_limits<unsigned int>::max()); ++i) {
-        //for (size_t i=0; i<(std::numeric_limits<std::size_t>::max()); ++i) {
-            cout << my_vec[i] <<",";
-        }
-        cout << endl;
-    }
-    void test1 () {
-        int *p{nullptr};
-        *p = 42;        // Triggers SIGSEGV
-    }
-    void test2 () {
-        f1();
-    }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) {
     string my_arv{*arv}; cout << "$$ my_this: argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
     cin.exceptions( std::istream::failbit);
     Detail::crash_signals_register();
+    //Example1::test1 ();
+    //Example1::test2 ();
 
-    std::string                 STRING_QQQ          {"qqq"};
-    std::vector<char>           VECTOR_CHAR_QQQ     {STRING_QQQ.begin(),STRING_QQQ.end()};
+    using namespace xtd;
+    forms::application::run(main_form());
+    xtd::forms::application::run(main_form());
 
-    LOGGER_("testing LOGGER_");                   cout <<"my_endl"<<endl;
-    LOGGERX("testing LOGGERX",VECTOR_CHAR_QQQ);   cout <<"my_endl"<<endl;
-    cout << VECTOR_CHAR_QQQ <<                           "my_endl"<<endl;
-    LOGGER_R("testing LOGGER_R");                 cout <<"my_endl"<<endl;
-    LOGGERXR("testing LOGGERXR",VECTOR_CHAR_QQQ); cout <<"my_endl"<<endl;
-
-    Example1::test2 ();
-    Example1::test1 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
