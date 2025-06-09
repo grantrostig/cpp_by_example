@@ -39,16 +39,6 @@
  */
 #include "main_form.hpp"
 #include "global_entities.hpp"
-//#include "boost_headers.hpp"
-//#include "cpp_headers.hpp"
-//#include "math_grostig.hpp"
-//#include "ostream_joiner_gr.hpp"
-//#include "random_toolkit.hpp"
-//#include <bits/stdc++.h>
-//#include <boost/dynamic_bitset.hpp>
-//#include <boost/multiprecision/cpp_int.hpp>
-//#include <dlib/numeric_constants.h>
-//#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
 #include <xtd/forms/application>
 #include <bit>
 #include <bitset>
@@ -80,11 +70,8 @@ int main(int argc, char const * arv[]) {
     cin.exceptions( std::istream::failbit);
     Detail::crash_signals_register();
     //Example1::test1 ();
-    //Example1::test2 ();
 
-    using namespace xtd;
-    forms::application::run(main_form());
-    xtd::forms::application::run(main_form());
+    xtd::forms::application::run( main_form{} );
 
     cout << "###" << endl;
     return EXIT_SUCCESS;

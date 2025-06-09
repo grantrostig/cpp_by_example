@@ -38,8 +38,8 @@ QMAKE_CXXFLAGS += \                     #https://gcc.gnu.org/onlinedocs/gcc-13.2
    #-fmodules-ts                \
    #-fsanitize=undefined        \       # 60K link errors possible \
                                 \
-    -std=c++26		            \
-   #-std=c++23		            \
+   #-std=c++26		            \
+    -std=c++23		            \
    #-std=gnu++23		        \
     -g3 		                \
     -O0 		                \

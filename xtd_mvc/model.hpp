@@ -1,19 +1,15 @@
 #pragma once
-#include <xtd/event_args>       // grostig
-#include <xtd/event_handler>    // grostig
+//#include <xtd/event_args>       // @grantrostig
+#include <xtd/event_handler>    // @grantrostig
 #include <xtd/event>
 
-class counter_model {
+class counter_model : public xtd::object {
+    int value_ = 0;
 public:
-    int value() const {return value_;}
-
+    xtd::event<counter_model, xtd::event_handler> event_a_handler_value_changed{};
+    int  value() const {return value_;}
     void increment() {
         ++value_;
-        value_changed(*this, xtd::event_args::empty);
+        event_a_handler_value_changed(*this, xtd::event_args::empty);
     }
-
-    xtd::event<counter_model, xtd::event_handler> value_changed;
-
-private:
-    int value_ = 0;
 };
