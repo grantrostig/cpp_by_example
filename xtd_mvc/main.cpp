@@ -71,7 +71,7 @@ int main(int argc, char const * arv[]) {
     Detail::crash_signals_register();
     //Example1::test1 ();
 
-    xtd::forms::application::run( main_form{} );
+    xtd::forms::application::run( View_main_form{} );
 
     cout << "###" << endl;
     return EXIT_SUCCESS;

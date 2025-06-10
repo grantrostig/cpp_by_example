@@ -3,13 +3,14 @@
 #include <xtd/event_handler>    // @grantrostig
 #include <xtd/event>
 
-class counter_model : public xtd::object {
-    int value_ = 0;
+class Model : public xtd::object {
+    int value_{0};
 public:
-    xtd::event<counter_model, xtd::event_handler> event_a_handler_value_changed{};
+    xtd::event<Model, xtd::event_handler> event_a_handler_value_changed_{};
+
     int  value() const {return value_;}
-    void increment() {
+    void increment_counter() {
         ++value_;
-        event_a_handler_value_changed(*this, xtd::event_args::empty);
+        event_a_handler_value_changed_(*this, xtd::event_args::empty);
     }
 };
