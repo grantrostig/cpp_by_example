@@ -37,22 +37,10 @@
     #ifdef GR_DEBUG
     #endif GR_DEBUG
  */
-#include "main_form.hpp"
-#include "global_entities.hpp"
+#include "view_main_form.hpp"
 #include <xtd/forms/application>
-#include <bit>
-#include <bitset>
-#include <cassert>
-#include <chrono>
-#include <climits>
-#include <cmath>
-#include <csignal>
-#include <flat_map>
 #include <iostream>
-#include <optional>
-#include <source_location>
 #include <string>
-#include <stacktrace>
 #include <vector>
 
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; // NOT using namespace std; // duplicated here in case global_entities.hpp is not used.
@@ -66,12 +54,14 @@ namespace Example1 {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) {
-    string my_arv{*arv}; cout << "$$ my_this: argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
-    cin.exceptions( std::istream::failbit);
-    Detail::crash_signals_register();
+    //std::string my_arv{*arv}; cout << "$$ my_this: argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
+    //cin.exceptions( std::istream::failbit);
+    //Detail::crash_signals_register();
     //Example1::test1 ();
 
-    xtd::forms::application::run( View_main_form{} );
+    //xtd::forms::application::run( View_main_form{} );
+    using namespace xtd;
+    forms::application::run( View_main_form{} );
 
     cout << "###" << endl;
     return EXIT_SUCCESS;

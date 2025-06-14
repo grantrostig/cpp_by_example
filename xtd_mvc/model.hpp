@@ -1,16 +1,20 @@
 #pragma once
-//#include <xtd/event_args>       // @grantrostig
-#include <xtd/event_handler>    // @grantrostig
 #include <xtd/event>
+#include <xtd/event_handler>
 
-class Model : public xtd::object {
-    int value_{0};
+class Model : public xtd::object {  // Instanciated/Held by View.
+    int                                   value_{0};
 public:
-    xtd::event<Model, xtd::event_handler> event_a_handler_value_changed_{};
+    xtd::event<Model, xtd::event_handler>
+        event_value_changed_cMy_ModelaHandler_{};
 
-    int  value() const {return value_;}
+    int  value() const {
+        return value_;
+    }
     void increment_counter() {
         ++value_;
-        event_a_handler_value_changed_(*this, xtd::event_args::empty);
+        this->event_value_changed_cMy_ModelaHandler_ (
+            *this,
+            xtd::event_args::empty ); // !empty, one or two? TODO??:
     }
 };
