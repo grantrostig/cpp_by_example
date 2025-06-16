@@ -37,10 +37,32 @@
     #ifdef GR_DEBUG
     #endif GR_DEBUG
  */
-#include "view_main_form.hpp"
-#include <xtd/forms/application>
+#include "global_entities.hpp"
+//#include "boost_headers.hpp"
+//#include "cpp_headers.hpp"
+//#include "math_grostig.hpp"
+//#include "ostream_joiner_gr.hpp"
+//#include "random_toolkit.hpp"
+//#include <bits/stdc++.h>
+//#include <boost/dynamic_bitset.hpp>
+//#include <boost/multiprecision/cpp_int.hpp>
+//#include <dlib/numeric_constants.h>
+//#include <gsl/gsl>      // sudo dnf install  guidelines-support-library-devel
+#include <bit>
+#include <bitset>
+#include <cassert>
+#include <chrono>
+#include <climits>
+#include <cmath>
+#include <csignal>
+#include <flat_map>
+#include <generator> // helps with coroutines
 #include <iostream>
+#include <optional>
+#include <ranges>
+#include <source_location>
 #include <string>
+#include <stacktrace>
 #include <vector>
 
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; // NOT using namespace std; // duplicated here in case global_entities.hpp is not used.
@@ -51,18 +73,64 @@ namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace Example1 {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    int call_me_many_times( bool const restart=false ){
+        int const starting_number{0};
+        static int running_number{starting_number};
+        if (restart) running_number=starting_number;
+        ++running_number;
+        ///co_yield running_number;
+        return running_number;
+    }
+
+    std::generator<long long> fibonacci (int const end_sentinel_value) {
+        co_yield 1;
+        cout << "past 1." << endl;
+        int const starting_value{1};
+        long long a{1}, b{1};
+        //for (auto junk: std::ranges::iota_view{starting_value, end_sentinel_value} ) {
+        for (auto i=starting_value; i<end_sentinel_value; ++i ) {
+            auto res{a+b};
+            co_yield b;
+            a=b;
+            b=res;
+        }
+    }
+
+    void test0 () { LOGGER_();
+        for (auto junk: std::ranges::iota_view{1, 12} ) {
+            cout << call_me_many_times() << ",";
+        }
+        cout << endl; LOGGER_();
+    }
+    void test1 () { LOGGER_();
+        int end_sentinel_value{12};
+        for (auto value : fibonacci(end_sentinel_value) )
+            cout << value << endl;
+        cout << endl; LOGGER_();
+        for (auto value : fibonacci(10) )
+            cout << value << endl;
+        cout << endl; LOGGER_();
+    }
+    void test2 () { LOGGER_();
+        for (auto junk: std::ranges::iota_view{2, 5} ) {
+            cout << junk << ",";
+        }
+        cout << endl; LOGGER_("$ Above ranges, below simple for loop.")
+        for ( int i=2 ; i<5  ; ++i) {
+            cout << i << ",";
+        }
+        cout << endl; LOGGER_();
+    }
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) {
-    //std::string my_arv{*arv}; cout << "$$ my_this: argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
-    //cin.exceptions( std::istream::failbit);
-    //Detail::crash_signals_register();
-    //Example1::test1 ();
+    string my_arv{*arv}; cout << "$$ my_this: argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
+    cin.exceptions( std::istream::failbit);
+    Detail::crash_signals_register();
 
-    //xtd::forms::application::run( View_main_form{} );
-    using namespace xtd;
-    forms::application::run( View_main_form{} );
-
+    //Example1::test0 ();
+    Example1::test1 ();
+    //Example1::test2 ();
     cout << "###" << endl;
     return EXIT_SUCCESS;
 }
