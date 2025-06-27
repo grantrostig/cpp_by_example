@@ -202,59 +202,14 @@ namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace Example1 {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-
-void input_thread_internal_f (std::stop_token const &st) {
-}
-
-void input_thread_f (std::stop_token const &st) {
-    std::string my_string {"is this temp?"};
-    std::string_view my_sview {"is this temp?"};
-    cin >> my_string;
-    std::osyncstream(cout) << my_string <<"."<< endl;  // TODO??: Is there an isyncstream
-}
-
-void output_thread_f (std::stop_token const &st) {
-    std::osyncstream(cout) << "hello world." << endl;
-}
-
-void output_thread_f1 () {
-    std::this_thread::sleep_for(std::chrono::seconds {99});
-    std::osyncstream(cout) << "hello world1." << endl;
-}
-
 void test1 () {
-    std::jthread my_input_jthread   {input_thread_f};
-    std::jthread my_output_jthread  {output_thread_f};
-    my_output_jthread.join();
-
-    std::thread  my_output_thread1 {output_thread_f1};
-    my_output_thread1.join();
 }
-
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace Example2 {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-void input_thread_internal_f (std::stop_token const &st  ) {
-}
-
-void input_thread_f (std::stop_token const &my_stop_token, std::stop_source my_stop_source ) {
-    std::string my_string{};
-    cin >> my_string;
-    std::osyncstream(cout) << my_string <<"."<< endl;  // TODO??: Is there an isyncstream
-    if ( "q"s == my_string) {
-        my_stop_source.request_stop();
-    }
-}
-
-void output_thread_f (std::stop_token const &st ) {
-    std::osyncstream(cout) << "hello world." << endl;
-}
-
 void test1 () {
-    std::jthread my_output_jthread  {output_thread_f};
-    std::jthread my_input_jthread   {input_thread_f, my_output_jthread.get_stop_source()};
 }
-}
+} // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 int main(int argc, char const * arv[]) {
     std::string my_arv{*arv}; cout << "$$ ~~~ argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
