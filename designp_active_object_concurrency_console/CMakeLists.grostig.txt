@@ -22,8 +22,8 @@ set(CMAKE_CXX_STANDARD 23)                                          # set_proper
    set(CMAKE_CXX_STANDARD 17)
  endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_VERBOSE_MAKEFILE ON)  # Doesn't seem to do anything ??
 set(CXX_STANDARD 23)
 set(CXX_STANDARD_REQUIRED ON)
