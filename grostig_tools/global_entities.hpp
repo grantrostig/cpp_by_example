@@ -22,13 +22,43 @@
     TODO?:X   the X programmer is not sure about something, that should be addressed.
     TODO??:   is a question for verbal discussion at CppMSG.com meetup meetings.
 
-    Ordering of headers as follows: re:Lakos
-    + The prototype/interface header for this implementation (ie, the .h/.hh file that corresponds to this .cpp/.cc file).
+    Ordering of headers as follows: re:Lakos + The prototype/interface header for this implementation (ie, the .h/.hh file that corresponds to this .cpp/.cc file).
     + Other headers from the same project, as needed.
     + Headers from other non-standard, non-system libraries (for example, Qt, Eigen, etc).
     + Headers from other "almost-standard" libraries (for example, Boost)
     + Standard C++ headers (for example, iostream, functional, etc.)
     + Standard C headers (for example, cstdint, dirent.h, etc.)
+
+    As per Anthony Williams C++ on Sea 2022 "intro to Multithreading" @33 min.
+    + Order of selecting C++ synchonization facilites:
+    1) Latches <== think this first and the proceed down list as required.
+    2) Barriers
+    3) Futures
+    4) Mutexes
+    5) Semaphores
+    6) Atomics (last choice, your profiling has told you that you need it.)
+    + We have 6 Mutexes (for most code 5 too many LOL):
+    1) std::mutex  <== USE THIS ONE for most, rethink your code. if need then:
+    2) std::timed_mutex
+    3) std::recursive_mutex
+    4) std::recursive_timed_mutex
+    5) std::shared_mutex
+    6) std::shared_timed_mutex
+        + RAII type Locking of those Mutexes:
+        1) std::scoped_lock (will lock multiple mutexes (bad sign) <== USE THIS ONE
+        2) std::unique_lock (if using a std::condition_variable RARE case)
+        3) std::lock_guard
+        4) std::shared_lock
+    + Condition variables optimize wait'ing.
+        std::unique_lock lock{m};
+        my_condition_variable.wait(lock,[]{return my_optional_data.has_value());
+
+        Other thread$ { std::scoped_lock ...; data=make_data();} my_condition_variable.notify_one(); TODO??:How does this other thread know about my_condition_variable?
+        Note: condition_variable_any
+    Semaphores: READ: The Little Book of Semaphores
+        Counting_semaphore
+        Binary_semaphore ~ mutex TODO??
+    std::Atomic< T(trivially copyable && bitwise comparable || unique_||weak_ptr) >:
 
     define NDEBUG if asserts are NOT to be checked.  Put in *.h file not *.CPP
     #define NDEBUG
@@ -38,18 +68,14 @@
     #endif GR_DEBUG
  */
 #pragma once
+//#include <gsl/gsl>                                // sudo dnf install  guidelines-support-library-devel
 //#include <bits/stdc++.h>
 //#include <boost/dynamic_bitset.hpp>
 //#include <boost/multiprecision/cpp_int.hpp>
 //#include <dlib/numeric_constants.h>
-//#include <gsl/gsl>                                // sudo dnf install  guidelines-support-library-devel
 #include <bit>
 #include <bitset>
-#include <cassert>
 #include <chrono>
-#include <climits>
-#include <cmath>
-#include <csignal>
 #include <iostream>
 #include <iterator>
 #include <map>
@@ -59,6 +85,12 @@
 #include <string>
 #include <stacktrace>
 #include <vector>
+
+#include <cassert>
+#include <climits>
+#include <csignal>
+#include <cmath>
+
 // NOTE: This file/library is NOT header only, so it has to be copied into each project that uses it.  TODO??: fix this
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // NOT using namespace std;
 using namespace std::string_literals;  // Doesn't cause harm?

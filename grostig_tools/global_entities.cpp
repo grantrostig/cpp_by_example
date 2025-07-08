@@ -2,14 +2,21 @@
     Snippet
 */
 #include "global_entities.hpp"
-//#include <bits/stdc++.h>
 //#include <gsl/gsl>      // $ sudo dnf install guidelines-support-library-devel
-//#include <cassert>
-//#include <csignal>
-//#include <iostream>
-//#include <source_location>
-//#include <stacktrace>
+//#include <bits/stdc++.h>
+#include <chrono>
+#include <iostream>
+#include <map>
+#include <source_location>
+#include <stacktrace>
+#include <string>
+#include <cassert>
+#include <csignal>
 #include <cstring>  // only needed here, for strsignal().
+
+using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // NOT using namespace std;
+using namespace std::string_literals;  // Doesn't cause harm?
+using namespace std::chrono_literals;  // Doesn't cause harm?
 
 namespace Detail {  // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 /** signals that cause "terminate" and sometimes "core dump"  https://en.wikipedia.org/wiki/Signal_(IPC)
