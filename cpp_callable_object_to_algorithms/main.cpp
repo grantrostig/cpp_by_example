@@ -231,23 +231,25 @@ void f1 () { LOGGER_()
               The bound object must remain valid during the callable’s lifetime.
     */
     struct MyClass2 {
-        static void member_function1(int x) {
+        // static void member_function1(int x) {  // TODO??: why not a static?
+        void member_function1(int x) {
             LOGGER_("my_message");
             std::cout << x << '\n';
         }
-        static void member_function2(int x, int y) {
+        void print_sum(int x, int y) {
             LOGGER_("my_message");
             std::cout << x+y << '\n';
         }
     };
-
-    auto bound2 = std::bind( &MyClass2::member_function1, &obj, 10);
-    auto bound3 = std::bind( &MyClass2::member_function1, &obj, std::placeholders::_1, 10);
-    auto bound4 = std::bind( &MyClass2::member_function2, &obj, std::placeholders::_1, 10);
-    bound2(9);                                                // Callable: invokes print_sum(8, 10) TODO??: ignores 99999999?
-
+    MyClass2 obj2;
+    auto bound2 = std::bind( &MyClass2::member_function1, &obj2, 11);
+    auto bound3 = std::bind( &MyClass2::print_sum,        &obj2, std::placeholders::_1, 12);
+    bound2(13);                                                // Callable: invokes print_sum(8, 10) TODO??: ignores 99999999?
+    bound2();                                                // Callable: invokes print_sum(8, 10) TODO??: ignores 99999999?
+    bound3(14,99999999999);                                    // Callable: invokes print_sum(8, 10) TODO??: ignores 99999999?
     LOGGER_()
 }
+
 void test1 () { LOGGER_()
     f1();
     LOGGER_()
