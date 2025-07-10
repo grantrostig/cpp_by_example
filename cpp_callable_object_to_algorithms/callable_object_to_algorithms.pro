@@ -119,13 +119,13 @@ LIBS += \                               # https://gcc.gnu.org/onlinedocs/gcc-13.
 #}
 
 HEADERS +=                      \
-   #global_entities.hpp         \
+    global_entities.hpp         \
    #ut.hpp                      \
    #$$PWD/..h                   \   # probably wrong
 
 SOURCES +=                      \
-   # NOT HERE main.cpp          \   # declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
-   #global_entities.cpp         \
+   ##NOT HERE main.cpp          \   # declared above for app, and not declared above for lib.  Therefore do NOT declare it here in either case.
+    global_entities.cpp         \
 
 HEADERS +=                      \
    #boost_headers.hpp           \
