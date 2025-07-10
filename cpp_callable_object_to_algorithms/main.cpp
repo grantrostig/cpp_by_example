@@ -96,9 +96,9 @@ _ForwardIterator remove_if3(_ForwardIterator __first, _ForwardIterator __last, _
 int main() {
     list<int> coll0 { 0,1,2,3,4,5,6,7,8,9 }, coll1{coll0}, coll2 {coll0}, coll3 {coll0}, coll4 {coll0}, coll5{coll0};
     PRINT_ELEMENTS( coll1, "orig        : "); cout << "Remove third element, not also the 6th!\n";
-    //auto pos0 = remove_if(  coll0.begin(), coll0.end(), Nth_fo{3} ); 		// remove third element
-    //auto pos1 = remove_if1( coll1.begin(), coll1.end(), Nth_fo{3}(999) ); 		// remove third element, try again!
-    auto pos1 = remove_if1( coll1.begin(), coll1.end(), Nth_fo{3}() ); 		// remove third element, try again!
+    auto pos0 = remove_if(  coll0.begin(), coll0.end(), Nth_fo{3} ); 		// remove third element
+    auto pos1 = remove_if1( coll1.begin(), coll1.end(), Nth_fo{3}(999) ); 		// remove third element, try again!
+    //auto pos1 = remove_if1( coll1.begin(), coll1.end(), Nth_fo{3}() ); 		// remove third element, try again!
     //auto pos2 = remove_if2( coll2.begin(), coll2.end(), Nth_fo(3) ); 		// remove third element, try again!
     //auto pos3 = remove_if3( coll3.begin(), coll3.end(), Nth_fo(3) ); 		// remove third element, try again!
     //auto pos4 = remove_if4( coll4.begin(), coll4.end(), Nth_fn(0) ); 		// remove third element, try again!

@@ -34,7 +34,7 @@
     1) Latches <== think this first and the proceed down list as required.
     2) Barriers
     3) Futures
-    4) Mutexes
+    4) Mutexes (binary semaphore)
     5) Semaphores
     6) Atomics (last choice, your profiling has told you that you need it.)
     + We have 6 Mutexes (for most code 5 too many LOL):
@@ -50,15 +50,14 @@
         3) std::lock_guard
         4) std::shared_lock
     + Condition variables optimize wait'ing.
-        std::unique_lock lock{m};
-        my_condition_variable.wait(lock,[]{return my_optional_data.has_value());
-
-        Other thread$ { std::scoped_lock ...; data=make_data();} my_condition_variable.notify_one(); TODO??:How does this other thread know about my_condition_variable?
-        Note: condition_variable_any
-    Semaphores: READ: The Little Book of Semaphores
-        Counting_semaphore
-        Binary_semaphore ~ mutex TODO??
-    std::Atomic< T(trivially copyable && bitwise comparable || unique_||weak_ptr) >:
+        1) Eg. {Std::unique_lock lock{m};
+                my_condition_variable.wait(lock,[]{return my_optional_data.has_value());}
+               {Other thread$ { std::scoped_lock ...; data=make_data();} my_condition_variable.notify_one();
+                        TODO??:How does this other thread know about my_condition_variable?}
+        2) Note: condition_variable_any
+    + Semaphores: READ: The Little Book of Semaphores
+        1) Counting_semaphore
+    + Std::Atomic< T(trivially copyable && bitwise comparable || unique_ptr || weak_ptr) >:
 
     define NDEBUG if asserts are NOT to be checked.  Put in *.h file not *.CPP
     #define NDEBUG
@@ -85,13 +84,11 @@
 #include <string>
 #include <stacktrace>
 #include <vector>
-
 #include <cassert>
 #include <climits>
 #include <csignal>
 #include <cmath>
-
-// NOTE: This file/library is NOT header only, so it has to be copied into each project that uses it.  TODO??: fix this
+// NOTE: This file/library is NOT header only, so *.hpp and *.cpp have to be copied into each project that uses it.  TODO??: fix this
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // NOT using namespace std;
 using namespace std::string_literals;  // Doesn't cause harm?
 using namespace std::chrono_literals;  // Doesn't cause harm?
