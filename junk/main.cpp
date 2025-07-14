@@ -7,7 +7,7 @@ using namespace std;
 
 int main() {
     MyClass obj;
-    auto bound = std::bind(&MyClass::member_function, &obj, std::placeholders::_1);
+    auto bound = std::bind(&MyClass::member_function, &obj, std::placeholders::_1 );
     bound(42); // Outputs: Value: 42
     cout << "Hello World!" << endl;
     return 0;
