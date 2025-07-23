@@ -1,4 +1,6 @@
-block(COMMENT "*** Comment BEGIN ***")
+#[=====[
+#]=====]
+#[=====[ *** Comment BEGIN ***
 # Non Qt, for C++ on Fedora and others?
 # Grant Rostig copyright (c) 2025, License: Boost 1.0
 # Replace variable <ALL_CAPS> with all caps name, removing angle brakets.
@@ -14,9 +16,9 @@ block(COMMENT "*** Comment BEGIN ***")
 # OR
 # $ cmake --build . --verbose
 # ? $ make VERBOSE=1 # not sure what this is?
-endblock(COMMENT "*** Comment END ***")
+*** Comment END *** #]=====]
 
-cmake_minimum_required(VERSION 3.31)  # cmake_minimum_required(VERSION 3.9.6...3.15.0)
+cmake_minimum_required(VERSION 3.30)  # cmake_minimum_required(VERSION 3.9.6...3.15.0)
 set(CMAKE_CXX_STANDARD 23)                                          # set_property(CMAKE_CXX_STANDARD 23)  #TODO??: old?
  if(CMAKE_CXX_STANDARD LESS 17)
    set(CMAKE_CXX_STANDARD 17)
@@ -37,20 +39,23 @@ set_source_files_properties(<NAME>.cpp PROPERTIES COMPILE_OPTIONS "-Wno-unused-p
 find_package( Boost 1.81 )                                  # find_package(Boost 1.81 COMPONENTS program_options REQUIRED)
 include_directories( src, include )  # TODO??: does this include the subdirectories too?
 
-project( <EXECUTABLE_NAME> VERSION 0.1 LANGUAGES CXX )
-add_executable( <EXECUTABLE_NAME>
-        src/main.cpp
-        src/<>.h
-        include/<>.h
-        src/<>.cpp
+project( boost_json VERSION 0.1 LANGUAGES CXX )
+add_executable( boost_json
+       main.cpp
+       boost_headers.cpp boost_headers.hpp global_entities.cpp global_entities.hpp README.txt
+       cpp_llm_prompt_chatgpt.json cpp_llm_prompt_claude.json cpp_llm_prompt_gemini.json
+       #src/main.cpp
+       #src/<>.h
+       #include/<>.h
+       #src/<>.cpp
 )
 # *** LINKING: https://cmake.org/cmake/help/latest/command/add_link_options.html#command:add_link_options
 # TODO??: add_link_options(<option> ...)  Does NOT Work.
-# TODO??: target_link_libraries(<EXECUTABLE_NAME> Boost::program_options)  # macOS
+# TODO??: target_link_libraries(boost_json Boost::program_options)  # macOS
 # TODO??: string(APPEND CMAKE_EXE_LINKER_FLAGS " -fexceptions")
-target_link_libraries(  <EXECUTABLE_NAME> -lstdc++_exp) # Others for Fedora: -lstdc++_libbacktrace
+target_link_libraries(  boost_json -lstdc++_exp) # Others for Fedora: -lstdc++_libbacktrace
 
-block(COMMENT "*** Comment BEGIN ***") # *** Qt STUFF *** Original project name and dir: qt_QtQuickApplication_template_cmake
+#[=====[ *** Comment BEGIN *** *** Qt STUFF *** Original project name and dir: qt_QtQuickApplication_template_cmake
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -69,15 +74,15 @@ set(PROJECT_SOURCES
       # <>.ui
       # ${TS_FILES}
 )
-qt_add_executable( <EXECUTABLE_NAME>
+qt_add_executable( boost_json
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
 )
 
 # TODO??: what!? - Define target properties for Android with Qt 6 as: set_property(TARGET designp_active_object_concurrency_console APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android ) For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
-qt_add_qml_module( app<EXECUTABLE_NAME>                 # TODO??: or maybe not app< prefix
-    URI <EXECUTABLE_NAME>
+qt_add_qml_module( appboost_json                 # TODO??: or maybe not app< prefix
+    URI boost_json
     VERSION 1.0
     QML_FILES
         Main.qml
@@ -93,13 +98,13 @@ set_target_properties(appqt_QtQuickApplication_template_cmake PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries( app<EXECUTABLE_NAME> PRIVATE
+target_link_libraries( appboost_json PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Quick
 )
 include(GNUInstallDirs)
-install(TARGETS <EXECUTABLE_NAME>            # for sometimes app<EXECUTABLE_NAME>
+install(TARGETS boost_json            # for sometimes appboost_json
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -107,15 +112,15 @@ install(TARGETS <EXECUTABLE_NAME>            # for sometimes app<EXECUTABLE_NAME
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(designp_active_object_concurrency_console)
 endif()
-endblock(COMMENT "*** Comment END ***")
+#]=====]
 
-block(COMMENT "*** Comment BEGIN ***") # ***  OTHER quality stuff? TODO??:
+#[=====[ *** Comment BEGIN *** ***  OTHER quality stuff? TODO??:
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(<Executable_name>ConfigCommon)
-option(<EXECUTABLE_NAME>_BUILD_EXAMPLES "build <Executable_name> library examples" ON)
-option(<EXECUTABLE_NAME>_ENABLE_LTO "enable link time optimization for <Executable_name> targets" OFF)
-set(<EXECUTABLE_NAME>_HOST_UI_LIBRARY "" CACHE STRING "gtk, cocoa or win32")
-option(<EXECUTABLE_NAME>_HOST_ONLY_WIN7 "If host UI library is win32, reduce <Executable_name> features to support Windows 7" OFF)
+option(boost_json_BUILD_EXAMPLES "build <Executable_name> library examples" ON)
+option(boost_json_ENABLE_LTO "enable link time optimization for <Executable_name> targets" OFF)
+set(boost_json_HOST_UI_LIBRARY "" CACHE STRING "gtk, cocoa or win32")
+option(boost_json_HOST_ONLY_WIN7 "If host UI library is win32, reduce <Executable_name> features to support Windows 7" OFF)
 option(ENABLE_GIT_SUBMODULE_CHECK "Check and clone submodules when not available." ON)
 if (ENABLE_GIT_SUBMODULE_CHECK)
    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
@@ -134,4 +139,4 @@ add_subdirectory(lib)
    # add_subdirectory(examples)
 # endif()
 
-endblock(COMMENT "*** Comment END ***")
+#]=====]

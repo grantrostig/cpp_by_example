@@ -263,7 +263,7 @@ int main(int argc, char const * arv[]) {
     string my_arv{*arv}; cout << "$$ my_this: argc, argv:"<<argc<<","<<my_arv<<"."<<endl;
     cin.exceptions( std::istream::failbit);
     Detail::crash_signals_register();
-
+// NO RECENT WORK, but had planned to discuss on CppMSG as of: 6/18/2025
     //Example1::test1 ();
     Example2::test1 ();
     cout << "###" << endl;
