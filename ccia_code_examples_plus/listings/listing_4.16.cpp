@@ -1,6 +1,5 @@
 #include "listing_4.15.cpp"
-void Atm::getting_pin()
-{
+void Atm::getting_pin() {
     incoming.wait()
         .handle<digit_pressed>(
             [&](digit_pressed const& msg)
@@ -15,17 +14,14 @@ void Atm::getting_pin()
             }
             )
         .handle<clear_last_pressed>(
-            [&](clear_last_pressed const& msg)
-            {
-                if(!pin.empty())
-                {
+            [&](clear_last_pressed const& msg) {
+                if(!pin.empty()) {
                     pin.resize(pin.length()-1);
                 }
             }
             )
         .handle<cancel_pressed>(
-            [&](cancel_pressed const& msg)
-            {
+            [&](cancel_pressed const& msg) {
                 state=&atm::done_processing;
             }
             );
