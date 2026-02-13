@@ -1,7 +1,7 @@
-class interface_machine {
-    messaging::receiver incoming;
+class Interface_machine {
+    Messaging::receiver incoming;
 public:
-    void done() { get_sender().send(messaging::close_queue()); }
+    void done() { get_sender().send(Messaging::close_queue()); }
     void run() {
         try {
             for(;;) {
@@ -76,7 +76,7 @@ public:
                         } );
             }
         }
-        catch(messaging::close_queue&) {};
+        catch(Messaging::close_queue&) {};
     }
-    messaging::sender get_sender() { return incoming; }
+    Messaging::sender get_sender() { return incoming; }
 };

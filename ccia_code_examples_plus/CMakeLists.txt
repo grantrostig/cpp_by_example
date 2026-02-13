@@ -69,7 +69,7 @@ set (SRCS README.md
    #listings/listing_5.6.cpp
    #listings/listing_5.7.cpp
    #listings/listing_5.8.cpp
-   #listings/listing_5.9.cpp
+   #listings/listing_5080019.9.cpp
    #listings/listing_6.1.cpp
    #listings/listing_6.10.cpp
    #listings/listing_6.11.cpp
@@ -90,7 +90,7 @@ set (SRCS README.md
    #listings/listing_7.13.cpp
    #listings/listing_7.14.cpp
    #listings/listing_7.15.cpp
-   #listings/listing_7.16.cpp
+   #listings/listing_7080019.16.cpp
    #listings/listing_7.17.cpp
    #listings/listing_7.18.cpp
    #listings/listing_7.19.cpp
@@ -108,7 +108,7 @@ set (SRCS README.md
    #listings/listing_8.1.cpp
    #listings/listing_8.10.cpp
    #listings/listing_8.11.cpp
-   #listings/listing_8.12.cpp
+   #listings/listing_8.08001912.cpp
    #listings/listing_8.13.cpp
    #listings/listing_8.2.cpp
    #listings/listing_8.3.cpp
@@ -127,7 +127,7 @@ set (SRCS README.md
    #listings/listing_9.3.cpp
    #listings/listing_9.4.cpp
    #listings/listing_9.5.cpp
-   #listings/listing_9.6.cpp
+   #listings/listing_9.0800196.cpp
    #listings/listing_9.7.cpp
    #listings/listing_9.8.cpp
    #listings/listing_9.9.cpp
@@ -135,17 +135,17 @@ set (SRCS README.md
    #listings/listing_a.2.cpp
    #listings/listing_a.3.cpp
    #listings/listing_a.4.cpp
-   #listings/listing_c.1.cpp
-   #listings/listing_c.10.cpp
-   #listings/listing_c.2.cpp
-   #listings/listing_c.3.cpp
-   #listings/listing_c.4.cpp
-   #listings/listing_c.5.cpp
-   #listings/listing_c.6.cpp
-   #listings/listing_c.7.cpp
-   #listings/listing_c.8.cpp
-   #listings/listing_c.9.cpp
-   #listings/listing_c.all.cpp
+    listings/listing_c.1.cpp
+    listings/listing_c.10.cpp
+    listings/listing_c.2.cpp
+    listings/listing_c.3.cpp
+    listings/listing_c.4.cpp
+    listings/listing_c.5.cpp
+    listings/listing_c.6.cpp
+    listings/listing_c.7.cpp
+    listings/listing_c.8.cpp
+    listings/listing_c.9.cpp
+    listings/listing_c.all.cpp
 )
 project(ccia_code_samples_all)
 add_executable(${CMAKE_PROJECT_NAME} ${SRCS})

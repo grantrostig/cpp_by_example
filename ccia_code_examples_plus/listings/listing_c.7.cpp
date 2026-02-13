@@ -1,8 +1,8 @@
-class atm {
-    messaging::receiver incoming;
-    messaging::sender bank;
-    messaging::sender interface_hardware;
-    void (atm::*state)();
+class Atm {
+    Messaging::receiver incoming;
+    Messaging::sender bank;
+    Messaging::sender interface_hardware;
+    void (Atm::*state)();
     std::string account;
     unsigned withdrawal_amount;
     std::string pin;
@@ -13,12 +13,12 @@ class atm {
                         issue_money(withdrawal_amount));
                     bank.send(
                         withdrawal_processed(account,withdrawal_amount));
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } )
             .handle<withdraw_denied>(
                 [&](withdraw_denied const& msg) {
                     interface_hardware.send(display_insufficient_funds());
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } )
             .handle<cancel_pressed>(
                 [&](cancel_pressed const& msg) {
@@ -26,7 +26,7 @@ class atm {
                         cancel_withdrawal(account,withdrawal_amount));
                     interface_hardware.send(
                         display_withdrawal_cancelled());
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } );
     }
     void process_balance() {
@@ -34,11 +34,11 @@ class atm {
             .handle<balance>(
                 [&](balance const& msg) {
                     interface_hardware.send(display_balance(msg.amount));
-                    state=&atm::wait_for_action;
+                    state=&Atm::wait_for_action;
                 } )
             .handle<cancel_pressed>(
                 [&](cancel_pressed const& msg) {
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } );
     }
     void wait_for_action() {
@@ -47,32 +47,32 @@ class atm {
                 [&](withdraw_pressed const& msg) {
                     withdrawal_amount=msg.amount;
                     bank.send(withdraw(account,msg.amount,incoming));
-                    state=&atm::process_withdrawal;
+                    state=&Atm::process_withdrawal;
                 } )
             .handle<balance_pressed>(
                 [&](balance_pressed const& msg) {
                     bank.send(get_balance(account,incoming));
-                    state=&atm::process_balance;
+                    state=&Atm::process_balance;
                 } )
             .handle<cancel_pressed>(
                 [&](cancel_pressed const& msg) {
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } );
     }
     void verifying_pin() {
         incoming.wait()
             .handle<pin_verified>(
                 [&](pin_verified const& msg) {
-                    state=&atm::wait_for_action;
+                    state=&Atm::wait_for_action;
                 } )
             .handle<pin_incorrect>(
                 [&](pin_incorrect const& msg)
                 {   interface_hardware.send( display_pin_incorrect_message());
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } )
             .handle<cancel_pressed>(
                 [&](cancel_pressed const& msg) {
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } );
     }
     void getting_pin() {
@@ -83,7 +83,7 @@ class atm {
                     pin+=msg.digit;
                     if(pin.length()==pin_length) {
                         bank.send(verify_pin(account,pin,incoming));
-                        state=&atm::verifying_pin;
+                        state=&Atm::verifying_pin;
                     }
                 } )
             .handle<clear_last_pressed>(
@@ -92,7 +92,7 @@ class atm {
                 } )
             .handle<cancel_pressed>(
                 [&](cancel_pressed const& msg) {
-                    state=&atm::done_processing;
+                    state=&Atm::done_processing;
                 } );
     }
     void waiting_for_card() {
@@ -102,29 +102,29 @@ class atm {
                     account=msg.account;
                     pin="";
                     interface_hardware.send(display_enter_pin());
-                    state=&atm::getting_pin;
+                    state=&Atm::getting_pin;
                 } );
     }
     void done_processing() {
         interface_hardware.send(eject_card());
-        state=&atm::waiting_for_card;
+        state=&Atm::waiting_for_card;
     }
-    atm(atm const&)=delete;
-    atm& operator=(atm const&)=delete;
+    Atm(Atm const&)=delete;
+    Atm& operator=(Atm const&)=delete;
 public:
-    atm(messaging::sender bank_, messaging::sender interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
-    void done() { get_sender().send(messaging::close_queue()); }
+    Atm(Messaging::sender bank_, Messaging::sender interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
+    void done() { get_sender().send(Messaging::close_queue()); }
     void run() {
-        state=&atm::waiting_for_card;
+        state=&Atm::waiting_for_card;
         try {
             for(;;)
             {
                 (this->*state)();
             }
         }
-        catch(messaging::close_queue const&) { }
+        catch(Messaging::close_queue const&) { }
     }
-    messaging::sender get_sender() {
+    Messaging::sender get_sender() {
         return incoming;
     }
 };

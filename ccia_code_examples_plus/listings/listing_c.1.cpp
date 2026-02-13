@@ -2,7 +2,7 @@
 #include <condition_variable>
 #include <queue>
 #include <memory>
-namespace messaging {
+namespace Messaging {
     struct message_base {
         virtual ~message_base() {}
     };

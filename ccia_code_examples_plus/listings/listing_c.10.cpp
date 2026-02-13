@@ -5,7 +5,7 @@ int main() {
     std::thread bank_thread(&bank_machine::run,&bank);
     std::thread if_thread(&interface_machine::run,&interface_hardware);
     std::thread atm_thread(&atm::run,&machine);
-    messaging::sender atmqueue(machine.get_sender());
+    Messaging::sender atmqueue(machine.get_sender());
     bool quit_pressed=false;
     while(!quit_pressed) {
         char c=getchar();

@@ -1,9 +1,9 @@
-class bank_machine {
-    messaging::receiver incoming;
+class Bank_machine {
+    Messaging::receiver incoming;
     unsigned balance;
 public:
-    bank_machine(): balance(199) {}
-    void done() { get_sender().send(messaging::close_queue()); }
+    Bank_machine(): balance(199) {}
+    void done() { get_sender().send(Messaging::close_queue()); }
     void run() { try {
             for(;;)
             {
@@ -34,7 +34,7 @@ public:
                         );
             }
         }
-        catch(messaging::close_queue const&) { }
+        catch(Messaging::close_queue const&) { }
     }
-    messaging::sender get_sender() { return incoming; }
+    Messaging::sender get_sender() { return incoming; }
 };

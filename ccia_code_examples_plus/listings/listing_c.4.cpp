@@ -1,4 +1,4 @@
-namespace messaging {
+namespace Messaging {
     class close_queue {};
     class dispatcher {
         queue* q;

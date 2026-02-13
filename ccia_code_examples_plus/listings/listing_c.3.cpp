@@ -1,4 +1,4 @@
-namespace messaging {
+namespace Messaging {
     class receiver {
         queue q;
     public:

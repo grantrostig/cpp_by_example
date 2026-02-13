@@ -1,4 +1,4 @@
-namespace messaging {
+namespace Messaging {
     template<typename PreviousDispatcher,typename Msg,typename Func>
     class TemplateDispatcher {
         queue* q;
