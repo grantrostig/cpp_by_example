@@ -130,7 +130,7 @@ namespace Messaging {
 
         template<typename Message>
         void send(Message const& msg) {
-            if(qdisplay_insufficient_funds) { q->push(msg); }
+            if(q) { q->push(msg); }
         }
     };
     class Receiver {
@@ -460,43 +460,3 @@ public:
     }
     Messaging::Sender get_sender() { return incoming; }
 };
-
-int main() {
-    Bank_machine        bank;
-    Interface_machine   interface_hardware;
-    Atm                 machine(bank.get_sender(),interface_hardware.get_sender());
-    std::thread         bank_thread(&Bank_machine::run,&bank);
-    std::thread         if_thread(&Interface_machine::run,&interface_hardware);
-    std::thread         atm_thread(&Atm::run,&machine);
-    Messaging::Sender   atmqueue(machine.get_sender());
-    bool                quit_pressed=false;
-    while(!quit_pressed) {
-        char c=getchar();
-        switch(c) {
-        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-            atmqueue.send(Digit_pressed(c));
-            break;
-        case 'b':
-            atmqueue.send(Balance_pressed());
-            break;
-        case 'w':
-            atmqueue.send(Withdraw_pressed(50));
-            break;
-        case 'c':
-            atmqueue.send(Cancel_pressed());
-            break;
-        case 'q':
-            quit_pressed=true;
-            break;
-        case 'i':
-            atmqueue.send(Card_inserted("acc1234"));
-            break;
-        }
-    }
-    bank.done();
-    machine.done();
-    interface_hardware.done();
-    atm_thread.join();
-    bank_thread.join();
-    if_thread.join();
-}

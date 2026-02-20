@@ -1,4 +1,5 @@
-#include "listing_4.15.cpp"
+//#include "listing_4.15.atm.cpp"
+#include "listing_c.all.nomain.cpp"
 void Atm::getting_pin() {
     incoming.wait()
         .handle<digit_pressed>(
