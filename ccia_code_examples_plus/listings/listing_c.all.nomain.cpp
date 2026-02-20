@@ -141,6 +141,7 @@ namespace Messaging {
     };
 } // END namespace NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
+namespace App_message {
 struct Withdraw {
     std::string account;
     unsigned amount;
@@ -149,7 +150,7 @@ struct Withdraw {
         : account(account_),amount(amount_), atm_queue(atm_queue_) {}
 };
 struct Withdraw_ok {};
-struct withdraw_denied {};
+struct Withdraw_denied {};
 struct Cancel_withdrawal {
     std::string account;
     unsigned amount;
@@ -210,6 +211,8 @@ struct Display_balance {
     explicit Display_balance(unsigned amount_): amount(amount_) {}
 };
 struct Balance_pressed {};
+} // namespace App_message
+
 class Atm {
     Messaging::Receiver incoming{};
     Messaging::Sender   bank{};
@@ -227,8 +230,8 @@ class Atm {
                         Withdrawal_processed(account,withdrawal_amount));
                     state=&Atm::done_processing;
                 } )
-            .handle<withdraw_denied>(
-                [&](withdraw_denied const& msg) {
+            .handle<Withdraw_denied>(
+                [&](Withdraw_denied const& msg) {
                     interface_hardware.send(Display_insufficient_funds());
                     state=&Atm::done_processing;
                 } )
@@ -340,6 +343,7 @@ public:
         return incoming;
     }
 };
+
 class Bank_machine {
     Messaging::Receiver incoming;
     unsigned balance;
@@ -364,7 +368,8 @@ public:
                         } )
                     .handle<Get_balance>(
                         [&](Get_balance const& msg) {
-                            msg.atm_queue.send(::balance(balance));
+                            // grostig msg.atm_queue.send(::balance(balance));
+                            msg.atm_queue.send(::Balance(balance));
                         } )
                     .handle<Withdrawal_processed>(
                         [&](Withdrawal_processed const& msg) { }
