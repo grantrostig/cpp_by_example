@@ -145,11 +145,11 @@ set (SRCS README.md
    #listings/listing_c.7.cpp
    #listings/listing_c.8.cpp
    #listings/listing_c.9.cpp
-   listings/listing_c.all.nomain.cpp
+   listings/listing_c.classes.cpp
 )
 project(ccia_code_samples_all)
 add_executable(${CMAKE_PROJECT_NAME} ${SRCS}
-   listings/listing_c_copy.just.main.cpp)
+   listings/listing_c.main.cpp)
 # set(CMAKE_AUTOUIC ON)
 # set(CMAKE_AUTOMOC ON)
 # set(CMAKE_AUTORCC ON)
