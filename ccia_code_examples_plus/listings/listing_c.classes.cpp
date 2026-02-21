@@ -5,35 +5,37 @@
 #include <mutex>
 namespace Messaging {
 struct Message_base {
-    virtual ~Message_base() {}  // must have boilerplate.
+    virtual ~Message_base() {}  // This is boring "must have" boilerplate.
 };
 
 template <typename Msg>
-struct Wrapped_message : Message_base {  // TODO??: define in detail "wrapped" in this context and in general? It it just to use runtime dispatch?
+struct Wrapped_message : Message_base {  // TODO??: define in detail "wrapped" in this context and in general? Is it just to use runtime dispatch?
     Msg contents{};
     explicit Wrapped_message(Msg const &contents_) : contents(contents_) {}
 };
 class Queue {
-    std::mutex                                m{};
-    std::condition_variable                   cond_var{};
+    std::mutex                                mtx_to_protect_queue_sptr{};
     std::queue<std::shared_ptr<Message_base>> queue_sptr_to_wrapped_msg{};
+    std::condition_variable                   cond_var{};
 public:
     template <typename T>
-    void push(T const &msg) {
-        std::lock_guard<std::mutex> lk(m);
-        queue_sptr_to_wrapped_msg.push(std::make_shared<Wrapped_message<T>>(msg));
+    void push(T const &msg) { {
+            std::lock_guard<std::mutex> lk{mtx_to_protect_queue_sptr};
+            queue_sptr_to_wrapped_msg.push(std::make_shared<Wrapped_message<T>>(msg));
+        }
         cond_var.notify_all();
     }
     std::shared_ptr<Message_base> wait_and_pop() {
-        std::unique_lock<std::mutex> lk(m);
+        std::unique_lock<std::mutex> lk{mtx_to_protect_queue_sptr};
         cond_var.wait(lk, [&] { return not queue_sptr_to_wrapped_msg.empty(); });
-        auto result = queue_sptr_to_wrapped_msg.front();
+        auto result {queue_sptr_to_wrapped_msg.front()};
         queue_sptr_to_wrapped_msg.pop();
         return result;
     }
 };
 
-template <typename PreviousDispatcher, typename Msg, typename Func> class TemplateDispatcher {
+template <typename PreviousDispatcher, typename Msg, typename Func>
+class TemplateDispatcher {
     Queue              *ptr_queue{};
     PreviousDispatcher *ptr_prev_dispatcher{};
     Func                f{};
@@ -46,15 +48,16 @@ template <typename PreviousDispatcher, typename Msg, typename Func> class Templa
     void wait_and_dispatch() {
         for(;;) {
             auto msg = ptr_queue->wait_and_pop();
-            if(dispatch(msg)) break;
+            if( dispatch(msg)) break;
         }
     }
-    bool dispatch(std::shared_ptr<Message_base> const &msg) {
-        if(Wrapped_message<Msg> *wrapper = dynamic_cast<Wrapped_message<Msg> *>(msg.get())) {
-            f(wrapper->contents);
-            return true;
+    bool dispatch( std::shared_ptr<Message_base> const &sptr_msg ) {
+        if( Wrapped_message<Msg> *wrapper { dynamic_cast< Wrapped_message<Msg> *>( sptr_msg.get() ) }
+            ) {
+             f(wrapper->contents);
+             return true;
         } else {
-            return ptr_prev_dispatcher->dispatch(msg);
+            return ptr_prev_dispatcher->dispatch(sptr_msg);
         }
     }
 public:
@@ -76,7 +79,7 @@ public:
     }
 };
 
-class Close_queue {};
+class Close_queue_actor_frmwrk_msg {};
 class Dispatcher {
     Queue *q;
     bool   is_chained{ false }; // grostig added false
@@ -96,7 +99,7 @@ class Dispatcher {
     }
     bool
     dispatch(std::shared_ptr<Message_base> const &msg) {
-        if(dynamic_cast<Wrapped_message<Close_queue> *>(msg.get())) { throw Close_queue(); }
+        if(dynamic_cast<Wrapped_message<Close_queue_actor_frmwrk_msg> *>(msg.get())) { throw Close_queue_actor_frmwrk_msg(); }
         return false;
     }
 public:
@@ -113,21 +116,21 @@ public:
     }
 };
 
-class Sender {
+class Sender_actor {
     Queue *q;
 public:
-    Sender() : q(nullptr) {}
-    explicit Sender(Queue *q_) : q(q_) {}
+    Sender_actor() : q(nullptr) {}
+    explicit Sender_actor(Queue *q_) : q(q_) {}
 
     template <typename Message>
     void send(Message const &msg) {
         if(q) { q->push(msg); }
     }
 };
-class Receiver {
+class Receiver_actor {
     Queue q;
 public:
-    operator Sender() { return Sender(&q); }
+    operator Sender_actor() { return Sender_actor(&q); }
     Dispatcher wait() {
         return Dispatcher(&q);
     }
@@ -138,8 +141,8 @@ namespace Msg {
 struct Withdraw {
     std::string account;
     unsigned amount;
-    mutable Messaging::Sender atm_queue;
-    Withdraw(std::string const& account_, unsigned amount_, Messaging::Sender atm_queue_)
+    mutable Messaging::Sender_actor atm_queue;
+    Withdraw(std::string const& account_, unsigned amount_, Messaging::Sender_actor atm_queue_)
         : account(account_),amount(amount_), atm_queue(atm_queue_) {}
 };
 struct Withdraw_ok {};
@@ -177,8 +180,8 @@ struct Issue_money {
 struct Verify_pin {
     std::string account;
     std::string pin;
-    mutable Messaging::Sender atm_queue;
-    Verify_pin(std::string const& account_,std::string const& pin_, Messaging::Sender atm_queue_)
+    mutable Messaging::Sender_actor atm_queue;
+    Verify_pin(std::string const& account_,std::string const& pin_, Messaging::Sender_actor atm_queue_)
         : account(account_),pin(pin_),atm_queue(atm_queue_) {}
 };
 struct Pin_verified {};
@@ -191,8 +194,8 @@ struct Display_pin_incorrect_message {};
 struct Display_withdrawal_options {};
 struct Get_balance {
     std::string account{};
-    mutable Messaging::Sender atm_queue{};
-    Get_balance(std::string const& account_,Messaging::Sender atm_queue_)
+    mutable Messaging::Sender_actor atm_queue{};
+    Get_balance(std::string const& account_,Messaging::Sender_actor atm_queue_)
         : account(account_),atm_queue(atm_queue_) {}
 };
 struct Balance {
@@ -207,9 +210,9 @@ struct Balance_pressed {};
 } // END namespace Msg NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 class Atm_smachine {
-    Messaging::Receiver incoming{};
-    Messaging::Sender   bank{};
-    Messaging::Sender   interface_hardware{};
+    Messaging::Receiver_actor incoming{};
+    Messaging::Sender_actor   bank{};
+    Messaging::Sender_actor   interface_hardware{};
     std::string         account{};
     std::string         pin{};
     unsigned            withdrawal_amount{};
@@ -217,7 +220,8 @@ class Atm_smachine {
     void (Atm_smachine::*state)();  // TODO??: what is this?
     void process_withdrawal() {
         incoming.wait()
-            .handle<Msg::Withdraw_ok>( [&](Msg::Withdraw_ok const& msg) {
+            .handle<Msg::Withdraw_ok>(
+                [&](Msg::Withdraw_ok const& msg) {
                     interface_hardware.send(
                         Msg::Issue_money(withdrawal_amount));
                     bank.send(
@@ -321,8 +325,8 @@ class Atm_smachine {
     Atm_smachine(Atm_smachine const&)=delete;
     Atm_smachine& operator=(Atm_smachine const&)=delete;
 public:
-    Atm_smachine(Messaging::Sender bank_, Messaging::Sender interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
-    void done() { get_sender().send(Messaging::Close_queue()); }
+    Atm_smachine(Messaging::Sender_actor bank_, Messaging::Sender_actor interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
+    void done() { get_sender().send(Messaging::Close_queue_actor_frmwrk_msg()); }
     void run() {
         state=&Atm_smachine::waiting_for_card;
         try {
@@ -331,19 +335,19 @@ public:
                 (this->*state)();
             }
         }
-        catch(Messaging::Close_queue const&) { }
+        catch(Messaging::Close_queue_actor_frmwrk_msg const&) { }
     }
-    Messaging::Sender get_sender() {
+    Messaging::Sender_actor get_sender() {
         return incoming;
     }
 };
 
 class Bank_cloud_smachine {
     unsigned balance{};
-    Messaging::Receiver incoming{};
+    Messaging::Receiver_actor incoming{};
 public:
     Bank_cloud_smachine(): balance{199} {}
-    void done() { get_sender().send(Messaging::Close_queue()); }
+    void done() { get_sender().send(Messaging::Close_queue_actor_frmwrk_msg()); }
     void run() { try { for(;;) {
                 incoming.wait()
                     .handle<Msg::Verify_pin>(
@@ -369,16 +373,16 @@ public:
                     .handle<Msg::Cancel_withdrawal>(
                         [&](Msg::Cancel_withdrawal const& msg) {
                         } );
-            } } catch(Messaging::Close_queue const&) {}
+            } } catch(Messaging::Close_queue_actor_frmwrk_msg const&) {}
     }
-    Messaging::Sender get_sender() { return incoming; }
+    Messaging::Sender_actor get_sender() { return incoming; }
 };
 
 class Interface_smachine {
     std::mutex          iom;
-    Messaging::Receiver incoming;
+    Messaging::Receiver_actor incoming;
 public:
-    void done() { get_sender().send(Messaging::Close_queue()); }
+    void done() { get_sender().send(Messaging::Close_queue_actor_frmwrk_msg()); }
     void run() { try { for(;;) {
                 incoming.wait()
                     .handle<Msg::Issue_money>(
@@ -442,7 +446,7 @@ public:
                         } );
             }
         }
-        catch(Messaging::Close_queue&) {};
+        catch(Messaging::Close_queue_actor_frmwrk_msg&) {};
     }
-    Messaging::Sender get_sender() { return incoming; }
+    Messaging::Sender_actor get_sender() { return incoming; }
 };

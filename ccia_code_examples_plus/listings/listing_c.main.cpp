@@ -12,7 +12,7 @@ int main() {
     std::thread         bank_thread      {&Bank_cloud_smachine::run, &bank_cloud_smachine};
     std::thread         interface_thread {&Interface_smachine::run, &interface_hardware_smachine };
     std::thread         atm_thread       {&Atm_smachine::run,&atm_smachine};
-    Messaging::Sender   atm_sender       {atm_smachine.get_sender()};
+    Messaging::Sender_actor   atm_sender       {atm_smachine.get_sender()};
     bool                quit_pressed     {false};
     while(!quit_pressed) {
         char c=getchar();
