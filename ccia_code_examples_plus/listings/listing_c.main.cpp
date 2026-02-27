@@ -7,15 +7,15 @@
 
 int main() {
     bool                            quit_pressed     {false};
-    Bank_cloud_smachine             bank_cloud_s_machine{};
-    Interface_smachine              interface_hardware_s_machine{};
-    Atm_s_machine                   atm_s_machine     {bank_cloud_s_machine.get_sender(), interface_hardware_s_machine.get_sender()};
-    CCIA_Messaging::Sender_actor    atm_sender       {atm_s_machine.get_sender()};
+    Bank_cloud_s_machine             bank_cloud_s_machine{};
+    Interface_s_machine              interface_hardware_s_machine{};
+    Atm_s_machine                   atm_s_machine    {bank_cloud_s_machine.get_sender(), interface_hardware_s_machine.get_sender()};
 
-    std::thread                     bank_thread      {&Bank_cloud_smachine::run, &bank_cloud_s_machine};
-    std::thread                     interface_thread {&Interface_smachine::run, &interface_hardware_s_machine };
+    std::thread                     bank_thread      {&Bank_cloud_s_machine::run, &bank_cloud_s_machine};
+    std::thread                     interface_thread {&Interface_s_machine::run, &interface_hardware_s_machine };
     std::thread                     atm_thread       {&Atm_s_machine::run,&atm_s_machine};
 
+    CCIA_Messaging::Sender_actor    atm_sender       {atm_s_machine.get_sender()};
     while(!quit_pressed) {  // input loop for sending input to atm_s_machine
         char c=getchar();
         switch(c) {

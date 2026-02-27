@@ -342,11 +342,11 @@ public:
     }
 };
 
-class Bank_cloud_smachine {
+class Bank_cloud_s_machine {
     unsigned balance{};
     CCIA_Messaging::Receiver_actor incoming{};
 public:
-    Bank_cloud_smachine(): balance{199} {}
+    Bank_cloud_s_machine(): balance{199} {}
     void done() { get_sender().send(CCIA_Messaging::Close_queue_actor_frmwrk_msg()); }
     void run() { try { for(;;) {
                 incoming.wait()
@@ -378,7 +378,7 @@ public:
     CCIA_Messaging::Sender_actor get_sender() { return incoming; }
 };
 
-class Interface_smachine {
+class Interface_s_machine {
     std::mutex          iom;
     CCIA_Messaging::Receiver_actor incoming;
 public:
