@@ -3,7 +3,7 @@
 #include <queue>
 #include <memory>
 #include <mutex>
-namespace Messaging {
+namespace CCIA_Messaging {
 struct Message_base {
     virtual ~Message_base() {}  // This is boring "must have" boilerplate.
 };
@@ -137,12 +137,12 @@ public:
 };
 } // END namespace Messaging NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-namespace Msg {
+namespace Atm_system_msg {
 struct Withdraw {
     std::string account;
     unsigned amount;
-    mutable Messaging::Sender_actor atm_queue;
-    Withdraw(std::string const& account_, unsigned amount_, Messaging::Sender_actor atm_queue_)
+    mutable CCIA_Messaging::Sender_actor atm_queue;
+    Withdraw(std::string const& account_, unsigned amount_, CCIA_Messaging::Sender_actor atm_queue_)
         : account(account_),amount(amount_), atm_queue(atm_queue_) {}
 };
 struct Withdraw_ok {};
@@ -180,8 +180,8 @@ struct Issue_money {
 struct Verify_pin {
     std::string account;
     std::string pin;
-    mutable Messaging::Sender_actor atm_queue;
-    Verify_pin(std::string const& account_,std::string const& pin_, Messaging::Sender_actor atm_queue_)
+    mutable CCIA_Messaging::Sender_actor atm_queue;
+    Verify_pin(std::string const& account_,std::string const& pin_, CCIA_Messaging::Sender_actor atm_queue_)
         : account(account_),pin(pin_),atm_queue(atm_queue_) {}
 };
 struct Pin_verified {};
@@ -194,8 +194,8 @@ struct Display_pin_incorrect_message {};
 struct Display_withdrawal_options {};
 struct Get_balance {
     std::string account{};
-    mutable Messaging::Sender_actor atm_queue{};
-    Get_balance(std::string const& account_,Messaging::Sender_actor atm_queue_)
+    mutable CCIA_Messaging::Sender_actor atm_queue{};
+    Get_balance(std::string const& account_,CCIA_Messaging::Sender_actor atm_queue_)
         : account(account_),atm_queue(atm_queue_) {}
 };
 struct Balance {
@@ -209,244 +209,242 @@ struct Display_balance {
 struct Balance_pressed {};
 } // END namespace Msg NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-class Atm_smachine {
-    Messaging::Receiver_actor incoming{};
-    Messaging::Sender_actor   bank{};
-    Messaging::Sender_actor   interface_hardware{};
+class Atm_s_machine {  // s_machine = state machine, which in this case runs in its own thread started in main?
+    CCIA_Messaging::Receiver_actor incoming{};
+    CCIA_Messaging::Sender_actor   bank{};
+    CCIA_Messaging::Sender_actor   interface_hardware{};
     std::string         account{};
     std::string         pin{};
     unsigned            withdrawal_amount{};
 
-    void (Atm_smachine::*state)();  // TODO??: what is this?
-    void process_withdrawal() {
+    void (Atm_s_machine::*state)();  // pointer to member function? TODO??: what is this?
+    void process_withdrawal_s() {  // a state in which this statemachine can be.
         incoming.wait()
-            .handle<Msg::Withdraw_ok>(
-                [&](Msg::Withdraw_ok const& msg) {
+            .handle<Atm_system_msg::Withdraw_ok>(
+                [&](Atm_system_msg::Withdraw_ok const& msg) {
                     interface_hardware.send(
-                        Msg::Issue_money(withdrawal_amount));
+                        Atm_system_msg::Issue_money(withdrawal_amount));
                     bank.send(
-                        Msg::Withdrawal_processed(account,withdrawal_amount));
-                    state=&Atm_smachine::done_processing;
+                        Atm_system_msg::Withdrawal_processed(account,withdrawal_amount));
+                    state=&Atm_s_machine::done_processing_s;
                 } )
-            .handle<Msg::Withdraw_denied>(
-                [&](Msg::Withdraw_denied const& msg) {
-                    interface_hardware.send(Msg::Display_insufficient_funds());
-                    state=&Atm_smachine::done_processing;
+            .handle<Atm_system_msg::Withdraw_denied>(
+                [&](Atm_system_msg::Withdraw_denied const& msg) {
+                    interface_hardware.send(Atm_system_msg::Display_insufficient_funds());
+                    state=&Atm_s_machine::done_processing_s;
                 } )
-            .handle<Msg::Cancel_pressed>(
-                [&](Msg::Cancel_pressed const& msg) {
+            .handle<Atm_system_msg::Cancel_pressed>(
+                [&](Atm_system_msg::Cancel_pressed const& msg) {
                     bank.send(
-                        Msg::Cancel_withdrawal(account,withdrawal_amount));
+                        Atm_system_msg::Cancel_withdrawal(account,withdrawal_amount));
                     interface_hardware.send(
-                        Msg::Display_withdrawal_cancelled());
-                    state=&Atm_smachine::done_processing;
+                        Atm_system_msg::Display_withdrawal_cancelled());
+                    state=&Atm_s_machine::done_processing_s;
                 } );
     }
-    void process_balance() {
+    void process_balance_s() {
         incoming.wait()
-            .handle<Msg::Balance>(
-                [&](Msg::Balance const& msg) {
-                    interface_hardware.send(Msg::Display_balance(msg.amount));
-                    state=&Atm_smachine::wait_for_action;
+            .handle<Atm_system_msg::Balance>(
+                [&](Atm_system_msg::Balance const& msg) {
+                    interface_hardware.send(Atm_system_msg::Display_balance(msg.amount));
+                    state=&Atm_s_machine::wait_for_action_s;
                 } )
-            .handle<Msg::Cancel_pressed>(
-                [&](Msg::Cancel_pressed const& msg) {
-                    state=&Atm_smachine::done_processing;
+            .handle<Atm_system_msg::Cancel_pressed>(
+                [&](Atm_system_msg::Cancel_pressed const& msg) {
+                    state=&Atm_s_machine::done_processing_s;
                 } );
     }
-    void wait_for_action() {
-        interface_hardware.send(Msg::Display_withdrawal_options());
-        incoming.wait() .handle<Msg::Withdraw_pressed>(
-                [&](Msg::Withdraw_pressed const& msg) {
+    void wait_for_action_s() {
+        interface_hardware.send(Atm_system_msg::Display_withdrawal_options());
+        incoming.wait() .handle<Atm_system_msg::Withdraw_pressed>(
+                [&](Atm_system_msg::Withdraw_pressed const& msg) {
                     withdrawal_amount=msg.amount;
-                    bank.send( Msg::Withdraw( account, msg.amount, incoming) );
-                    state=&Atm_smachine::process_withdrawal;
+                    bank.send( Atm_system_msg::Withdraw( account, msg.amount, incoming) );
+                    state=&Atm_s_machine::process_withdrawal_s;
                 } )
-            .handle<Msg::Balance_pressed>(
-                [&](Msg::Balance_pressed const& msg) {
-                    bank.send(Msg::Get_balance(account,incoming));
-                    state=&Atm_smachine::process_balance;
+            .handle<Atm_system_msg::Balance_pressed>(
+                [&](Atm_system_msg::Balance_pressed const& msg) {
+                    bank.send(Atm_system_msg::Get_balance(account,incoming));
+                    state=&Atm_s_machine::process_balance_s;
                 } )
-            .handle<Msg::Cancel_pressed>(
-                [&](Msg::Cancel_pressed const& msg) {
-                    state=&Atm_smachine::done_processing;
+            .handle<Atm_system_msg::Cancel_pressed>(
+                [&](Atm_system_msg::Cancel_pressed const& msg) {
+                    state=&Atm_s_machine::done_processing_s;
                 } );
     }
-    void verifying_pin() {
+    void verifying_pin_s() {
         incoming.wait()
-            .handle<Msg::Pin_verified>(
-                [&](Msg::Pin_verified const& msg) {
-                    state=&Atm_smachine::wait_for_action;
+            .handle<Atm_system_msg::Pin_verified>(
+                [&](Atm_system_msg::Pin_verified const& msg) {
+                    state=&Atm_s_machine::wait_for_action_s;
                 } )
-            .handle<Msg::Pin_incorrect>(
-                [&](Msg::Pin_incorrect const& msg)
-                {   interface_hardware.send( Msg::Display_pin_incorrect_message());
-                    state=&Atm_smachine::done_processing;
+            .handle<Atm_system_msg::Pin_incorrect>(
+                [&](Atm_system_msg::Pin_incorrect const& msg)
+                {   interface_hardware.send( Atm_system_msg::Display_pin_incorrect_message());
+                    state=&Atm_s_machine::done_processing_s;
                 } )
-            .handle<Msg::Cancel_pressed>(
-                [&](Msg::Cancel_pressed const& msg) {
-                    state=&Atm_smachine::done_processing;
+            .handle<Atm_system_msg::Cancel_pressed>(
+                [&](Atm_system_msg::Cancel_pressed const& msg) {
+                    state=&Atm_s_machine::done_processing_s;
                 } );
     }
-    void getting_pin() {
+    void getting_pin_s() {
         incoming.wait()
-            .handle<Msg::Digit_pressed>(
-                [&](Msg::Digit_pressed const& msg) {
+            .handle<Atm_system_msg::Digit_pressed>(
+                [&](Atm_system_msg::Digit_pressed const& msg) {
                     unsigned const pin_length=4;
                     pin+=msg.digit;
                     if(pin.length()==pin_length) {
-                        bank.send(Msg::Verify_pin(account,pin,incoming));
-                        state=&Atm_smachine::verifying_pin;
+                        bank.send(Atm_system_msg::Verify_pin(account,pin,incoming));
+                        state=&Atm_s_machine::verifying_pin_s;
                     }
                 } )
-            .handle<Msg::Clear_last_pressed>(
-                [&](Msg::Clear_last_pressed const& msg) {
+            .handle<Atm_system_msg::Clear_last_pressed>(
+                [&](Atm_system_msg::Clear_last_pressed const& msg) {
                     if(!pin.empty()) { pin.pop_back(); }
                 } )
-            .handle<Msg::Cancel_pressed>(
-                [&](Msg::Cancel_pressed const& msg) {
-                    state=&Atm_smachine::done_processing;
+            .handle<Atm_system_msg::Cancel_pressed>(
+                [&](Atm_system_msg::Cancel_pressed const& msg) {
+                    state=&Atm_s_machine::done_processing_s;
                 } );
     }
-    void waiting_for_card() {
-        interface_hardware.send(Msg::Display_enter_card());
-        incoming.wait() .handle<Msg::Card_inserted>(
-                [&](Msg::Card_inserted const& msg) {
+    void waiting_for_card_s() {
+        interface_hardware.send(Atm_system_msg::Display_enter_card());
+        incoming.wait() .handle<Atm_system_msg::Card_inserted>(
+                [&](Atm_system_msg::Card_inserted const& msg) {
                     account=msg.account;
                     pin="";
-                    interface_hardware.send(Msg::Display_enter_pin());
-                    state=&Atm_smachine::getting_pin;
+                    interface_hardware.send(Atm_system_msg::Display_enter_pin());
+                    state=&Atm_s_machine::getting_pin_s;
                 } );
     }
-    void done_processing() {
-        interface_hardware.send(Msg::Eject_card());
-        state=&Atm_smachine::waiting_for_card;
+    void done_processing_s() {
+        interface_hardware.send(Atm_system_msg::Eject_card());
+        state=&Atm_s_machine::waiting_for_card_s;
     }
-    Atm_smachine(Atm_smachine const&)=delete;
-    Atm_smachine& operator=(Atm_smachine const&)=delete;
+    Atm_s_machine(Atm_s_machine const&)=delete;
+    Atm_s_machine& operator=(Atm_s_machine const&)=delete;
 public:
-    Atm_smachine(Messaging::Sender_actor bank_, Messaging::Sender_actor interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
-    void done() { get_sender().send(Messaging::Close_queue_actor_frmwrk_msg()); }
+    Atm_s_machine(CCIA_Messaging::Sender_actor bank_, CCIA_Messaging::Sender_actor interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
+    void done() { get_sender().send(CCIA_Messaging::Close_queue_actor_frmwrk_msg()); }
     void run() {
-        state=&Atm_smachine::waiting_for_card;
+        state=&Atm_s_machine::waiting_for_card_s;  // Initial state of this s_machine
         try {
             for(;;)
             {
                 (this->*state)();
             }
         }
-        catch(Messaging::Close_queue_actor_frmwrk_msg const&) { }
+        catch(CCIA_Messaging::Close_queue_actor_frmwrk_msg const&) { }
     }
-    Messaging::Sender_actor get_sender() {
+    CCIA_Messaging::Sender_actor get_sender() {
         return incoming;
     }
 };
 
 class Bank_cloud_smachine {
     unsigned balance{};
-    Messaging::Receiver_actor incoming{};
+    CCIA_Messaging::Receiver_actor incoming{};
 public:
     Bank_cloud_smachine(): balance{199} {}
-    void done() { get_sender().send(Messaging::Close_queue_actor_frmwrk_msg()); }
+    void done() { get_sender().send(CCIA_Messaging::Close_queue_actor_frmwrk_msg()); }
     void run() { try { for(;;) {
                 incoming.wait()
-                    .handle<Msg::Verify_pin>(
-                        [&](Msg::Verify_pin const& msg) {
-                            if(msg.pin=="mypin") { msg.atm_queue.send(Msg::Pin_verified()); }
-                            else { msg.atm_queue.send(Msg::Pin_incorrect()); }
+                    .handle<Atm_system_msg::Verify_pin>(
+                        [&](Atm_system_msg::Verify_pin const& msg) {
+                            if(msg.pin=="mypin") { msg.atm_queue.send(Atm_system_msg::Pin_verified()); }
+                            else { msg.atm_queue.send(Atm_system_msg::Pin_incorrect()); }
                         } )
-                    .handle<Msg::Withdraw>(
-                        [&](Msg::Withdraw const& msg) {
+                    .handle<Atm_system_msg::Withdraw>(
+                        [&](Atm_system_msg::Withdraw const& msg) {
                             if(balance>=msg.amount) {
-                                msg.atm_queue.send(Msg::Withdraw_ok());
+                                msg.atm_queue.send(Atm_system_msg::Withdraw_ok());
                                 balance-=msg.amount;
                             }
-                            else { msg.atm_queue.send(Msg::Withdraw_denied()); }
+                            else { msg.atm_queue.send(Atm_system_msg::Withdraw_denied()); }
                         } )
-                    .handle<Msg::Get_balance>(
-                        [&](Msg::Get_balance const& msg) {
-                            msg.atm_queue.send(Msg::Balance(balance));
+                    .handle<Atm_system_msg::Get_balance>(
+                        [&](Atm_system_msg::Get_balance const& msg) {
+                            msg.atm_queue.send(Atm_system_msg::Balance(balance));
                         } )
-                    .handle<Msg::Withdrawal_processed>(
-                        [&](Msg::Withdrawal_processed const& msg) {
+                    .handle<Atm_system_msg::Withdrawal_processed>(
+                        [&](Atm_system_msg::Withdrawal_processed const& msg) {
                         } )
-                    .handle<Msg::Cancel_withdrawal>(
-                        [&](Msg::Cancel_withdrawal const& msg) {
+                    .handle<Atm_system_msg::Cancel_withdrawal>(
+                        [&](Atm_system_msg::Cancel_withdrawal const& msg) {
                         } );
-            } } catch(Messaging::Close_queue_actor_frmwrk_msg const&) {}
+            } } catch(CCIA_Messaging::Close_queue_actor_frmwrk_msg const&) {}
     }
-    Messaging::Sender_actor get_sender() { return incoming; }
+    CCIA_Messaging::Sender_actor get_sender() { return incoming; }
 };
 
 class Interface_smachine {
     std::mutex          iom;
-    Messaging::Receiver_actor incoming;
+    CCIA_Messaging::Receiver_actor incoming;
 public:
-    void done() { get_sender().send(Messaging::Close_queue_actor_frmwrk_msg()); }
+    void done() { get_sender().send(CCIA_Messaging::Close_queue_actor_frmwrk_msg()); }
     void run() { try { for(;;) {
                 incoming.wait()
-                    .handle<Msg::Issue_money>(
-                        [&](Msg::Issue_money const& msg) { {
+                    .handle<Atm_system_msg::Issue_money>(
+                        [&](Atm_system_msg::Issue_money const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout<<"Issuing "<<msg.amount<<std::endl;
                             }
                         } )
-                    .handle<Msg::Display_insufficient_funds>(
-                        [&](Msg::Display_insufficient_funds const& msg) { {
+                    .handle<Atm_system_msg::Display_insufficient_funds>(
+                        [&](Atm_system_msg::Display_insufficient_funds const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout<<"Insufficient funds"<<std::endl;
                             }
                         } )
-                    .handle<Msg::Display_enter_pin>(
-                        [&](Msg::Display_enter_pin const& msg) { {
+                    .handle<Atm_system_msg::Display_enter_pin>(
+                        [&](Atm_system_msg::Display_enter_pin const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout <<"Please enter your PIN (0-9 hint: mypin)" <<std::endl;
                             }
                         } )
-                    .handle<Msg::Display_enter_card>(
-                        [&](Msg::Display_enter_card const& msg) { {
+                    .handle<Atm_system_msg::Display_enter_card>(
+                        [&](Atm_system_msg::Display_enter_card const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout<<"Please enter your card (I)" <<std::endl;
                             }
                         } )
-                    .handle<Msg::Display_balance>(
-                        [&](Msg::Display_balance const& msg) { {
+                    .handle<Atm_system_msg::Display_balance>(
+                        [&](Atm_system_msg::Display_balance const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout <<"The balance of your account is " <<msg.amount<<std::endl;
                             }
                         } )
-                    .handle<Msg::Display_withdrawal_options>(
-                        [&](Msg::Display_withdrawal_options const& msg) { {
+                    .handle<Atm_system_msg::Display_withdrawal_options>(
+                        [&](Atm_system_msg::Display_withdrawal_options const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout<<"Withdraw 50? (w)"<<std::endl;
-                                std::cout<<"Display Balance? (b)"
-                                         <<std::endl;
+                                std::cout<<"Display Balance? (b)" <<std::endl;
                                 std::cout<<"Cancel? (c)"<<std::endl;
                             }
                         }
                         )
-                    .handle<Msg::Display_withdrawal_cancelled>(
-                        [&](Msg::Display_withdrawal_cancelled const& msg) { {
+                    .handle<Atm_system_msg::Display_withdrawal_cancelled>(
+                        [&](Atm_system_msg::Display_withdrawal_cancelled const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
-                                std::cout<<"Withdrawal cancelled"
-                                         <<std::endl;
+                                std::cout<<"Withdrawal cancelled" <<std::endl;
                             }
                         } )
-                    .handle<Msg::Display_pin_incorrect_message>(
-                        [&](Msg::Display_pin_incorrect_message const& msg) { {
+                    .handle<Atm_system_msg::Display_pin_incorrect_message>(
+                        [&](Atm_system_msg::Display_pin_incorrect_message const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout<<"PIN incorrect"<<std::endl;
                             }
                         } )
-                    .handle<Msg::Eject_card>(
-                        [&](Msg::Eject_card const& msg) { {
+                    .handle<Atm_system_msg::Eject_card>(
+                        [&](Atm_system_msg::Eject_card const& msg) { {
                                 std::lock_guard<std::mutex> lk{iom};
                                 std::cout<<"Ejecting card"<<std::endl;
                             }
                         } );
             }
         }
-        catch(Messaging::Close_queue_actor_frmwrk_msg&) {};
+        catch(CCIA_Messaging::Close_queue_actor_frmwrk_msg&) {};
     }
-    Messaging::Sender_actor get_sender() { return incoming; }
+    CCIA_Messaging::Sender_actor get_sender() { return incoming; }
 };
