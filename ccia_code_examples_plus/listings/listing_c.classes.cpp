@@ -3,9 +3,10 @@
 #include <queue>
 #include <memory>
 #include <mutex>
-namespace CCIA_Messaging {
+using std::string;
+namespace Csp {
 struct Message_base {
-    virtual ~Message_base() {}  // This is boring "must have" boilerplate.
+    virtual ~Message_base() {}  // C++ required boilerplate.
 };
 
 template <typename Msg>
@@ -34,12 +35,12 @@ public:
     }
 };
 
-template <typename PreviousDispatcher, typename Msg, typename Func>
+template <typename T_Previous_dispatcher, typename Msg, typename Func>
 class TemplateDispatcher {
-    Queue              *ptr_queue{};
-    PreviousDispatcher *ptr_prev_dispatcher{};
-    Func                f{};
-    bool                is_chained{ false };
+    Queue                 *ptr_queue{};
+    T_Previous_dispatcher *ptr_prev_dispatcher{};
+    Func                  f{};
+    bool                  is_chained{ false };
 
     TemplateDispatcher(TemplateDispatcher const &)            = delete;
     TemplateDispatcher &operator=(TemplateDispatcher const &) = delete;
@@ -62,20 +63,23 @@ class TemplateDispatcher {
     }
 public:
     TemplateDispatcher(TemplateDispatcher &&other_)
-        : ptr_queue(other_.ptr_queue), ptr_prev_dispatcher(other_.ptr_prev_dispatcher), f(std::move(other_.f)), is_chained(other_.is_chained) {
+        : ptr_queue(other_.ptr_queue), ptr_prev_dispatcher(other_.ptr_prev_dispatcher), f(std::move(other_.f)), is_chained(other_.is_chained)
+    {
         other_.is_chained = true;
     }
-    TemplateDispatcher(Queue *q_, PreviousDispatcher *prev_, Func &&f_)
-        : ptr_queue(q_), ptr_prev_dispatcher(prev_), f(std::forward<Func>(f_)), is_chained(false) {
+    TemplateDispatcher(Queue *q_, T_Previous_dispatcher *prev_, Func &&f_)
+        : ptr_queue(q_), ptr_prev_dispatcher(prev_), f(std::forward<Func>(f_)), is_chained(false)
+    {
         prev_->is_chained = true;
-    }
-
-    template <typename OtherMsg, typename OtherFunc>
-    TemplateDispatcher<TemplateDispatcher, OtherMsg, OtherFunc> handle(OtherFunc &&of) {
-        return TemplateDispatcher<TemplateDispatcher, OtherMsg, OtherFunc>(ptr_queue, this, std::forward<OtherFunc>(of));
     }
     ~TemplateDispatcher() noexcept(false) {
         if(!is_chained) { wait_and_dispatch(); }
+    }
+
+    template <typename OtherMsg, typename OtherFunc>
+    TemplateDispatcher<TemplateDispatcher, OtherMsg, OtherFunc> handle(OtherFunc &&of)
+    {
+        return TemplateDispatcher<TemplateDispatcher, OtherMsg, OtherFunc>(ptr_queue, this, std::forward<OtherFunc>(of));
     }
 };
 
@@ -117,50 +121,51 @@ public:
 };
 
 class Sender_actor {
-    Queue *q;
+    std::shared_ptr<Queue> q_ptr;
 public:
-    Sender_actor() : q(nullptr) {}
-    explicit Sender_actor(Queue *q_) : q(q_) {}
+    Sender_actor() : q_ptr(nullptr) {}
+    explicit Sender_actor(Queue *q_) : q_ptr(q_) {}
 
     template <typename Message>
     void send(Message const &msg) {
-        if(q) { q->push(msg); }
+        if (q_ptr) { q_ptr->push(msg); } else {
+            throw std::logic_error("CSP send() to null queue");
+        }
     }
 };
 class Receiver_actor {
-    Queue q;
+    std::shared_ptr<Queue> q_ptr;
 public:
-    operator Sender_actor() { return Sender_actor(&q); }
+    operator Sender_actor() { return Sender_actor(q_ptr.get()); }
     Dispatcher wait() {
-        return Dispatcher(&q);
+        //return Dispatcher(&q_ptr);
+        return Dispatcher(q_ptr.get());
     }
 };
 } // END namespace Messaging NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 namespace Atm_system_msg {
 struct Withdraw {
-    std::string account;
+    string account;
     unsigned amount;
-    mutable CCIA_Messaging::Sender_actor atm_queue;
-    Withdraw(std::string const& account_, unsigned amount_, CCIA_Messaging::Sender_actor atm_queue_)
-        : account(account_),amount(amount_), atm_queue(atm_queue_) {}
+    mutable Csp::Sender_actor atm_queue;  // TODO??: Why mutable required?
+    Withdraw(string const& account_, unsigned amount_, Csp::Sender_actor atm_queue_):account(account_),amount(amount_), atm_queue(atm_queue_){}
 };
 struct Withdraw_ok {};
 struct Withdraw_denied {};
 struct Cancel_withdrawal {
-    std::string account;
+    string account;
     unsigned amount;
-    Cancel_withdrawal(std::string const& account_, unsigned amount_)
-        : account(account_),amount(amount_) {}
+    Cancel_withdrawal(string const& account_, unsigned amount_) : account(account_),amount(amount_) {}
 };
 struct Withdrawal_processed {
-    std::string account;
+    string account;
     unsigned amount;
-    Withdrawal_processed(std::string const& account_, unsigned amount_): account(account_),amount(amount_) {}
+    Withdrawal_processed(string const& account_, unsigned amount_): account(account_),amount(amount_) {}
 };
 struct Card_inserted {
-    std::string account;
-    explicit Card_inserted(std::string const& account_): account(account_) {}
+    string account;
+    explicit Card_inserted(string const& account_): account(account_) {}
 };
 struct Digit_pressed {
     char digit;
@@ -178,11 +183,10 @@ struct Issue_money {
     Issue_money(unsigned amount_): amount(amount_) {}
 };
 struct Verify_pin {
-    std::string account;
-    std::string pin;
-    mutable CCIA_Messaging::Sender_actor atm_queue;
-    Verify_pin(std::string const& account_,std::string const& pin_, CCIA_Messaging::Sender_actor atm_queue_)
-        : account(account_),pin(pin_),atm_queue(atm_queue_) {}
+    string               account;
+    string               pin;
+    mutable Csp::Sender_actor atm_queue;  // TODO??: Why mutable required?
+    Verify_pin(string const& account_,string const& pin_, Csp::Sender_actor atm_queue_):account(account_),pin(pin_),atm_queue(atm_queue_){}
 };
 struct Pin_verified {};
 struct Pin_incorrect {};
@@ -193,10 +197,9 @@ struct Display_withdrawal_cancelled {};
 struct Display_pin_incorrect_message {};
 struct Display_withdrawal_options {};
 struct Get_balance {
-    std::string account{};
-    mutable CCIA_Messaging::Sender_actor atm_queue{};
-    Get_balance(std::string const& account_,CCIA_Messaging::Sender_actor atm_queue_)
-        : account(account_),atm_queue(atm_queue_) {}
+    string               account{};
+    mutable Csp::Sender_actor atm_queue{};  // TODO??: Why mutable required?
+    Get_balance(string const& account_,Csp::Sender_actor atm_queue_) : account(account_),atm_queue(atm_queue_) {}
 };
 struct Balance {
     unsigned amount;
@@ -210,11 +213,11 @@ struct Balance_pressed {};
 } // END namespace Msg NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 class Atm_s_machine {  // s_machine = state machine, which in this case runs in its own thread started in main?
-    CCIA_Messaging::Receiver_actor incoming{};
-    CCIA_Messaging::Sender_actor   bank{};
-    CCIA_Messaging::Sender_actor   interface_hardware{};
-    std::string         account{};
-    std::string         pin{};
+    Csp::Receiver_actor incoming{};
+    Csp::Sender_actor   bank{};
+    Csp::Sender_actor   interface_hardware{};
+    string         account{};
+    string         pin{};
     unsigned            withdrawal_amount{};
 
     void (Atm_s_machine::*state)();  // pointer to member function? TODO??: what is this?
@@ -325,8 +328,8 @@ class Atm_s_machine {  // s_machine = state machine, which in this case runs in 
     Atm_s_machine(Atm_s_machine const&)=delete;
     Atm_s_machine& operator=(Atm_s_machine const&)=delete;
 public:
-    Atm_s_machine(CCIA_Messaging::Sender_actor bank_, CCIA_Messaging::Sender_actor interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
-    void done() { get_sender().send(CCIA_Messaging::Close_queue_actor_frmwrk_msg()); }
+    Atm_s_machine(Csp::Sender_actor bank_, Csp::Sender_actor interface_hardware_) : bank(bank_),interface_hardware(interface_hardware_) {}
+    void done() { get_sender().send(Csp::Close_queue_actor_frmwrk_msg()); }
     void run() {
         state=&Atm_s_machine::waiting_for_card_s;  // Initial state of this s_machine
         try {
@@ -335,19 +338,19 @@ public:
                 (this->*state)();
             }
         }
-        catch(CCIA_Messaging::Close_queue_actor_frmwrk_msg const&) { }
+        catch(Csp::Close_queue_actor_frmwrk_msg const&) { }
     }
-    CCIA_Messaging::Sender_actor get_sender() {
+    Csp::Sender_actor get_sender() {
         return incoming;
     }
 };
 
 class Bank_cloud_s_machine {
     unsigned balance{};
-    CCIA_Messaging::Receiver_actor incoming{};
+    Csp::Receiver_actor incoming{};
 public:
     Bank_cloud_s_machine(): balance{199} {}
-    void done() { get_sender().send(CCIA_Messaging::Close_queue_actor_frmwrk_msg()); }
+    void done() { get_sender().send(Csp::Close_queue_actor_frmwrk_msg()); }
     void run() { try { for(;;) {
                 incoming.wait()
                     .handle<Atm_system_msg::Verify_pin>(
@@ -373,16 +376,16 @@ public:
                     .handle<Atm_system_msg::Cancel_withdrawal>(
                         [&](Atm_system_msg::Cancel_withdrawal const& msg) {
                         } );
-            } } catch(CCIA_Messaging::Close_queue_actor_frmwrk_msg const&) {}
+            } } catch(Csp::Close_queue_actor_frmwrk_msg const&) {}
     }
-    CCIA_Messaging::Sender_actor get_sender() { return incoming; }
+    Csp::Sender_actor get_sender() { return incoming; }
 };
 
 class Interface_s_machine {
     std::mutex          iom;
-    CCIA_Messaging::Receiver_actor incoming;
+    Csp::Receiver_actor incoming;
 public:
-    void done() { get_sender().send(CCIA_Messaging::Close_queue_actor_frmwrk_msg()); }
+    void done() { get_sender().send(Csp::Close_queue_actor_frmwrk_msg()); }
     void run() { try { for(;;) {
                 incoming.wait()
                     .handle<Atm_system_msg::Issue_money>(
@@ -444,7 +447,7 @@ public:
                         } );
             }
         }
-        catch(CCIA_Messaging::Close_queue_actor_frmwrk_msg&) {};
+        catch(Csp::Close_queue_actor_frmwrk_msg&) {};
     }
-    CCIA_Messaging::Sender_actor get_sender() { return incoming; }
+    Csp::Sender_actor get_sender() { return incoming; }
 };
