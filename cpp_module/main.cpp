@@ -11,25 +11,20 @@
  */
 //#include "global_entities.h"
 //#include <bits/stdc++.h>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <csignal>
-#include <stacktrace>
-#include <source_location>
+//#include <iostream>
+//#include <vector>
+//#include <string>
 
+import std;
 using std::cin; using std::cout; using std::cerr; using std::clog; using std::endl; using std::string;  // using namespace std;
 using namespace std::string_literals;
 
 import My_module;
 
-int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl; //crash_signals_register();
-    std::string                 STRING_QQQ          {"qqq"};
-    std::vector<char>           QQQ                 {STRING_QQQ.begin(),STRING_QQQ.end()};
-
-    cout << ":i*3:" << f(3) << endl;
-
+int main ( int argc, char* arv[] ) { string my_arv { *arv}; cout << "~~~ argc,argv:"<<argc<<","<<my_arv<<"."<<endl;
+    cout << "> i*3:" << f(42) << endl;
 
     cout << "###" << endl;
-    return EXIT_SUCCESS;
+    //return EXIT_SUCCESS;
+    return 0;
 }

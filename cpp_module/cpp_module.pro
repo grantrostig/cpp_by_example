@@ -15,18 +15,19 @@ CONFIG += thread
 # // Compiler to use (comment out to use default one).
 #QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += \
-        -std=gnu++23		\
+        -std=c++26		\
+        --compile-std-module   \
+        -fmodules              \
         -O0 		        \
         -g3 		        \
         #-ggdb 		        \
         #-ggdb3 	        \
         -fconcepts              \
-        -fmodules-ts              \
         #-pedantic              \
         #-pedantic-errors       \
         -Wall   		\  # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
         -Wextra   		\
-        -Wdeprecated-declarations\
+        #-Wdeprecated-declarations\
         #-Weffc++ \
         #-Wno-comment 		\
         #-Wno-uninitialized 	\
@@ -51,7 +52,7 @@ QMAKE_CXXFLAGS += \
 LIBS += \
         -lpthread               \
         -lrt                    \
-        -lstdc++_libbacktrace   \
+        #-lstdc++_libbacktrace   \
         #-lboost_system         \
         #-lboost_coroutine      \
         #-lssl                  \  #  missing this still: undefined reference to symbol 'd2i_PrivateKey_bio@@OPENSSL_1_1_0  related to: OPENSSL_API_COMPAT
@@ -68,10 +69,9 @@ LIBS += \
 #DEFINES =
 
 HEADERS += \
-        global_entities.h       \
- \#       $$PWD/..h               \ # probably wrong
+   #global_entities.h       \
     my_module.hpp
 
 SOURCES += \
-    main.cpp \
-    my_module.cpp
+    my_module.cpp \
+    main.cpp
